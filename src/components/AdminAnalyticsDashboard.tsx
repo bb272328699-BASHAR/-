@@ -42,6 +42,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
   const [loading, setLoading] = useState(true);
   const [savingGa, setSavingGa] = useState(false);
   const [gaMeasurementId, setGaMeasurementId] = useState('');
+  const [gaStreamId, setGaStreamId] = useState('');
   const [gaPropertyId, setGaPropertyId] = useState('');
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<'tools' | 'articles' | 'comparisons' | 'categories' | 'searchKeywords'>('tools');
@@ -61,6 +62,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
           setData(resData);
           if (resData.googleAnalytics) {
             setGaMeasurementId(resData.googleAnalytics.measurementId || '');
+            setGaStreamId(resData.googleAnalytics.streamId || '15813564380');
             setGaPropertyId(resData.googleAnalytics.propertyId || '');
           }
         } else {
@@ -146,6 +148,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
     try {
       const settingsArray = [
         { key: 'ga_measurement_id', value: gaMeasurementId.trim() },
+        { key: 'ga_stream_id', value: gaStreamId.trim() },
         { key: 'ga_property_id', value: gaPropertyId.trim() },
       ];
 
@@ -730,16 +733,29 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
           </span>
         </div>
 
-        <form onSubmit={handleSaveGaConfig} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSaveGaConfig} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               معرف القياس (GA4 Measurement ID)
             </label>
             <input
               type="text"
-              placeholder="G-XXXXXXXXXX"
+              placeholder="G-T1X92GT5YK"
               value={gaMeasurementId}
               onChange={(e) => setGaMeasurementId(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              معرف البث (Data Stream ID)
+            </label>
+            <input
+              type="text"
+              placeholder="15813564380"
+              value={gaStreamId}
+              onChange={(e) => setGaStreamId(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
             />
           </div>
@@ -757,7 +773,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
             />
           </div>
 
-          <div className="sm:col-span-2 flex justify-end pt-2">
+          <div className="sm:col-span-3 flex justify-end pt-2">
             <button
               type="submit"
               disabled={savingGa}

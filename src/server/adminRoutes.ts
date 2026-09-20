@@ -1028,6 +1028,7 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
     });
 
     const gaMeasurementId = settingsMap['ga_measurement_id'] || 'G-T1X92GT5YK';
+    const gaStreamId = settingsMap['ga_stream_id'] || '15813564380';
     const gaPropertyId = settingsMap['ga_property_id'] || '389402182';
 
     // 2. Fetch Top Tools by Visits & Engagement
@@ -1104,6 +1105,7 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
     res.json({
       googleAnalytics: {
         measurementId: gaMeasurementId,
+        streamId: gaStreamId,
         propertyId: gaPropertyId,
         status: gaMeasurementId ? 'Connected' : 'Active (Integrated Mode)',
       },

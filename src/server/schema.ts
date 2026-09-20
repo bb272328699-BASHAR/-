@@ -327,6 +327,7 @@ async function seedInitialData() {
       ['ads_test_mode', 'false'],
       ['ads_publisher_id', 'ca-pub-6343594295307676'],
       ['ga_measurement_id', 'G-T1X92GT5YK'],
+      ['ga_stream_id', '15813564380'],
       ['ads_slot_article_top', '9685713922'],
       ['ads_slot_article_incontent', '9685713922'],
       ['ads_slot_article_bottom', '9685713922'],

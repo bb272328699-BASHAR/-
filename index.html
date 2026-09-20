@@ -172,12 +172,14 @@
     </script>
 
     <!-- Google tag (gtag.js) - Google Analytics 4 -->
+    <meta name="google-analytics-stream-id" content="15813564380" />
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-T1X92GT5YK"></script>
     <script>
       gtag('js', new Date());
       // Default config without automatic single-page duplicate pageviews (handled by React SPA hook)
       gtag('config', 'G-T1X92GT5YK', {
-        send_page_view: false
+        send_page_view: false,
+        stream_id: '15813564380'
       });
     </script>
 
