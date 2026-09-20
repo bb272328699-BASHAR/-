@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile in the platform",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "full_name": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "created_at": { "type": "string" }
+      },
+      "required": ["id", "email", "full_name"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "A user's bookmarked AI tool",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "toolName": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "toolSlug", "toolName"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A community review for an AI tool",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "user_name": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["userId", "user_name", "toolSlug", "rating", "comment"]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "Contact form inquiry message",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["name", "email", "message"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "User bookmarked tools subcollection"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Community user reviews for AI tools"
+    },
+    "/contact_messages/{messageId}": {
+      "schema": "ContactMessage",
+      "description": "Submitted contact inquiries"
+    }
+  }
+}

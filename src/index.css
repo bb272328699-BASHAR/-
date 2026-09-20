@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0b0f19;
+  color: #f1f5f9;
+}
+
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f8fafc;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #0f172a !important;
+  color: #e2e8f0;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-950,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark header {
+  background-color: rgba(17, 24, 39, 0.9) !important;
+  border-color: #1e293b !important;
+}
+
+html.dark footer {
+  background-color: #070a11 !important;
+  border-color: #1e293b !important;
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  header, footer, nav, .no-print, [role="navigation"], .ad-slot-container {
+    display: none !important;
+  }
+
+  /* Printable comparison container */
+  .comparison-print-container {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Keep table borders crisp */
+  table, tr, td, th {
+    page-break-inside: avoid !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Ensure card backgrounds print legibly */
+  .bg-white, .bg-slate-50, .bg-indigo-50, .bg-emerald-50 {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+  }
+}

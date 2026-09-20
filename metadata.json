@@ -1,0 +1,6 @@
+{
+  "name": "دليل الذكاء الاصطناعي | Daleel AI",
+  "description": "منصة ويب Full-Stack عربية متكاملة لاكتشاف، تقييم، ومقارنة أحدث أدوات الذكاء الاصطناعي وقاعدة بيانات حقيقية وإدارة محتوى متقدمة.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

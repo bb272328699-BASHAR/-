@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>دليل الذكاء الاصطناعي</ShortName>
+  <Description>محرك بحث متكامل لاكتشاف ومقارنة أدوات الذكاء الاصطناعي والمقالات المتخصصة</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Image width="16" height="16" type="image/x-icon">https://daleel.ai/favicon.ico</Image>
+  <Url type="text/html" method="get" template="https://daleel.ai/ai-tools?search={searchTerms}" />
+  <Url type="application/x-suggestions+json" method="get" template="https://daleel.ai/api/search/suggestions?q={searchTerms}" />
+  <Language>ar</Language>
+  <moz:SearchForm>https://daleel.ai/ai-tools</moz:SearchForm>
+</OpenSearchDescription>

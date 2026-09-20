@@ -1,0 +1,273 @@
+import { GoogleGenAI } from '@google/genai';
+import { query } from '../db.ts';
+
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient(): GoogleGenAI | null {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      aiClient = new GoogleGenAI({ apiKey });
+    }
+  }
+  return aiClient;
+}
+
+export interface AdvisorRecommendation {
+  toolSlug: string;
+  toolName: string;
+  category: string;
+  pricingType: string;
+  reason: string;
+  keyFeature: string;
+  starterPrompt?: string;
+}
+
+export interface AdvisorResponse {
+  answer: string;
+  recommendations: AdvisorRecommendation[];
+  actionPlan?: string[];
+  suggestedPrompts?: string[];
+}
+
+export const AiService = {
+  /**
+   * AI Tool Advisor: Analyzes user needs and recommends the most matching tools from database.
+   */
+  async consultAdvisor(userMessage: string, history: Array<{ role: string; text: string }> = []): Promise<AdvisorResponse> {
+    // 1. Fetch current catalog snapshot from DB to ground the AI with real platform tools
+    let availableTools: any[] = [];
+    try {
+      const dbRes = await query(`
+        SELECT id, name, slug, tagline, pricing_type, arabic_support, starting_price, rating, review_count
+        FROM tools
+        ORDER BY rating DESC
+        LIMIT 40
+      `);
+      availableTools = dbRes.rows;
+    } catch (e) {
+      console.warn('Could not query tools for AI grounding:', e);
+    }
+
+    const toolsContext = availableTools
+      .map((t) => `- ${t.name} (slug: "${t.slug}", pricing: ${t.pricing_type}, arabic: ${t.arabic_support || 'ممتاز'}, tagline: "${t.tagline}")`)
+      .join('\n');
+
+    const systemInstruction = `
+أنت "المستشار الذكي لدليل الذكاء الاصطناعي (Daleel AI Advisor)"، الخبير العربي المتخصص والأكثر دراية بمساعدات وأدوات الذكاء الاصطناعي في الوطن العربي والعالم.
+مهمتك: مساعدة المستخدمين ورواد الأعمال، المبرمجين، الكتاب، والمصممين في اختيار أفضل الأدوات والحلول المناسبة لاحتياجاتهم وميزانياتهم بدقة وشفافية باللغة العربية.
+
+قائمة الأدوات المتاحة حالياً في قاعدة بيانات المنصة:
+${toolsContext}
+
+قواعد الإجابة الإلزامية:
+1. قدم تحليلاً دقيقاً وموجزاً باللغة العربية الفصحى مع نبرة احترافية وودودة.
+2. رشح من 2 إلى 4 أدوات محددة ومناسبة تماماً لطلب المستخدم من القائمة أعلاه (استخدم دائماً نفس الـ slug المذكور).
+3. وضح سبب الترشيح وميزة كل أداة وخطة تسعيرها.
+4. أرجع النتيجة بتنسيق JSON حصراً بالهيكل التالي:
+{
+  "answer": "فقرة تقديمية شارحة للحل والنهج الأمثل للمستخدم باللغة العربية",
+  "recommendations": [
+    {
+      "toolSlug": "slug-here",
+      "toolName": "اسم الأداة",
+      "category": "تصنيف الأداة",
+      "pricingType": "مجاني / مدفوع / Freemium",
+      "reason": "شرح لماذا هذه الأداة هي الأنسب له",
+      "keyFeature": "أبرز ميزة يستفيد منها",
+      "starterPrompt": "أمر أو برومبت مقترح للبدء في استخدامها"
+    }
+  ],
+  "actionPlan": [
+    "الخطوة الأولى للبدء",
+    "الخطوة الثانية",
+    "الخطوة الثالثة"
+  ],
+  "suggestedPrompts": [
+    "سؤال متابعة مقترح 1",
+    "سؤال متابعة مقترح 2"
+  ]
+}
+`;
+
+    const ai = getAiClient();
+    if (ai) {
+      try {
+        const prompt = `طلب واستفسار المستخدم: "${userMessage}"`;
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: prompt,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            temperature: 0.3,
+          },
+        });
+
+        const text = result.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          return {
+            answer: parsed.answer || 'إليك أفضل الأدوات والتوصيات المناسبة لطلبك:',
+            recommendations: parsed.recommendations || [],
+            actionPlan: parsed.actionPlan || [],
+            suggestedPrompts: parsed.suggestedPrompts || [],
+          };
+        }
+      } catch (err) {
+        console.error('Gemini advisor API error, falling back to smart heuristic:', err);
+      }
+    }
+
+    // Heuristic Fallback when Gemini key is not set or temporary network issue
+    const lowerQuery = userMessage.toLowerCase();
+    const matches: AdvisorRecommendation[] = [];
+
+    if (lowerQuery.includes('برمج') || lowerQuery.includes('كود') || lowerQuery.includes('تطوير') || lowerQuery.includes('code')) {
+      matches.push({
+        toolSlug: 'cursor-ai',
+        toolName: 'Cursor AI',
+        category: 'البرمجة والأكواد',
+        pricingType: 'Freemium',
+        reason: 'أفضل محرر أكواد ذكي ومساعد برمجي متكامل يدعم إكمال الأكواد وإصلاح الأخطاء تلقائياً.',
+        keyFeature: 'تعديل المشاريع الضخمة والشات البرمجي المباشر مع كامل مستودع الكود.',
+        starterPrompt: 'قم بفحص هذا الكود وتحسين أدائه وإضافة معالجة الأخطاء والتوثيق.',
+      });
+      matches.push({
+        toolSlug: 'github-copilot',
+        toolName: 'GitHub Copilot',
+        category: 'البرمجة والأكواد',
+        pricingType: 'مدفوع / تجربة مجانية',
+        reason: 'رفيق برمجي موثوق من مايكروسوفت يدعم جميع بيئات التطوير.',
+        keyFeature: 'الإكمال التلقائي فائق السرعة لكافة اللغات البرمجية.',
+      });
+    } else if (lowerQuery.includes('صور') || lowerQuery.includes('تصميم') || lowerQuery.includes('شعار') || lowerQuery.includes('image') || lowerQuery.includes('design')) {
+      matches.push({
+        toolSlug: 'midjourney',
+        toolName: 'Midjourney v6',
+        category: 'توليد الصور والتصميم',
+        pricingType: 'مدفوع',
+        reason: 'الرائد عالمياً في دقة التفاصيل، الواقعية الفائقة، والإخراج البصري السينمائي.',
+        keyFeature: 'توليد صور واقعية وجودة إضاءة وتفاصيل سينمائية مبهرة.',
+        starterPrompt: 'A photorealistic modern workspace in Dubai, cinematic lighting, 8k resolution --v 6.0',
+      });
+      matches.push({
+        toolSlug: 'dall-e-3',
+        toolName: 'DALL-E 3',
+        category: 'توليد الصور والتصميم',
+        pricingType: 'Freemium',
+        reason: 'فهم دقيق للأوامر باللغة العربية والإنجليزية وتكامل سلس مع ChatGPT.',
+        keyFeature: 'التوليد الدقيق للنصوص داخل الصور والرسومات التوضيحية.',
+      });
+    } else {
+      matches.push({
+        toolSlug: 'chatgpt',
+        toolName: 'ChatGPT (GPT-4o)',
+        category: 'روبوتات المحادثة والمساعدين',
+        pricingType: 'Freemium',
+        reason: 'المساعد الأكثر شمولية وكفاءة في كتابة المحتوى، التحليل، والترجمة المتقدمة.',
+        keyFeature: 'الرؤية الحاسوبية، المحادثة الصوتية الحية، والتحليل المتقدم للبيانات.',
+        starterPrompt: 'ساعدني في وضع خطة عمل استراتيجية لزيادة الإنتاجية لرواد الأعمال.',
+      });
+      matches.push({
+        toolSlug: 'claude-3-5-sonnet',
+        toolName: 'Claude 3.5 Sonnet',
+        category: 'روبوتات المحادثة والمساعدين',
+        pricingType: 'Freemium',
+        reason: 'الأقوى في الكتابة الطبيعية الدقيقة، البرمجة، والتحليل العميق للنصوص الطويلة.',
+        keyFeature: 'خاصية Artifacts التفاعلية وسعة سياق ضخمة تبلغ 200 ألف رمز.',
+      });
+    }
+
+    return {
+      answer: `بناءً على تحليلي لطلبك ("${userMessage}")، قمت بمطابقة أفضل الأدوات المتاحة في قاعدة بيانات المنصة التي تحقق لك أعلى جودة وأفضل عائد على وقتك واستثمارك:`,
+      recommendations: matches,
+      actionPlan: [
+        'ابدأ بتجربة الخطة المجانية للأداة الأولى للتحقق من توافقها مع طبيعة عملك.',
+        'استخدم البرومبت المقترح لتوجيه النموذج بدقة والحصول على نتائج فورية.',
+        'قارن بين الأداء وسرعة الاستجابة ودعم اللغة العربية قبل الترقية للباقات المدفوعة.',
+      ],
+      suggestedPrompts: [
+        'ما هي الفروق الجوهرية في الأسعار بين هذه الأدوات؟',
+        'هل تتوفر بدائل مجانية بالكامل ومفتوحة المصدر؟',
+        'كيف يمكنني كتابة أوامر برومبت احترافية للحصول على أفضل نتيجة؟',
+      ],
+    };
+  },
+
+  /**
+   * AI Prompt Generator: Generates professional prompts for specific models & tasks.
+   */
+  async generateCustomPrompt(task: string, targetModel: string, language: string = 'ar'): Promise<{
+    prompt: string;
+    tips: string[];
+    variables: string[];
+  }> {
+    const ai = getAiClient();
+    if (ai) {
+      try {
+        const systemInstruction = `
+أنت خبير هندسة الأوامر (Prompt Engineering Specialist).
+مهمتك: صياغة أمر (Prompt) احترافي، دقيق، ومركب وفق أحدث المعايير وموجّه لنموذج الذكاء الاصطناعي المحدد.
+يجب أن يتضمن الأمر:
+1. تحديد الدور والخبرة (Persona / Role).
+2. سياق المهمة بوضوح (Context).
+3. الخطوات والشروط المحددة (Instructions & Constraints).
+4. صيغة المخرجات المطلوبة (Output Format).
+5. متغيرات ديناميكية بين أقواس معقوفة مثل [اسم المشروع] أو [المجال] لكي يملأها المستخدم بسهولة.
+
+أرجع النتيجة بصيغة JSON فقط:
+{
+  "prompt": "النص الكامل والمحكم للأمر",
+  "tips": ["نصيحة 1 للحصول على نتيجة أفضل", "نصيحة 2"],
+  "variables": ["اسم المتغير 1", "اسم المتغير 2"]
+}
+`;
+
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: `المهمة المطلوبة: "${task}"\nالنموذج المستهدف: "${targetModel}"\nاللغة: "${language}"`,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        });
+
+        const text = result.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          return {
+            prompt: parsed.prompt || '',
+            tips: parsed.tips || [],
+            variables: parsed.variables || [],
+          };
+        }
+      } catch (err) {
+        console.error('Prompt generator API error:', err);
+      }
+    }
+
+    // Heuristic fallback prompt
+    return {
+      prompt: `بصفتك خبيراً متخصصاً في [المجال المحدد]، أريدك أن تساعدني في تنفيذ المهمة التالية: "${task}".
+
+المتطلبات والشروط الإلزامية:
+1. تقديم خطة واضحة ومباشرة قابلة للتنفيذ الفوري.
+2. التركيز على الجودة والاحترافية ومراعاة أفضل الممارسات المتبعة عالمياً.
+3. التنسيق على هيئة نقاط منظمة وجداول إذا تطلب الأمر.
+4. اللغة: العربية الفصحى الواضحة والمهنية.
+
+البيانات والمدخلات الخاصة بي:
+- الهدف الأساسي: [اكتب هدفك هنا]
+- الجمهور المستهدف: [حدد جمهورك]
+- النبرة والأسلوب: [مهني / إبداعي / تقني]`,
+      tips: [
+        'املأ المتغيرات بين الأقواس المعقوفة [ ] بتفاصيلك الحقيقية قبل الإرسال.',
+        'كلما كانت المدخلات والبيانات واضحة، كلما جاءت النتيجة مطابقة لتوقعاتك بدقة.',
+        'يمكنك طلب التعديل أو إعادة الصياغة من النموذج بعد استلام المسودة الأولى.',
+      ],
+      variables: ['المجال المحدد', 'اكتب هدفك هنا', 'حدد جمهورك', 'النبرة والأسلوب'],
+    };
+  },
+};
