@@ -1,4 +1,12 @@
 import { query } from '../db.ts';
+import {
+  DEFAULT_TOOLS,
+  DEFAULT_CATEGORIES,
+  DEFAULT_ARTICLES,
+  DEFAULT_COMPARISONS,
+  DEFAULT_TUTORIALS,
+  DEFAULT_REVIEWS,
+} from '../../data/defaultCatalog.ts';
 
 export interface SitemapUrlEntry {
   loc: string;
@@ -265,7 +273,82 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
       });
     }
   } catch (err) {
-    console.error('Error fetching dynamic entries for sitemap:', err);
+    console.error('Error fetching dynamic entries for sitemap from database:', err);
+  }
+
+  // Fallbacks if database entries were empty or unreachable
+  if (toolEntries.length === 0) {
+    for (const tool of DEFAULT_TOOLS) {
+      toolEntries.push({
+        loc: `${baseUrl}/tools/${encodeURIComponent(tool.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.9,
+        type: 'tool',
+        images: tool.cover_image_url || tool.logo_url ? [{ loc: tool.cover_image_url || tool.logo_url || '', title: tool.name }] : undefined,
+      });
+    }
+  }
+
+  if (categoryEntries.length === 0) {
+    for (const cat of DEFAULT_CATEGORIES) {
+      categoryEntries.push({
+        loc: `${baseUrl}/categories/${encodeURIComponent(cat.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.8,
+        type: 'category',
+      });
+    }
+  }
+
+  if (articleEntries.length === 0) {
+    for (const art of DEFAULT_ARTICLES) {
+      articleEntries.push({
+        loc: `${baseUrl}/articles/${encodeURIComponent(art.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.85,
+        type: 'article',
+        images: art.cover_image_url ? [{ loc: art.cover_image_url, title: art.title }] : undefined,
+      });
+    }
+  }
+
+  if (comparisonEntries.length === 0) {
+    for (const comp of DEFAULT_COMPARISONS) {
+      comparisonEntries.push({
+        loc: `${baseUrl}/comparisons/${encodeURIComponent(comp.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.8,
+        type: 'comparison',
+      });
+    }
+  }
+
+  if (tutorialEntries.length === 0) {
+    for (const tut of DEFAULT_TUTORIALS) {
+      tutorialEntries.push({
+        loc: `${baseUrl}/tutorials/${encodeURIComponent(tut.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.8,
+        type: 'tutorial',
+      });
+    }
+  }
+
+  if (reviewEntries.length === 0) {
+    for (const rev of DEFAULT_REVIEWS) {
+      reviewEntries.push({
+        loc: `${baseUrl}/reviews/${encodeURIComponent(rev.slug)}`,
+        lastmod: todayIso,
+        changefreq: 'weekly',
+        priority: 0.8,
+        type: 'review',
+      });
+    }
   }
 
   const allEntries: SitemapUrlEntry[] = [

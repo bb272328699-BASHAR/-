@@ -14,6 +14,7 @@ export const pool = new Pool(
         password: process.env.SQL_PASSWORD,
         database: process.env.SQL_DB_NAME || 'cloud_sql_development_database',
         host: process.env.SQL_HOST,
+        connectionTimeoutMillis: 3000,
       }
     : {
         user: process.env.SQL_USER || 'ai_studio_app_user',
@@ -21,6 +22,7 @@ export const pool = new Pool(
         database: process.env.SQL_DB_NAME || 'cloud_sql_development_database',
         host: process.env.SQL_HOST || 'localhost',
         port: Number(process.env.SQL_PORT || 5432),
+        connectionTimeoutMillis: 3000,
       }
 );
 
