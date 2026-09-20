@@ -122,6 +122,11 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     }
   }
 
+  // Fallback to active Ad Unit Slot ID
+  if (!slotId) {
+    slotId = '9685713922';
+  }
+
   // Load AdSense script dynamically if publisherId is set and ads are enabled
   useEffect(() => {
     if (!isAdsEnabled || isTestMode || !publisherId || publisherId === 'ca-pub-0000000000000000') {

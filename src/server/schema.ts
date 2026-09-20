@@ -326,13 +326,13 @@ async function seedInitialData() {
       ['ads_auto_ads_enabled', 'true'],
       ['ads_test_mode', 'false'],
       ['ads_publisher_id', 'ca-pub-6343594295307676'],
-      ['ads_slot_article_top', '1001001001'],
-      ['ads_slot_article_incontent', '2002002002'],
-      ['ads_slot_article_bottom', '2502502502'],
-      ['ads_slot_article_sidebar', '3003003003'],
-      ['ads_slot_tool_detail', '4004004004'],
-      ['ads_slot_home_banner', '5005005005'],
-      ['ads_slot_sticky_footer', '6006006006']
+      ['ads_slot_article_top', '9685713922'],
+      ['ads_slot_article_incontent', '9685713922'],
+      ['ads_slot_article_bottom', '9685713922'],
+      ['ads_slot_article_sidebar', '9685713922'],
+      ['ads_slot_tool_detail', '9685713922'],
+      ['ads_slot_home_banner', '9685713922'],
+      ['ads_slot_sticky_footer', '9685713922']
     ];
 
     for (const [key, val] of settings) {
