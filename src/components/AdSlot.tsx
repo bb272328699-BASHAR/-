@@ -83,10 +83,10 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     return () => window.removeEventListener('daleel_consent_updated', handleConsentEvent);
   }, []);
 
-  const isAdsEnabled = settings?.ads_enabled === 'true' || settings?.ads_enabled === '1';
+  const isAdsEnabled = settings?.ads_enabled === 'true' || settings?.ads_enabled === '1' || settings?.ads_enabled === undefined;
   const isAutoAdsEnabled = settings?.ads_auto_ads_enabled === 'true' || settings?.ads_auto_ads_enabled === '1' || settings?.ads_auto_ads_enabled === undefined;
-  const isTestMode = settings?.ads_test_mode === 'true' || !settings?.ads_publisher_id;
-  const publisherId = settings?.ads_publisher_id || 'ca-pub-0000000000000000';
+  const isTestMode = settings?.ads_test_mode === 'true';
+  const publisherId = settings?.ads_publisher_id || 'ca-pub-6343594295307676';
 
   // Determine slot ID for AdSense
   let slotId = customSlotId;

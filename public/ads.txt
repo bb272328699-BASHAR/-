@@ -1,0 +1,2 @@
+# Google AdSense Authorized Digital Sellers (ads.txt) for Daleel AI
+google.com, pub-6343594295307676, DIRECT, f08c47fec0942fa0

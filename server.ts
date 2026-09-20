@@ -132,14 +132,14 @@ Sitemap: ${protocol}://${host}/sitemap.xml
       let pubId = pubRes.rows[0]?.value?.trim() || '';
       pubId = pubId.replace(/^ca-/, '');
       if (!pubId || pubId === 'pub-0000000000000000') {
-        pubId = 'pub-0000000000000000';
+        pubId = 'pub-6343594295307676';
       }
       const adsTxt = `# Google AdSense ads.txt for Daleel AI
 google.com, ${pubId}, DIRECT, f08c47fec0942fa0
 `;
       res.type('text/plain; charset=utf-8').send(adsTxt);
     } catch (e: any) {
-      res.type('text/plain; charset=utf-8').send('google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n');
+      res.type('text/plain; charset=utf-8').send('google.com, pub-6343594295307676, DIRECT, f08c47fec0942fa0\n');
     }
   });
 
