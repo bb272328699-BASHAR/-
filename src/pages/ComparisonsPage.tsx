@@ -8,6 +8,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
 import { generateComparisonSEO } from '../utils/autoSeoGenerator.ts';
 import { AdSlot } from '../components/AdSlot.tsx';
+import { OptimizedImage } from '../components/OptimizedImage.tsx';
 
 interface ComparisonsPageProps {
   navigate: (path: string) => void;
@@ -152,7 +153,7 @@ export const ComparisonsPage: React.FC<ComparisonsPageProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        {t.logo_url && <img src={t.logo_url} alt="" className="w-10 h-10 rounded-xl object-cover" />}
+                        <OptimizedImage src={t.logo_url} alt={t.name || ''} fallbackText={t.name} className="w-10 h-10 rounded-xl" containerClassName="w-10 h-10 rounded-xl" />
                         <div>
                           <h3 className="font-bold text-lg text-slate-900">{t.name}</h3>
                           <span className="text-xs text-slate-500">{t.pricing_type}</span>

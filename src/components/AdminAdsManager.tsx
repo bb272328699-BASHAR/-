@@ -46,15 +46,15 @@ export const AdminAdsManager: React.FC<AdminAdsManagerProps> = ({ token }) => {
         if (data) {
           setAdsEnabled(data.ads_enabled === 'true' || data.ads_enabled === '1' || data.ads_enabled === undefined);
           setAutoAdsEnabled(data.ads_auto_ads_enabled === 'true' || data.ads_auto_ads_enabled === '1' || data.ads_auto_ads_enabled === undefined);
-          setTestMode(data.ads_test_mode === 'true' || data.ads_test_mode === undefined);
-          setPublisherId(data.ads_publisher_id || '');
-          setSlotArticleTop(data.ads_slot_article_top || '');
-          setSlotArticleIncontent(data.ads_slot_article_incontent || '');
-          setSlotArticleBottom(data.ads_slot_article_bottom || '');
-          setSlotArticleSidebar(data.ads_slot_article_sidebar || '');
-          setSlotToolDetail(data.ads_slot_tool_detail || '');
-          setSlotHomeBanner(data.ads_slot_home_banner || '');
-          setSlotStickyFooter(data.ads_slot_sticky_footer || '');
+          setTestMode(data.ads_test_mode === 'true');
+          setPublisherId(data.ads_publisher_id || 'ca-pub-6343594295307676');
+          setSlotArticleTop(data.ads_slot_article_top || '9685713922');
+          setSlotArticleIncontent(data.ads_slot_article_incontent || '9685713922');
+          setSlotArticleBottom(data.ads_slot_article_bottom || '9685713922');
+          setSlotArticleSidebar(data.ads_slot_article_sidebar || '9685713922');
+          setSlotToolDetail(data.ads_slot_tool_detail || '9685713922');
+          setSlotHomeBanner(data.ads_slot_home_banner || '9685713922');
+          setSlotStickyFooter(data.ads_slot_sticky_footer || '9685713922');
           setCustomCode(data.ads_custom_code || '');
         }
       })

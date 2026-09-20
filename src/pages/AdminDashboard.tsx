@@ -379,7 +379,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
                 {tools.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50">
                     <td className="p-3 font-bold text-slate-900 flex items-center gap-2">
-                      {t.logo_url && <img src={t.logo_url} alt="" className="w-6 h-6 rounded-md object-cover" />}
+                      {t.logo_url && <img src={t.logo_url} alt={t.name || ''} className="w-6 h-6 rounded-md object-cover" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />}
                       <span>{t.name}</span>
                     </td>
                     <td className="p-3 text-slate-500 font-mono">{t.slug}</td>

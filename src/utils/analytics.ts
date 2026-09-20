@@ -10,7 +10,7 @@ declare global {
 }
 
 export const GA_MEASUREMENT_ID = 
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GA_MEASUREMENT_ID) || 'G-DALEELAI26';
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GA_MEASUREMENT_ID) || 'G-T1X92GT5YK';
 
 /**
  * Safely send a Google Analytics command

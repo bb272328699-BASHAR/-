@@ -973,13 +973,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
                     className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100/80 cursor-pointer transition-colors flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2.5">
-                      {st.logo_url ? (
-                        <img src={st.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
-                          {st.name?.charAt(0)}
-                        </div>
-                      )}
+                      <OptimizedImage src={st.logo_url} alt={st.name || ''} fallbackText={st.name} className="w-8 h-8 rounded-lg" containerClassName="w-8 h-8 rounded-lg shrink-0" />
                       <div>
                         <h4 className="font-bold text-xs text-slate-900 hover:text-indigo-600">{st.name}</h4>
                         <span className="text-[10px] text-slate-500">{st.pricing_type}</span>

@@ -1027,7 +1027,7 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
       settingsMap[r.key] = r.value;
     });
 
-    const gaMeasurementId = settingsMap['ga_measurement_id'] || 'G-DALEELAI2026';
+    const gaMeasurementId = settingsMap['ga_measurement_id'] || 'G-T1X92GT5YK';
     const gaPropertyId = settingsMap['ga_property_id'] || '389402182';
 
     // 2. Fetch Top Tools by Visits & Engagement
@@ -1105,7 +1105,7 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
       googleAnalytics: {
         measurementId: gaMeasurementId,
         propertyId: gaPropertyId,
-        status: gaMeasurementId && gaMeasurementId !== 'G-DALEELAI2026' ? 'Connected' : 'Active (Integrated Mode)',
+        status: gaMeasurementId ? 'Connected' : 'Active (Integrated Mode)',
       },
       summary: {
         totalPageviews,

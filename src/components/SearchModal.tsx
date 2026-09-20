@@ -252,7 +252,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, navig
               {part}
             </mark>
           ) : (
-            part
+            <span key={i}>{part}</span>
           )
         )}
       </span>

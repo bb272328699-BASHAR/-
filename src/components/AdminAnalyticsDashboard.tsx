@@ -451,7 +451,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
                 <div key={tool.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all">
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-black text-slate-400 w-5 text-center">#{idx + 1}</span>
-                    <img src={tool.logo_url} alt={tool.name} className="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-white" />
+                    <img src={tool.logo_url} alt={tool.name} className="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-white" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />
                     <div>
                       <a href={`/tools/${tool.slug}`} target="_blank" rel="noreferrer" className="font-bold text-xs text-slate-900 hover:text-indigo-600 flex items-center gap-1">
                         <span>{tool.name}</span>
@@ -482,7 +482,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
                 <div key={art.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-purple-200 transition-all">
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-black text-slate-400 w-5 text-center">#{idx + 1}</span>
-                    <img src={art.cover_image_url} alt={art.title} className="w-12 h-10 rounded-xl object-cover border border-slate-200 bg-white" />
+                    <img src={art.cover_image_url} alt={art.title} className="w-12 h-10 rounded-xl object-cover border border-slate-200 bg-white" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />
                     <div className="max-w-xs">
                       <a href={`/articles/${art.slug}`} target="_blank" rel="noreferrer" className="font-bold text-xs text-slate-900 hover:text-purple-600 line-clamp-1 flex items-center gap-1">
                         <span>{art.title}</span>

@@ -480,7 +480,7 @@ export const InteractiveComparisonTool: React.FC<InteractiveComparisonToolProps>
                           <div className="flex items-center gap-2 truncate">
                             <div className="w-6 h-6 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
                               {t.logo_url ? (
-                                <img src={t.logo_url} alt="" className="w-full h-full object-cover" />
+                                <img src={t.logo_url} alt={t.name || ''} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />
                               ) : (
                                 <span className="font-bold text-[10px] text-indigo-600">{t.name.charAt(0)}</span>
                               )}
@@ -605,7 +605,7 @@ export const InteractiveComparisonTool: React.FC<InteractiveComparisonToolProps>
                           <div className="flex items-center gap-2 truncate">
                             <div className="w-6 h-6 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
                               {t.logo_url ? (
-                                <img src={t.logo_url} alt="" className="w-full h-full object-cover" />
+                                <img src={t.logo_url} alt={t.name || ''} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />
                               ) : (
                                 <span className="font-bold text-[10px] text-emerald-600">{t.name.charAt(0)}</span>
                               )}
@@ -718,7 +718,7 @@ export const InteractiveComparisonTool: React.FC<InteractiveComparisonToolProps>
                             <div className="flex items-center gap-2 truncate">
                               <div className="w-6 h-6 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
                                 {t.logo_url ? (
-                                  <img src={t.logo_url} alt="" className="w-full h-full object-cover" />
+                                  <img src={t.logo_url} alt={t.name || ''} className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLElement).style.display = 'none'; }} />
                                 ) : (
                                   <span className="font-bold text-[10px] text-purple-600">{t.name.charAt(0)}</span>
                                 )}
