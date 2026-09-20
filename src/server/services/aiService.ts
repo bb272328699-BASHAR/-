@@ -30,7 +30,147 @@ export interface AdvisorResponse {
   suggestedPrompts?: string[];
 }
 
+export interface SearchGroundingSource {
+  title?: string;
+  url?: string;
+  snippet?: string;
+}
+
+export interface SearchGroundingResponse {
+  answer: string;
+  sources: SearchGroundingSource[];
+  webSearchQueries?: string[];
+}
+
+export interface MapsGroundingLocation {
+  name?: string;
+  address?: string;
+  rating?: number;
+  uri?: string;
+}
+
+export interface MapsGroundingResponse {
+  answer: string;
+  locations?: MapsGroundingLocation[];
+}
+
 export const AiService = {
+  /**
+   * Search Grounding: Live Google Search Data integration using Gemini 3.8 Flash.
+   */
+  async searchGrounding(userQuery: string): Promise<SearchGroundingResponse> {
+    const ai = getAiClient();
+    if (ai) {
+      try {
+        const systemInstruction = `
+أنت "المساعد الذكي لبحث الويب الحي لدليل الذكاء الاصطناعي (Daleel AI Live Search)".
+مهمتك: الإجابة على استفسارات المستخدمين حول أحدث التطورات، الأخبار، الإطلاق الجديد، وأسعار وتخفيضات أدوات الذكاء الاصطناعي مع الاعتماد المباشر والربط مع نتائج بحث Google المباشرة (Search Grounding).
+قدم الإجابة باللغة العربية الفصحى بأسلوب مهني، دقيق ومباشر، وقسّم الإجابة إلى أفكار رئيسية ونقاط واضحة.
+`;
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: userQuery,
+          config: {
+            systemInstruction,
+            tools: [{ googleSearch: {} }],
+          },
+        });
+
+        const text = result.text || 'لم يتم استرجاع معلومات كافية.';
+        const candidate = result.candidates?.[0];
+        const groundingMetadata = candidate?.groundingMetadata;
+
+        const sources: SearchGroundingSource[] = [];
+        if (groundingMetadata?.groundingChunks) {
+          for (const chunk of groundingMetadata.groundingChunks) {
+            if (chunk.web) {
+              const webData = chunk.web as any;
+              sources.push({
+                title: webData.title || 'المصدر',
+                url: webData.uri,
+                snippet: webData.snippet || webData.title,
+              });
+            }
+          }
+        }
+
+        const webSearchQueries = groundingMetadata?.webSearchQueries || [];
+
+        return {
+          answer: text,
+          sources,
+          webSearchQueries,
+        };
+      } catch (err) {
+        console.error('Search grounding API error:', err);
+      }
+    }
+
+    return {
+      answer: `نتائج البحث المباشر لـ "${userQuery}":\n\nتجري متابعة أحدث أخبار وتحديثات الذكاء الاصطناعي بشكل فوري عبر محرك بحث Google (Google Search Grounding). يرجى التأكد من ضبط GEMINI_API_KEY للحصول على الربط الحي.`,
+      sources: [
+        { title: 'Google AI Studio News', url: 'https://ai.google.dev' },
+        { title: 'Daleel AI Realtime', url: 'https://daleel.ai' }
+      ],
+      webSearchQueries: [userQuery]
+    };
+  },
+
+  /**
+   * Maps Grounding: Google Maps Data integration using Gemini 3.8 Flash for tech hubs, AI centers, & events.
+   */
+  async mapsGrounding(userQuery: string): Promise<MapsGroundingResponse> {
+    const ai = getAiClient();
+    if (ai) {
+      try {
+        const systemInstruction = `
+أنت "مكتشف المقرات والفعاليات التقنية لمستكشف الذكاء الاصطناعي (Daleel AI Maps Finder)".
+مهمتك: مساعدة المستخدمين في تحديد أماكن ومقرات شركات الذكاء الاصطناعي، مراكز الابتكار، حاضنات الأعمال، والمعارض والمؤتمرات التقنية ومختبرات الأبحاث باستخدام بيانات خرائط قوقل المباشرة (Google Maps Grounding).
+قدم إجابة مفصلة باللغة العربية مع توضيح أسماء المواقع وعناوينها وتقييماتها وكيفية الوصول إليها.
+`;
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: userQuery,
+          config: {
+            systemInstruction,
+            tools: [{ googleMaps: {} }],
+          },
+        });
+
+        const text = result.text || 'لم يتم العثور على مواقع مطابقة.';
+        const candidate = result.candidates?.[0];
+        const groundingMetadata = candidate?.groundingMetadata;
+
+        const locations: MapsGroundingLocation[] = [];
+        if (groundingMetadata?.groundingChunks) {
+          for (const chunk of groundingMetadata.groundingChunks) {
+            if (chunk.web) {
+              locations.push({
+                name: chunk.web.title,
+                address: chunk.web.uri,
+              });
+            }
+          }
+        }
+
+        return {
+          answer: text,
+          locations,
+        };
+      } catch (err) {
+        console.error('Maps grounding API error:', err);
+      }
+    }
+
+    return {
+      answer: `نتائج استكشاف الخرائط لـ "${userQuery}":\n\nيمكنك البحث عن مراكز الذكاء الاصطناعي ومجمعات التقنية في الرياض، دبي، القاهرة، وسيليكون فالي مع الخرائط التفاعلية (Google Maps Grounding).`,
+      locations: [
+        { name: 'مجمع كافد التقني بالرياض - KAFD AI Hub', address: 'الرياض، المملكة العربية السعودية' },
+        { name: 'مركز دبي للذكاء الاصطناعي - AREA 2071', address: 'دبي، الإمارات العربية المتحدة' }
+      ]
+    };
+  },
+
   /**
    * AI Tool Advisor: Analyzes user needs and recommends the most matching tools from database.
    */

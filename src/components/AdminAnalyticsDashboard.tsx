@@ -44,6 +44,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
   const [gaMeasurementId, setGaMeasurementId] = useState('');
   const [gaStreamId, setGaStreamId] = useState('');
   const [gaPropertyId, setGaPropertyId] = useState('');
+  const [gaAccountId, setGaAccountId] = useState('');
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<'tools' | 'articles' | 'comparisons' | 'categories' | 'searchKeywords'>('tools');
   const [timeRange, setTimeRange] = useState<'14d' | '30d' | '7d'>('14d');
@@ -61,9 +62,10 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         if (resData && !resData.error) {
           setData(resData);
           if (resData.googleAnalytics) {
-            setGaMeasurementId(resData.googleAnalytics.measurementId || '');
+            setGaMeasurementId(resData.googleAnalytics.measurementId || 'G-T1X92GT5YK');
             setGaStreamId(resData.googleAnalytics.streamId || '15813564380');
-            setGaPropertyId(resData.googleAnalytics.propertyId || '');
+            setGaPropertyId(resData.googleAnalytics.propertyId || '555078183');
+            setGaAccountId(resData.googleAnalytics.accountId || '408797938');
           }
         } else {
           throw new Error('No data');
@@ -150,6 +152,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
         { key: 'ga_measurement_id', value: gaMeasurementId.trim() },
         { key: 'ga_stream_id', value: gaStreamId.trim() },
         { key: 'ga_property_id', value: gaPropertyId.trim() },
+        { key: 'ga_account_id', value: gaAccountId.trim() },
       ];
 
       const res = await fetch('/api/admin/settings', {
@@ -733,7 +736,7 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
           </span>
         </div>
 
-        <form onSubmit={handleSaveGaConfig} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <form onSubmit={handleSaveGaConfig} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               معرف القياس (GA4 Measurement ID)
@@ -762,18 +765,31 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              معرف الملكية (GA4 Property ID)
+              معرف الملكية (Property ID)
             </label>
             <input
               type="text"
-              placeholder="389402182"
+              placeholder="555078183"
               value={gaPropertyId}
               onChange={(e) => setGaPropertyId(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
             />
           </div>
 
-          <div className="sm:col-span-3 flex justify-end pt-2">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              الرقم التعريفي للحساب (Account ID)
+            </label>
+            <input
+              type="text"
+              placeholder="408797938"
+              value={gaAccountId}
+              onChange={(e) => setGaAccountId(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+            />
+          </div>
+
+          <div className="sm:col-span-2 lg:col-span-4 flex justify-end pt-2">
             <button
               type="submit"
               disabled={savingGa}

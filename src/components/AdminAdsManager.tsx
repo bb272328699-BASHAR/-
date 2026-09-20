@@ -13,8 +13,15 @@ import {
   Info, 
   Save, 
   ExternalLink,
-  Code
+  Code,
+  TrendingUp,
+  Search,
+  BookOpen,
+  Sliders
 } from 'lucide-react';
+import { AdminAdSensePerformance } from './AdminAdSensePerformance.tsx';
+import { AdminAdDiagnostic } from './AdminAdDiagnostic.tsx';
+import { AdminAdSensePolicyDocs } from './AdminAdSensePolicyDocs.tsx';
 
 interface AdminAdsManagerProps {
   token: string;
@@ -24,6 +31,7 @@ export const AdminAdsManager: React.FC<AdminAdsManagerProps> = ({ token }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [subTab, setSubTab] = useState<'performance' | 'diagnostic' | 'settings' | 'policy'>('performance');
 
   const [adsEnabled, setAdsEnabled] = useState(true);
   const [autoAdsEnabled, setAutoAdsEnabled] = useState(true);
@@ -115,17 +123,17 @@ export const AdminAdsManager: React.FC<AdminAdsManagerProps> = ({ token }) => {
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-8" dir="rtl">
-      {/* Header Banner */}
+    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-6" dir="rtl">
+      {/* Top Banner Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-50 to-slate-50 border border-amber-200/60">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/20">
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-extrabold text-slate-900">إدارة الإعلانات والمساحات المتجاوبة</h2>
+            <h2 className="text-xl font-extrabold text-slate-900">مركز إدارة إعلانات Google AdSense</h2>
             <p className="text-xs text-slate-600 mt-0.5">
-              تكوين معرف الناشر (AdSense Publisher ID) والتحكم الكامل بمساحات الإعلانات الذكية في المقالات والأدوات.
+              مراقبة اتجاهات الأرباح، فحص الـ DOM المباشر، ضبط المواضع، ومراجعة سياسات واختبارات الإعلانات التلقائية.
             </p>
           </div>
         </div>
@@ -136,9 +144,52 @@ export const AdminAdsManager: React.FC<AdminAdsManagerProps> = ({ token }) => {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 bg-white text-slate-700 hover:text-indigo-600 font-bold px-4 py-2 rounded-xl text-xs border border-slate-200 shadow-2xs transition-colors shrink-0"
         >
-          <span>لوحة Google AdSense</span>
+          <span>حساب AdSense الرئيسي</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
+      </div>
+
+      {/* Sub Tabs Navigation */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
+        <button
+          onClick={() => setSubTab('performance')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            subTab === 'performance' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 text-emerald-400" />
+          <span>اتجاهات الأرباح والمتركس المباشر (Recharts)</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('diagnostic')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            subTab === 'diagnostic' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`}
+        >
+          <Search className="w-4 h-4 text-indigo-300" />
+          <span>فاحص ومعاين الـ DOM المباشر (Ad Diagnostic)</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('settings')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            subTab === 'settings' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`}
+        >
+          <Sliders className="w-4 h-4 text-amber-400" />
+          <span>إعدادات المواضع ومعرف الناشر</span>
+        </button>
+
+        <button
+          onClick={() => setSubTab('policy')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            subTab === 'policy' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`}
+        >
+          <BookOpen className="w-4 h-4 text-blue-300" />
+          <span>دليل الأكواد وسياسة الخصوصية</span>
+        </button>
       </div>
 
       {msg && (
@@ -150,290 +201,256 @@ export const AdminAdsManager: React.FC<AdminAdsManagerProps> = ({ token }) => {
         </div>
       )}
 
-      <form onSubmit={handleSave} className="space-y-8">
-        
-        {/* Main Controls & Switches */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-slate-50 border border-slate-200">
+      {/* SubTab Content Rendering */}
+      {subTab === 'performance' && (
+        <AdminAdSensePerformance token={token} />
+      )}
+
+      {subTab === 'diagnostic' && (
+        <AdminAdDiagnostic publisherId={publisherId || 'ca-pub-6343594295307676'} />
+      )}
+
+      {subTab === 'policy' && (
+        <AdminAdSensePolicyDocs />
+      )}
+
+      {subTab === 'settings' && (
+        <form onSubmit={handleSave} className="space-y-8">
           
-          {/* Toggle 1: Global Ads Switch */}
-          <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <div>
-              <span className="font-extrabold text-sm text-slate-900 block">تفعيل نظام الإعلانات الشامل</span>
-              <span className="text-xs text-slate-500 block mt-0.5">
-                إظهار أو إخفاء كافة المساحات الإعلانية في كامل المنصة.
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setAdsEnabled(!adsEnabled)}
-              className={`p-1.5 rounded-2xl transition-colors cursor-pointer ${
-                adsEnabled ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'
-              }`}
-            >
-              {adsEnabled ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
-            </button>
-          </div>
-
-          {/* Toggle 2: Auto Ads (Google Auto-ads) */}
-          <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-indigo-200/80 shadow-2xs">
-            <div>
-              <span className="font-extrabold text-sm text-indigo-950 block">الإعلانات التلقائية (Auto-ads)</span>
-              <span className="text-xs text-slate-500 block mt-0.5">
-                تفعيل ميزة الذكاء الاصطناعي من قوقل لتوزيع الإعلانات تلقائياً في أنسب المواقع.
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setAutoAdsEnabled(!autoAdsEnabled)}
-              className={`p-1.5 rounded-2xl transition-colors cursor-pointer ${
-                autoAdsEnabled ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500'
-              }`}
-            >
-              {autoAdsEnabled ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
-            </button>
-          </div>
-
-          {/* Toggle 3: Test / Preview Mode */}
-          <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <div>
-              <span className="font-extrabold text-sm text-slate-900 block">وضع المعاينة (Test Mode)</span>
-              <span className="text-xs text-slate-500 block mt-0.5">
-                عرض بنرات تجريبية أنيقة بدلاً من الإعلانات الحية لضبط المحاذاة.
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setTestMode(!testMode)}
-              className={`p-1.5 rounded-2xl transition-colors cursor-pointer ${
-                testMode ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500'
-              }`}
-            >
-              {testMode ? <ToggleRight className="w-8 h-8" /> : <ToggleLeft className="w-8 h-8" />}
-            </button>
-          </div>
-
-        </div>
-
-        {/* Publisher Settings */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-extrabold text-base text-slate-900">معرف الناشر والحساب (AdSense Config)</h3>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-700">
-              معرف الناشر في أدسنس (Publisher ID / Client ID) *
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="ca-pub-XXXXXXXXXXXXXXXX"
-                value={publisherId}
-                onChange={(e) => setPublisherId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm outline-none focus:border-indigo-500 font-mono"
-              />
-            </div>
-            <p className="text-[11px] text-slate-500">
-              مثال: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-600">ca-pub-1234567890123456</code>. سيتم تضمين السكريبت تلقائياً بأسلوب متوافق مع معايير الأداء والـ SPA.
-            </p>
-          </div>
-        </div>
-
-        {/* Google Consent Mode v2 Card */}
-        <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-50/70 via-teal-50/40 to-slate-50 border border-emerald-200/80 space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-600" />
-              <h4 className="font-extrabold text-sm text-slate-900">حالة وضع الموافقة (Google Consent Mode v2)</h4>
-            </div>
-            <span className="text-[11px] font-extrabold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-300/60">
-              مفعّل ومتوافق مع أدسنس تلقائياً ✓
-            </span>
-          </div>
-
-          <p className="text-xs text-slate-600 leading-relaxed">
-            المنصة مهيأة بنظام <strong>Google Consent Mode v2</strong> القياسي. يتم حجب تخزين وتخصيص الإعلانات (<code className="text-emerald-700 font-mono bg-emerald-100/60 px-1 py-0.5 rounded">ad_storage</code> و <code className="text-emerald-700 font-mono bg-emerald-100/60 px-1 py-0.5 rounded">ad_personalization</code>) افتراضياً حتى يمنح الزائر موافقته الصريحة عبر شريط الخصوصية، مما يضمن الامتثال للائحة GDPR وقواعد AdSense الدولية دون الإضرار بالإحصاءات وتوزيع الإعلانات.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 text-[11px]">
-            <div className="bg-white p-2.5 rounded-xl border border-emerald-100 flex items-center justify-between">
-              <span className="font-mono text-slate-700">ad_storage</span>
-              <span className="font-bold text-emerald-600">ديناميكي حسب الخيار</span>
-            </div>
-            <div className="bg-white p-2.5 rounded-xl border border-emerald-100 flex items-center justify-between">
-              <span className="font-mono text-slate-700">ad_user_data</span>
-              <span className="font-bold text-emerald-600">ديناميكي حسب الخيار</span>
-            </div>
-            <div className="bg-white p-2.5 rounded-xl border border-emerald-100 flex items-center justify-between">
-              <span className="font-mono text-slate-700">ad_personalization</span>
-              <span className="font-bold text-emerald-600">ديناميكي حسب الخيار</span>
-            </div>
-            <div className="bg-white p-2.5 rounded-xl border border-emerald-100 flex items-center justify-between">
-              <span className="font-mono text-slate-700">security_storage</span>
-              <span className="font-bold text-emerald-600">دائم (granted)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Slot IDs Grid */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Layout className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-extrabold text-base text-slate-900">معرفات الوحدات الإعلانية (Ad Slot IDs)</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Main Controls & Switches */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-slate-50 border border-slate-200">
             
-            {/* Slot 1: Article Top */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                1. أعلى المقال (Article Top Banner)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 1234567890"
-                value={slotArticleTop}
-                onChange={(e) => setSlotArticleTop(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">يظهر فوق محتوى المقال مباشرةً تحت الصور التوضيحية</span>
+            {/* Toggle 1: Global Ads Switch */}
+            <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <div>
+                <span className="block text-xs font-extrabold text-slate-900">تفعيل نظام الإعلانات الشامل</span>
+                <span className="text-[10px] text-slate-500">إظهار أو إخفاء كافة المساحات في الموقع</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAdsEnabled(!adsEnabled)}
+                className={`text-2xl transition-colors cursor-pointer ${adsEnabled ? 'text-emerald-600' : 'text-slate-300'}`}
+              >
+                {adsEnabled ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />}
+              </button>
             </div>
 
-            {/* Slot 2: Article In-Content */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                2. منتصف المقال (Article In-Content)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 2345678901"
-                value={slotArticleIncontent}
-                onChange={(e) => setSlotArticleIncontent(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">يظهر بين فقرات المقال والشروحات</span>
+            {/* Toggle 2: Auto Ads Switch */}
+            <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <div>
+                <span className="block text-xs font-extrabold text-slate-900">إعلانات جوجل التلقائية (Auto-ads)</span>
+                <span className="text-[10px] text-slate-500">سماح لخوارزمية جوجل بوضع بنرات ذكية</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAutoAdsEnabled(!autoAdsEnabled)}
+                className={`text-2xl transition-colors cursor-pointer ${autoAdsEnabled ? 'text-indigo-600' : 'text-slate-300'}`}
+              >
+                {autoAdsEnabled ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />}
+              </button>
             </div>
 
-            {/* Slot 3: Article Bottom (End of Content) */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                3. نهاية المقال (Article Bottom / End of Article)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 2555678901"
-                value={slotArticleBottom}
-                onChange={(e) => setSlotArticleBottom(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">يظهر في نهاية المحتوى مباشرة قبل أزرار المشاركة والمقالات ذات الصلة</span>
-            </div>
-
-            {/* Slot 4: Article Sidebar */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                4. الشريط الجانبي (Sidebar Banner)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 3456789012"
-                value={slotArticleSidebar}
-                onChange={(e) => setSlotArticleSidebar(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">يظهر في القائمة الجانبية للتفاصيل والبطاقات السريعة</span>
-            </div>
-
-            {/* Slot 5: Tool Detail Banner */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                5. صفحة تفاصيل الأداة (Tool Details Banner)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 4567890123"
-                value={slotToolDetail}
-                onChange={(e) => setSlotToolDetail(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">يظهر بين ميزات وتقييمات أداة الذكاء الاصطناعي</span>
-            </div>
-
-            {/* Slot 6: Home / Feed Banner */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                6. الصفحة الرئيسية / التجميعات (Feed Banner)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 5678901234"
-                value={slotHomeBanner}
-                onChange={(e) => setSlotHomeBanner(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">بنر عريض بين أقسام الأدوات الشائعة والتجميعات المميزة</span>
-            </div>
-
-            {/* Slot 7: Sticky Footer Banner */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800">
-                7. البنر السفلي الثابت (Sticky Bottom Anchor)
-              </label>
-              <input
-                type="text"
-                placeholder="مثال: 6789012345"
-                value={slotStickyFooter}
-                onChange={(e) => setSlotStickyFooter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
-              />
-              <span className="text-[10px] text-slate-500 block">بنر تثبيت سفلي شاشات الهواتف والمكتب</span>
+            {/* Toggle 3: Test Mode */}
+            <div className="flex items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <div>
+                <span className="block text-xs font-extrabold text-slate-900">وضع المعاينة المكتبي (Preview Mode)</span>
+                <span className="text-[10px] text-slate-500">عرض بنرات توضيحية أثناء التطوير</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTestMode(!testMode)}
+                className={`text-2xl transition-colors cursor-pointer ${testMode ? 'text-amber-500' : 'text-slate-300'}`}
+              >
+                {testMode ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />}
+              </button>
             </div>
 
           </div>
-        </div>
 
-        {/* Custom HTML/JS Script Code */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Code className="w-5 h-5 text-indigo-600" />
-            <h3 className="font-extrabold text-base text-slate-900">كود إعلاني مخصص (Custom HTML / Script Backup)</h3>
+          {/* Publisher ID & Global Meta */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-indigo-600" />
+              <h3 className="font-extrabold text-base text-slate-900">معرف الناشر الرئيسي (AdSense Publisher ID)</h3>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-2">
+              <label className="block text-xs font-bold text-slate-700">Publisher ID الخاص بحسابك في Google AdSense</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="pub-6343594295307676 أو ca-pub-6343594295307676"
+                  value={publisherId}
+                  onChange={(e) => setPublisherId(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-indigo-200 text-sm font-mono outline-none focus:border-indigo-600 bg-white font-bold text-slate-900"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                <Info className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                <span>سيتم ربط هذا المعرف تلقائياً بكافة وسوم `data-ad-client` وبملف `ads.txt` العام.</span>
+              </p>
+            </div>
           </div>
 
-          <textarea
-            rows={3}
-            placeholder="<!-- أدخل كود شبكة إعلانية مخصصة أو سكريبت مباشر هنا في حال رغبتك بالتحويل من أدسنس -->"
-            value={customCode}
-            onChange={(e) => setCustomCode(e.target.value)}
-            className="w-full p-4 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-slate-900 text-emerald-400 placeholder-slate-500"
-          />
-        </div>
+          {/* Individual Ad Slots Configuration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layout className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-extrabold text-base text-slate-900">مواضع الوحدات الإعلانية المحددة (Slot IDs)</h3>
+              </div>
+              <span className="text-xs text-slate-500 font-medium">أدخل معرف Slot ID المستخرج من لوحة AdSense</span>
+            </div>
 
-        {/* Save Button */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-          <button
-            type="submit"
-            disabled={saving}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>جاري حفظ الإعدادات...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>حفظ التغييرات وتفعيل المساحات الإعلانية</span>
-              </>
-            )}
-          </button>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              {/* Slot 1: Article Top */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  1. أعلى المقال (Article Header Banner)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotArticleTop}
+                  onChange={(e) => setSlotArticleTop(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">يظهر فوق محتوى المقال مباشرةً تحت الصور التوضيحية</span>
+              </div>
 
-      </form>
+              {/* Slot 2: Article In-Content */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  2. منتصف المقال (Article In-Content)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotArticleIncontent}
+                  onChange={(e) => setSlotArticleIncontent(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">يظهر بين فقرات المقال والشروحات</span>
+              </div>
+
+              {/* Slot 3: Article Bottom (End of Content) */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  3. نهاية المقال (Article Bottom / End of Article)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotArticleBottom}
+                  onChange={(e) => setSlotArticleBottom(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">يظهر في نهاية المحتوى مباشرة قبل أزرار المشاركة والمقالات ذات الصلة</span>
+              </div>
+
+              {/* Slot 4: Article Sidebar */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  4. الشريط الجانبي (Sidebar Banner)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotArticleSidebar}
+                  onChange={(e) => setSlotArticleSidebar(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">يظهر في القائمة الجانبية للتفاصيل والبطاقات السريعة</span>
+              </div>
+
+              {/* Slot 5: Tool Detail Banner */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  5. صفحة تفاصيل الأداة (Tool Details Banner)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotToolDetail}
+                  onChange={(e) => setSlotToolDetail(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">يظهر بين ميزات وتقييمات أداة الذكاء الاصطناعي</span>
+              </div>
+
+              {/* Slot 6: Home / Feed Banner */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  6. الصفحة الرئيسية / التجميعات (Feed Banner)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotHomeBanner}
+                  onChange={(e) => setSlotHomeBanner(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">بنر عريض بين أقسام الأدوات الشائعة والتجميعات المميزة</span>
+              </div>
+
+              {/* Slot 7: Sticky Footer Banner */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800">
+                  7. البنر السفلي الثابت (Sticky Bottom Anchor)
+                </label>
+                <input
+                  type="text"
+                  placeholder="مثال: 9685713922"
+                  value={slotStickyFooter}
+                  onChange={(e) => setSlotStickyFooter(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-white"
+                />
+                <span className="text-[10px] text-slate-500 block">بنر تثبيت سفلي شاشات الهواتف والمكتب</span>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Custom HTML/JS Script Code */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Code className="w-5 h-5 text-indigo-600" />
+              <h3 className="font-extrabold text-base text-slate-900">كود إعلاني مخصص (Custom HTML / Script Backup)</h3>
+            </div>
+
+            <textarea
+              rows={3}
+              placeholder="<!-- أدخل كود شبكة إعلانية مخصصة أو سكريبت مباشر هنا في حال رغبتك بالتحويل من أدسنس -->"
+              value={customCode}
+              onChange={(e) => setCustomCode(e.target.value)}
+              className="w-full p-4 rounded-xl border border-slate-200 text-xs font-mono outline-none focus:border-indigo-500 bg-slate-900 text-emerald-400 placeholder-slate-500"
+            />
+          </div>
+
+          {/* Save Button */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>جاري حفظ الإعدادات...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>حفظ التغييرات وتفعيل المساحات الإعلانية</span>
+                </>
+              )}
+            </button>
+          </div>
+
+        </form>
+      )}
     </div>
   );
 };

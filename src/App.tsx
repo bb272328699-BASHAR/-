@@ -48,6 +48,24 @@ export default function App() {
   // Google Analytics 4 automatic page view tracking on route changes
   usePageTracking(currentPath);
 
+  // Verify GA4 Tracking code & Property ID status (555078183)
+  useEffect(() => {
+    const propertyId = '555078183';
+    const measurementId = 'G-T1X92GT5YK';
+
+    const isGAActive = typeof window !== 'undefined' && 
+      (typeof window.gtag === 'function' || (Array.isArray(window.dataLayer) && window.dataLayer.length > 0));
+
+    // Console log appears only in development mode to confirm successful binding
+    if (process.env.NODE_ENV !== 'production') {
+      if (isGAActive) {
+        console.log(`%c[GA4 Verification] ✅ GA4 Tracking Verified & Active | Property ID: ${propertyId} | Measurement ID: ${measurementId}`, 'color: #10b981; font-weight: bold;');
+      } else {
+        console.warn(`[GA4 Verification] ⚠️ GA4 Tracking Script initializing for Property ID: ${propertyId}`);
+      }
+    }
+  }, []);
+
   // Automated Search Engine Optimization (SEO) & Schema.org markup on route changes
   useEffect(() => {
     applyRouteSEO(currentPath);

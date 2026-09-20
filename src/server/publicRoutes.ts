@@ -799,6 +799,36 @@ publicRouter.post('/ai/advisor', async (req: Request, res: Response) => {
   }
 });
 
+// 1.1 AI Live Search Endpoint (Google Search Grounding)
+publicRouter.post('/ai/live-search', async (req: Request, res: Response) => {
+  try {
+    const { query: searchQuery } = req.body;
+    if (!searchQuery || typeof searchQuery !== 'string' || searchQuery.trim().length < 2) {
+      return res.status(400).json({ error: 'الرجاء إدخال نص البحث للربط الحي مع نتائج Google' });
+    }
+
+    const result = await AiService.searchGrounding(searchQuery.trim());
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل البحث المباشر عبر Google Search Grounding' });
+  }
+});
+
+// 1.2 AI Tech Hubs & Events Locator Endpoint (Google Maps Grounding)
+publicRouter.post('/ai/maps-grounding', async (req: Request, res: Response) => {
+  try {
+    const { query: mapsQuery } = req.body;
+    if (!mapsQuery || typeof mapsQuery !== 'string' || mapsQuery.trim().length < 2) {
+      return res.status(400).json({ error: 'الرجاء تحديد المدينة أو المركز المطلوب استكشافه على الخريطة' });
+    }
+
+    const result = await AiService.mapsGrounding(mapsQuery.trim());
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل استكشاف المواقع عبر Google Maps Grounding' });
+  }
+});
+
 // 2. AI Prompt Generator Endpoint
 publicRouter.post('/ai/generate-prompt', async (req: Request, res: Response) => {
   try {
