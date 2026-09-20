@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Download, ExternalLink, Loader2, Sparkles, BookOpen, FileCode } from 'lucide-react';
 import { Resource } from '../types.ts';
+import { DEFAULT_RESOURCES } from '../data/defaultCatalog.ts';
 
 export const ResourcesPage: React.FC = () => {
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [resources, setResources] = useState<Resource[]>(DEFAULT_RESOURCES);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch('/api/resources')
-      .then(res => res.json())
-      .then(data => setResources(Array.isArray(data) ? data : []))
-      .catch(err => console.error(err))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setResources(data);
+        }
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

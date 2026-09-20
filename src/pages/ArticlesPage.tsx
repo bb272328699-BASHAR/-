@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ArrowLeft, Loader2, Sparkles, Clock, Calendar } from 'lucide-react';
 import { Article } from '../types.ts';
+import { DEFAULT_ARTICLES } from '../data/defaultCatalog.ts';
 import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
 import { generateArticleSEO } from '../utils/autoSeoGenerator.ts';
@@ -15,26 +16,40 @@ interface ArticlesPageProps {
 }
 
 export const ArticlesPage: React.FC<ArticlesPageProps> = ({ navigate, articleSlug }) => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [singleArticle, setSingleArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [articles, setArticles] = useState<Article[]>(DEFAULT_ARTICLES);
+  const [singleArticle, setSingleArticle] = useState<Article | null>(() => {
+    if (articleSlug) {
+      return DEFAULT_ARTICLES.find(a => a.slug === articleSlug) || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+    const fallbackArticle = articleSlug ? DEFAULT_ARTICLES.find(a => a.slug === articleSlug) : null;
 
     if (articleSlug) {
       fetch(`/api/articles/${articleSlug}`)
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && !data.error) {
             setSingleArticle(data);
             const seoConfig = generateArticleSEO(data, origin);
             updateDocumentSEO(seoConfig);
+          } else if (fallbackArticle) {
+            setSingleArticle(fallbackArticle);
+            const seoConfig = generateArticleSEO(fallbackArticle, origin);
+            updateDocumentSEO(seoConfig);
           } else {
             setSingleArticle(null);
           }
         })
-        .catch(err => console.error(err))
+        .catch(() => {
+          if (fallbackArticle) {
+            setSingleArticle(fallbackArticle);
+          }
+        })
         .finally(() => setLoading(false));
     } else {
       updateDocumentSEO({
@@ -45,9 +60,13 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({ navigate, articleSlu
       });
 
       fetch('/api/articles')
-        .then(res => res.json())
-        .then(data => setArticles(Array.isArray(data) ? data : []))
-        .catch(err => console.error(err))
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setArticles(data);
+          }
+        })
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [articleSlug]);

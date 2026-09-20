@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, ArrowLeft, Loader2, Award, ExternalLink, ThumbsUp, Check, X } from 'lucide-react';
 import { Review } from '../types.ts';
+import { DEFAULT_REVIEWS } from '../data/defaultCatalog.ts';
 import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
@@ -12,27 +13,40 @@ interface ReviewsPageProps {
 }
 
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({ navigate, reviewSlug }) => {
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [singleReview, setSingleReview] = useState<Review | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>(DEFAULT_REVIEWS);
+  const [singleReview, setSingleReview] = useState<Review | null>(() => {
+    if (reviewSlug) {
+      return DEFAULT_REVIEWS.find(r => r.slug === reviewSlug) || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+    const fallbackReview = reviewSlug ? DEFAULT_REVIEWS.find(r => r.slug === reviewSlug) : null;
 
     if (reviewSlug) {
       fetch(`/api/reviews/${reviewSlug}`)
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && !data.error) {
             setSingleReview(data);
             const seo = generateReviewSEO(data, origin);
             updateDocumentSEO(seo);
+          } else if (fallbackReview) {
+            setSingleReview(fallbackReview);
+            const seo = generateReviewSEO(fallbackReview, origin);
+            updateDocumentSEO(seo);
           } else {
             setSingleReview(null);
           }
         })
-        .catch(err => console.error(err))
+        .catch(() => {
+          if (fallbackReview) {
+            setSingleReview(fallbackReview);
+          }
+        })
         .finally(() => setLoading(false));
     } else {
       updateDocumentSEO({
@@ -43,9 +57,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ navigate, reviewSlug }
       });
 
       fetch('/api/reviews')
-        .then(res => res.json())
-        .then(data => setReviews(Array.isArray(data) ? data : []))
-        .catch(err => console.error(err))
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setReviews(data);
+          }
+        })
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [reviewSlug]);

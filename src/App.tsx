@@ -27,6 +27,14 @@ import { ComparisonDock } from './components/ComparisonDock.tsx';
 import { ScrollProgress } from './components/ScrollProgress.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import { Tool, Category, Article, Comparison, Review, Tutorial } from './types.ts';
+import { 
+  DEFAULT_CATEGORIES, 
+  DEFAULT_TOOLS, 
+  DEFAULT_COMPARISONS, 
+  DEFAULT_REVIEWS, 
+  DEFAULT_TUTORIALS, 
+  DEFAULT_ARTICLES 
+} from './data/defaultCatalog.ts';
 import { Loader2 } from 'lucide-react';
 import { usePageTracking } from './hooks/usePageTracking.ts';
 import { fetchAdSettings } from './components/AdSlot.tsx';
@@ -52,16 +60,16 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // Global catalog states
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [trendingTools, setTrendingTools] = useState<Tool[]>([]);
-  const [popularTools, setPopularTools] = useState<Tool[]>([]);
-  const [newTools, setNewTools] = useState<Tool[]>([]);
-  const [latestReviews, setLatestReviews] = useState<Review[]>([]);
-  const [latestComparisons, setLatestComparisons] = useState<Comparison[]>([]);
-  const [latestTutorials, setLatestTutorials] = useState<Tutorial[]>([]);
-  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
-  const [loadingInitial, setLoadingInitial] = useState(true);
+  // Global catalog states initialized with rich default data so Netlify / static hosts render immediately
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [trendingTools, setTrendingTools] = useState<Tool[]>(DEFAULT_TOOLS.filter(t => t.is_trending));
+  const [popularTools, setPopularTools] = useState<Tool[]>(DEFAULT_TOOLS.filter(t => t.is_popular));
+  const [newTools, setNewTools] = useState<Tool[]>(DEFAULT_TOOLS.slice(0, 6));
+  const [latestReviews, setLatestReviews] = useState<Review[]>(DEFAULT_REVIEWS);
+  const [latestComparisons, setLatestComparisons] = useState<Comparison[]>(DEFAULT_COMPARISONS);
+  const [latestTutorials, setLatestTutorials] = useState<Tutorial[]>(DEFAULT_TUTORIALS);
+  const [latestArticles, setLatestArticles] = useState<Article[]>(DEFAULT_ARTICLES);
+  const [loadingInitial, setLoadingInitial] = useState(false);
 
   // Synchronize browser URL on internal navigation
   const navigate = (path: string) => {
@@ -90,7 +98,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // Fetch initial catalog data from PostgreSQL
+  // Fetch initial catalog data from backend if available, retaining fallback data on failure
   useEffect(() => {
     let isMounted = true;
 
@@ -100,7 +108,6 @@ export default function App() {
         if (!res.ok) return null;
         return await res.json();
       } catch (e) {
-        console.warn(`Transient fetch issue for ${url}:`, e);
         return null;
       }
     }
@@ -119,27 +126,33 @@ export default function App() {
         if (!isMounted) return;
 
         if (homeData) {
-          setTrendingTools(Array.isArray(homeData?.trending) ? homeData.trending : []);
-          setPopularTools(Array.isArray(homeData?.popular) ? homeData.popular : []);
-          setNewTools(Array.isArray(homeData?.newest) ? homeData.newest : []);
+          if (Array.isArray(homeData?.trending) && homeData.trending.length > 0) {
+            setTrendingTools(homeData.trending);
+          }
+          if (Array.isArray(homeData?.popular) && homeData.popular.length > 0) {
+            setPopularTools(homeData.popular);
+          }
+          if (Array.isArray(homeData?.newest) && homeData.newest.length > 0) {
+            setNewTools(homeData.newest);
+          }
         }
-        if (catsData && Array.isArray(catsData)) {
+        if (catsData && Array.isArray(catsData) && catsData.length > 0) {
           setCategories(catsData);
         }
-        if (revData && Array.isArray(revData)) {
+        if (revData && Array.isArray(revData) && revData.length > 0) {
           setLatestReviews(revData);
         }
-        if (compData && Array.isArray(compData)) {
+        if (compData && Array.isArray(compData) && compData.length > 0) {
           setLatestComparisons(compData);
         }
-        if (tutData && Array.isArray(tutData)) {
+        if (tutData && Array.isArray(tutData) && tutData.length > 0) {
           setLatestTutorials(tutData);
         }
-        if (artData && Array.isArray(artData)) {
+        if (artData && Array.isArray(artData) && artData.length > 0) {
           setLatestArticles(artData);
         }
       } catch (err) {
-        console.warn('Initial load handled safely:', err);
+        console.warn('Initial load handled safely with default catalog:', err);
       } finally {
         if (isMounted) {
           setLoadingInitial(false);

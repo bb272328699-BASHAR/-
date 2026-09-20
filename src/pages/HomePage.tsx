@@ -52,10 +52,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [newsletterMsg, setNewsletterMsg] = useState('');
-  const [topUpvotedTools, setTopUpvotedTools] = useState<Tool[]>([]);
+  const [topUpvotedTools, setTopUpvotedTools] = useState<Tool[]>(() => popularTools.length > 0 ? popularTools.slice(0, 6) : trendingTools.slice(0, 6));
 
   useEffect(() => {
-    // Fetch community top upvoted tools
+    // Fetch community top upvoted tools, fallback to popularTools if offline or on static host
     fetch('/api/tools/leaderboard/top?limit=6')
       .then(res => res.ok ? res.json() : [])
       .then(data => {
@@ -64,7 +64,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         }
       })
       .catch(() => {});
-  }, []);
+  }, [popularTools, trendingTools]);
 
   useEffect(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';

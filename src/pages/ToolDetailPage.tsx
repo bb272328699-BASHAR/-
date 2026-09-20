@@ -23,6 +23,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Tool } from '../types.ts';
+import { DEFAULT_TOOLS } from '../data/defaultCatalog.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { toggleFirestoreBookmark, addFirestoreReview } from '../lib/firestoreService.ts';
 import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
@@ -82,6 +83,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
     const fetchTool = async () => {
       setLoading(true);
       setError(null);
+      const fallback = DEFAULT_TOOLS.find(t => t.slug === slug);
       try {
         const res = await fetch(`/api/tools/${slug}`);
         if (!res.ok) {
@@ -103,7 +105,15 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
           fetchReviews(data.id);
         }
       } catch (err: any) {
-        setError(err.message || 'حدث خطأ في تحميل بيانات الأداة');
+        if (fallback) {
+          setTool(fallback);
+          setUpvotes(Number(fallback.upvotes_count || 0));
+          const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+          const seoConfig = generateToolSEO(fallback, origin);
+          updateDocumentSEO(seoConfig);
+        } else {
+          setError(err.message || 'حدث خطأ في تحميل بيانات الأداة');
+        }
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, ArrowLeft, Loader2, Sparkles, Folder } from 'lucide-react';
 import { Category } from '../types.ts';
+import { DEFAULT_CATEGORIES } from '../data/defaultCatalog.ts';
 import { updateDocumentSEO } from '../utils/seo.ts';
 
 interface CategoriesPageProps {
@@ -8,8 +9,8 @@ interface CategoriesPageProps {
 }
 
 export const CategoriesPage: React.FC<CategoriesPageProps> = ({ navigate }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
@@ -22,9 +23,13 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({ navigate }) => {
     });
 
     fetch('/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(Array.isArray(data) ? data : []))
-      .catch(err => console.error(err))
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+        }
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

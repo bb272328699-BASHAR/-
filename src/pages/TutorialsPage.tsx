@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ArrowLeft, Loader2, Sparkles, Clock, CheckCircle2 } from 'lucide-react';
 import { Tutorial } from '../types.ts';
+import { DEFAULT_TUTORIALS } from '../data/defaultCatalog.ts';
 import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
@@ -12,27 +13,40 @@ interface TutorialsPageProps {
 }
 
 export const TutorialsPage: React.FC<TutorialsPageProps> = ({ navigate, tutorialSlug }) => {
-  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
-  const [singleTut, setSingleTut] = useState<Tutorial | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [tutorials, setTutorials] = useState<Tutorial[]>(DEFAULT_TUTORIALS);
+  const [singleTut, setSingleTut] = useState<Tutorial | null>(() => {
+    if (tutorialSlug) {
+      return DEFAULT_TUTORIALS.find(t => t.slug === tutorialSlug) || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+    const fallbackTut = tutorialSlug ? DEFAULT_TUTORIALS.find(t => t.slug === tutorialSlug) : null;
 
     if (tutorialSlug) {
       fetch(`/api/tutorials/${tutorialSlug}`)
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && !data.error) {
             setSingleTut(data);
             const seo = generateTutorialSEO(data, origin);
             updateDocumentSEO(seo);
+          } else if (fallbackTut) {
+            setSingleTut(fallbackTut);
+            const seo = generateTutorialSEO(fallbackTut, origin);
+            updateDocumentSEO(seo);
           } else {
             setSingleTut(null);
           }
         })
-        .catch(err => console.error(err))
+        .catch(() => {
+          if (fallbackTut) {
+            setSingleTut(fallbackTut);
+          }
+        })
         .finally(() => setLoading(false));
     } else {
       updateDocumentSEO({
@@ -43,9 +57,13 @@ export const TutorialsPage: React.FC<TutorialsPageProps> = ({ navigate, tutorial
       });
 
       fetch('/api/tutorials')
-        .then(res => res.json())
-        .then(data => setTutorials(Array.isArray(data) ? data : []))
-        .catch(err => console.error(err))
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setTutorials(data);
+          }
+        })
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [tutorialSlug]);

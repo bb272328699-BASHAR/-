@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, ArrowUpDown, Layers, Loader2, Sparkles, X, ChevronRight, ChevronLeft, SlidersHorizontal, RotateCcw } from 'lucide-react';
 import { Tool, Category } from '../types.ts';
+import { DEFAULT_TOOLS } from '../data/defaultCatalog.ts';
 import { ToolCard } from '../components/ToolCard.tsx';
 import { ToolsSidebarFilter, FilterState } from '../components/ToolsSidebarFilter.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
@@ -14,8 +15,8 @@ interface ToolsPageProps {
 }
 
 export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategory, initialFilter, navigate }) => {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tools, setTools] = useState<Tool[]>(DEFAULT_TOOLS);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory || 'all');
   const [selectedPricing, setSelectedPricing] = useState('all');
@@ -23,7 +24,7 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
   const [sortBy, setSortBy] = useState('rating'); // rating, newest, reviews, name
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(DEFAULT_TOOLS.length);
 
   // Local Sidebar Filter State
   const [filterState, setFilterState] = useState<FilterState>({
@@ -59,12 +60,47 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
         limit: '36',
       });
       const res = await fetch(`/api/tools?${queryParams.toString()}`);
+      if (!res.ok) throw new Error('API unreachable');
       const data = await res.json();
-      setTools(Array.isArray(data?.tools) ? data.tools : []);
-      setTotalPages(data.pagination?.totalPages || 1);
-      setTotalCount(data.pagination?.total || 0);
+      if (Array.isArray(data?.tools) && data.tools.length > 0) {
+        setTools(data.tools);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setTotalCount(data.pagination?.total || data.tools.length);
+      } else {
+        // Filter default tools in memory if on static deployment without backend
+        let filtered = [...DEFAULT_TOOLS];
+        const cat = selectedCategory !== 'all' ? selectedCategory : filterState.selectedCategory;
+        if (cat && cat !== 'all') {
+          filtered = filtered.filter(t => t.categories?.some(c => c.slug === cat));
+        }
+        if (selectedPricing !== 'all') {
+          filtered = filtered.filter(t => t.pricing_type?.toLowerCase() === selectedPricing.toLowerCase());
+        }
+        if (search.trim()) {
+          const q = search.trim().toLowerCase();
+          filtered = filtered.filter(t => t.name.toLowerCase().includes(q) || t.tagline.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+        }
+        setTools(filtered);
+        setTotalPages(1);
+        setTotalCount(filtered.length);
+      }
     } catch (e) {
-      console.error('Failed to fetch tools', e);
+      // In-memory fallback
+      let filtered = [...DEFAULT_TOOLS];
+      const cat = selectedCategory !== 'all' ? selectedCategory : filterState.selectedCategory;
+      if (cat && cat !== 'all') {
+        filtered = filtered.filter(t => t.categories?.some(c => c.slug === cat));
+      }
+      if (selectedPricing !== 'all') {
+        filtered = filtered.filter(t => t.pricing_type?.toLowerCase() === selectedPricing.toLowerCase());
+      }
+      if (search.trim()) {
+        const q = search.trim().toLowerCase();
+        filtered = filtered.filter(t => t.name.toLowerCase().includes(q) || t.tagline.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+      }
+      setTools(filtered);
+      setTotalPages(1);
+      setTotalCount(filtered.length);
     } finally {
       setLoading(false);
     }

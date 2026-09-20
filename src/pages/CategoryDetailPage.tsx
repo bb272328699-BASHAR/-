@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, ArrowLeft, Loader2, Sparkles, Folder, ArrowRight } from 'lucide-react';
 import { Category, Tool } from '../types.ts';
+import { DEFAULT_CATEGORIES, DEFAULT_TOOLS } from '../data/defaultCatalog.ts';
 import { ToolCard } from '../components/ToolCard.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
@@ -12,11 +13,21 @@ interface CategoryDetailPageProps {
 }
 
 export const CategoryDetailPage: React.FC<CategoryDetailPageProps> = ({ slug, navigate }) => {
-  const [category, setCategory] = useState<Category | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState<Category | null>(() => {
+    const found = DEFAULT_CATEGORIES.find(c => c.slug === slug);
+    if (found) {
+      const tools = DEFAULT_TOOLS.filter(t => t.categories?.some(c => c.slug === slug));
+      return { ...found, tools };
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    // Check fallback
+    const foundFallback = DEFAULT_CATEGORIES.find(c => c.slug === slug);
+    const fallbackTools = DEFAULT_TOOLS.filter(t => t.categories?.some(c => c.slug === slug));
+    
     fetch(`/api/categories/${slug}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -25,11 +36,20 @@ export const CategoryDetailPage: React.FC<CategoryDetailPageProps> = ({ slug, na
           const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
           const seo = generateCategorySEO(data, origin);
           updateDocumentSEO(seo);
+        } else if (foundFallback) {
+          setCategory({ ...foundFallback, tools: fallbackTools });
+          const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+          const seo = generateCategorySEO(foundFallback, origin);
+          updateDocumentSEO(seo);
         } else {
           setCategory(null);
         }
       })
-      .catch(err => console.error(err))
+      .catch(() => {
+        if (foundFallback) {
+          setCategory({ ...foundFallback, tools: fallbackTools });
+        }
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 

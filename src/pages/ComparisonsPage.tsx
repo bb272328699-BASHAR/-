@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Scale, ArrowLeft, Loader2, Check, Sparkles, Star, GitCompare, Layers, FileDown } from 'lucide-react';
 import { Comparison } from '../types.ts';
+import { DEFAULT_COMPARISONS } from '../data/defaultCatalog.ts';
 import { InteractiveComparisonTool } from '../components/InteractiveComparisonTool.tsx';
 import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.tsx';
@@ -23,9 +24,14 @@ export const ComparisonsPage: React.FC<ComparisonsPageProps> = ({
   initialToolB,
   initialToolC
 }) => {
-  const [comparisons, setComparisons] = useState<Comparison[]>([]);
-  const [singleComp, setSingleComp] = useState<Comparison | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [comparisons, setComparisons] = useState<Comparison[]>(DEFAULT_COMPARISONS);
+  const [singleComp, setSingleComp] = useState<Comparison | null>(() => {
+    if (comparisonSlug) {
+      return DEFAULT_COMPARISONS.find(c => c.slug === comparisonSlug) || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
 
   // Tab mode: 'interactive' | 'curated'
   const [activeTab, setActiveTab] = useState<'interactive' | 'curated'>(
@@ -33,22 +39,30 @@ export const ComparisonsPage: React.FC<ComparisonsPageProps> = ({
   );
 
   useEffect(() => {
-    setLoading(true);
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+    const fallbackComp = comparisonSlug ? DEFAULT_COMPARISONS.find(c => c.slug === comparisonSlug) : null;
 
     if (comparisonSlug) {
       fetch(`/api/comparisons/${comparisonSlug}`)
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && !data.error) {
             setSingleComp(data);
             const seo = generateComparisonSEO(data, origin);
             updateDocumentSEO(seo);
+          } else if (fallbackComp) {
+            setSingleComp(fallbackComp);
+            const seo = generateComparisonSEO(fallbackComp, origin);
+            updateDocumentSEO(seo);
           } else {
             setSingleComp(null);
           }
         })
-        .catch(err => console.error(err))
+        .catch(() => {
+          if (fallbackComp) {
+            setSingleComp(fallbackComp);
+          }
+        })
         .finally(() => setLoading(false));
     } else {
       updateDocumentSEO({
@@ -59,9 +73,13 @@ export const ComparisonsPage: React.FC<ComparisonsPageProps> = ({
       });
 
       fetch('/api/comparisons')
-        .then(res => res.json())
-        .then(data => setComparisons(Array.isArray(data) ? data : []))
-        .catch(err => console.error(err))
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setComparisons(data);
+          }
+        })
+        .catch(() => {})
         .finally(() => setLoading(false));
     }
   }, [comparisonSlug]);

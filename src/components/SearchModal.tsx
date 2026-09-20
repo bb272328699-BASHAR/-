@@ -17,6 +17,13 @@ import {
   Compass
 } from 'lucide-react';
 import { OptimizedImage } from './OptimizedImage.tsx';
+import { 
+  DEFAULT_CATEGORIES, 
+  DEFAULT_TOOLS, 
+  DEFAULT_COMPARISONS, 
+  DEFAULT_TUTORIALS, 
+  DEFAULT_ARTICLES 
+} from '../data/defaultCatalog.ts';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -101,10 +108,19 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, navig
         if (res.ok) {
           const data = await res.json();
           setSuggestionsData(data);
+          return;
         }
-      } catch (err) {
-        console.error('Failed to fetch initial search suggestions', err);
-      }
+      } catch (err) {}
+      // Fallback
+      setSuggestionsData({
+        query: '',
+        suggestions: ['ChatGPT', 'Midjourney', 'Claude 3.5', 'Cursor AI', 'توليد الصور', 'البرمجة بالأكواد', 'كتابة المحتوى'],
+        tools: DEFAULT_TOOLS.slice(0, 5),
+        articles: DEFAULT_ARTICLES.slice(0, 3),
+        categories: DEFAULT_CATEGORIES.slice(0, 6),
+        comparisons: DEFAULT_COMPARISONS,
+        tutorials: DEFAULT_TUTORIALS,
+      });
     };
 
     fetchInitialData();
@@ -115,20 +131,50 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, navig
     if (!isOpen) return;
 
     const timer = setTimeout(async () => {
+      const q = searchTerm.trim().toLowerCase();
       setLoading(true);
       try {
-        const queryParam = encodeURIComponent(searchTerm.trim());
+        const queryParam = encodeURIComponent(q);
         const res = await fetch(`/api/search/suggestions?q=${queryParam}`);
         if (res.ok) {
           const data = await res.json();
           setSuggestionsData(data);
           setSelectedIndex(-1);
+          setLoading(false);
+          return;
         }
-      } catch (e) {
-        console.error('Search auto-suggestion error', e);
-      } finally {
-        setLoading(false);
+      } catch (e) {}
+
+      // In-memory instant fallback search
+      if (!q) {
+        setSuggestionsData({
+          query: '',
+          suggestions: ['ChatGPT', 'Midjourney', 'Claude 3.5', 'Cursor AI', 'توليد الصور'],
+          tools: DEFAULT_TOOLS.slice(0, 5),
+          articles: DEFAULT_ARTICLES.slice(0, 3),
+          categories: DEFAULT_CATEGORIES.slice(0, 6),
+          comparisons: DEFAULT_COMPARISONS,
+          tutorials: DEFAULT_TUTORIALS,
+        });
+      } else {
+        const matchedTools = DEFAULT_TOOLS.filter(t => t.name?.toLowerCase().includes(q) || (t.tagline && t.tagline.toLowerCase().includes(q)) || (t.description && t.description.toLowerCase().includes(q)));
+        const matchedCats = DEFAULT_CATEGORIES.filter(c => c.name?.toLowerCase().includes(q) || (c.description && c.description.toLowerCase().includes(q)));
+        const matchedArts = DEFAULT_ARTICLES.filter(a => a.title?.toLowerCase().includes(q) || (a.excerpt && a.excerpt.toLowerCase().includes(q)));
+        const matchedComps = DEFAULT_COMPARISONS.filter(c => c.title?.toLowerCase().includes(q) || (c.description && c.description.toLowerCase().includes(q)));
+        const matchedTuts = DEFAULT_TUTORIALS.filter(t => t.title?.toLowerCase().includes(q) || (t.excerpt && t.excerpt.toLowerCase().includes(q)));
+
+        setSuggestionsData({
+          query: searchTerm,
+          suggestions: matchedTools.map(t => t.name).slice(0, 5),
+          tools: matchedTools,
+          articles: matchedArts,
+          categories: matchedCats,
+          comparisons: matchedComps,
+          tutorials: matchedTuts,
+        });
       }
+      setSelectedIndex(-1);
+      setLoading(false);
     }, 120);
 
     return () => clearTimeout(timer);
