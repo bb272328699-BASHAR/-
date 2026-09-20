@@ -338,11 +338,11 @@ export default function App() {
     // 12. Static Pages
     if (currentPath === '/about') return <StaticPages type="about" navigate={navigate} />;
     if (currentPath === '/contact') return <StaticPages type="contact" navigate={navigate} />;
-    if (currentPath === '/privacy') return <StaticPages type="privacy" navigate={navigate} />;
-    if (currentPath === '/terms') return <StaticPages type="terms" navigate={navigate} />;
+    if (currentPath === '/privacy' || currentPath === '/privacy-policy') return <StaticPages type="privacy" navigate={navigate} />;
+    if (currentPath === '/terms' || currentPath === '/terms-of-service') return <StaticPages type="terms" navigate={navigate} />;
     if (currentPath === '/affiliate-disclosure') return <StaticPages type="affiliate" navigate={navigate} />;
     if (currentPath === '/editorial-policy') return <StaticPages type="editorial" navigate={navigate} />;
-    if (currentPath === '/cookie-policy') return <StaticPages type="cookies" navigate={navigate} />;
+    if (currentPath === '/cookie-policy' || currentPath === '/cookies') return <StaticPages type="cookies" navigate={navigate} />;
 
     // 13. Admin Routes
     if (currentPath === '/admin/login') {

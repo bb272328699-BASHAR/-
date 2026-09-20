@@ -14,7 +14,13 @@ import {
   Clock,
   Globe,
   Award,
-  Check
+  Check,
+  Eye,
+  Cookie,
+  UserCheck,
+  RefreshCw,
+  ExternalLink,
+  ShieldAlert
 } from 'lucide-react';
 import { submitFirestoreContact } from '../lib/firestoreService.ts';
 import { updateDocumentSEO } from '../utils/seo.ts';
@@ -326,44 +332,255 @@ export const StaticPages: React.FC<StaticPagesProps> = ({ type, navigate }) => {
   // 3. Privacy Policy
   if (type === 'privacy') {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        <div className="border-b border-slate-200 pb-6">
-          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">وثيقة قانونية رسمية</span>
-          <h1 className="text-3xl font-black text-slate-900 mt-2">سياسة الخصوصية وحماية البيانات</h1>
-          <p className="text-xs text-slate-500 mt-1">آخر تحديث: 18 يناير 2026 | متوافقة مع الأنظمة الوطنية لحماية البيانات الشخصية ومعايير GDPR</p>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10" dir="rtl">
+        {/* Header Badge & Title */}
+        <div className="border-b border-slate-200 pb-8 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
+              <span>وثيقة الامتثال وحماية البيانات الرسمية</span>
+            </span>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full flex items-center gap-1.5">
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <span>متوافقة مع Google AdSense و GDPR و CCPA</span>
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">سياسة الخصوصية وملفات تعريف الارتباط</h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">
+            تاريخ السريان: 2026 | النطاق الرسمي: <strong className="text-slate-700 font-mono">daleel.ai</strong> | مرجع الامتثال القانوني
+          </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6 text-sm sm:text-base text-slate-700 leading-relaxed">
-          <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">1. مقدمة والتزامنا</h2>
+        {/* Quick Highlights Summary Box */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+              <Lock className="w-4 h-4" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900">تشفير وحماية البيانات</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              تشفير كامل لكافة البيانات أثناء النقل (TLS 1.3) وكلمات المرور مشفرة بخوارزميات أحادية الاتجاه.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-100 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-900 flex items-center justify-center font-bold">
+              <Cookie className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900">التحكم في ملفات الكوكيز</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              ندعم نظام Google Consent Mode v2 لتحديد خياراتك الإعلانية والتحليلية بحرية كاملة.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-2">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <h3 className="font-bold text-sm text-slate-900">حقوق المستخدم (GDPR)</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              لك كامل الحق في الوصول، التعديل، التحميل، أو الحذف النهائي لبياناتك وحسابك في أي وقت.
+            </p>
+          </div>
+        </div>
+
+        {/* Main Detailed Content Body */}
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8 text-sm sm:text-base text-slate-700 leading-relaxed">
+          
+          {/* Section 1: Intro */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">1</span>
+              <span>المقدمة والتزامنا بالخصوصية</span>
+            </h2>
             <p>
-              تلتزم منصة دليل الذكاء الاصطناعي (Daleel AI) بأعلى معايير الشفافية وحماية البيانات الشخصية لزوارها ومستخدميها المسجلين. توضح هذه الوثيقة ماهية البيانات التي نقوم بجمعها، كيفية معالجتها، وحقوقك الكاملة في تعديلها أو حذفها.
+              أهلاً بك في منصة <strong>دليل الذكاء الاصطناعي (Daleel AI)</strong> المتاحة عبر النطاق الرسمي <span className="font-mono text-indigo-600 font-semibold">https://daleel.ai</span>. إن حماية خصوصيتك وأمان بياناتك الشخصية يمثلان الركيزة الأساسية لثقتك بنا. توضح هذه السياسة بشفافية تامة كيفية قيامنا بجمع ومعالجة وتخزين واستخدام بياناتك عند تصفح المنصة أو استخدام أدواتها، إلى جانب كيفية إدارة ملفات تعريف الارتباط والإعلانات.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">2. البيانات التي نجمعها</h2>
-            <ul className="list-disc pr-6 space-y-1.5 text-sm">
-              <li><strong>بيانات الحساب:</strong> عند قيامك بإنشاء حساب، نقوم بجمع اسمك الكامل وعنوان بريدك الإلكتروني وكلمة المرور المشفرة تشفيراً أحادي الاتجاه (Bcrypt Salted Hash).</li>
-              <li><strong>بيانات النشاط:</strong> قائمة الأدوات التي قمت بحفظها في المفضلة، والمراجعات والتقييمات التي كتبتها بمحض إرادتك.</li>
-              <li><strong>بيانات التواصل:</strong> الاسم والبريد ومحتوى الرسائل الموجهة لفريق الدعم والتحرير عبر نموذج التواصل.</li>
-              <li><strong>البيانات التقنية المجهولة:</strong> نوع المتصفح وعنوان IP المشفر لحماية الخوادم من الهجمات الآلية وتحسين سرعة التصفح.</li>
+          {/* Section 2: Data Collection */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">2</span>
+              <span>البيانات والمعلومات التي نقوم بجمعها</span>
+            </h2>
+            <p>نقوم بجمع المعلومات الضرورية فقط لتقديم وتطوير خدمات الدليل، وتنقسم إلى:</p>
+            <div className="space-y-3 pt-1">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">أ. المعلومات التي تقدمها لنا طواعية:</h4>
+                <ul className="list-disc pr-5 space-y-1 text-xs text-slate-600">
+                  <li><strong>بيانات التسجيل والحساب:</strong> الاسم، عنوان البريد الإلكتروني، وتفضيلات الحساب عند التسجيل.</li>
+                  <li><strong>التقييمات والمراجعات وقوائم التفضيلات:</strong> المراجعات الكتابية والتعليقات وقائمة الأدوات التي تحفظها في مفضلتك.</li>
+                  <li><strong>رسائل الدعم والتواصل:</strong> الاسم والبريد ومحتوى الرسائل الموجهة عبر نموذج الاتصال أو البريد الرسمي.</li>
+                </ul>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">ب. البيانات التقنية المجموعة تلقائياً (Log Data):</h4>
+                <ul className="list-disc pr-5 space-y-1 text-xs text-slate-600">
+                  <li>عنوان بروتوكول الإنترنت (IP Address) المشفر جزئياً لأغراض الحماية ومكافحة السبام.</li>
+                  <li>نوع المتصفح ونظام التشغيل واللغة المفضلة ونوع الجهاز (مكتب / هاتف).</li>
+                  <li>بيانات التصفح الإحصائية العامة مثل الصفحات التي تمت زيارتها، والوقت المستغرق، ونقرات الروابط.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 3: Google AdSense & Third-Party Advertising (CRITICAL COMPLIANCE) */}
+          <section className="space-y-4 p-5 sm:p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+            <h2 className="text-lg sm:text-xl font-black text-amber-950 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-amber-500 text-slate-900 text-xs font-black flex items-center justify-center">3</span>
+              <span>إعلانات Google AdSense وشبكات الإعلان الخارجية (Third-Party Vendors)</span>
+            </h2>
+            <div className="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <p>
+                نستخدم في منصة دليل الذكاء الاصطناعي برنامج <strong>Google AdSense</strong> وشبكات إعلانية شريكة لعرض الإعلانات أثناء زيارتك لموقعنا. تلتزم المنصة بمتطلبات Google الصارمة لناشري المحتوى، ونلفت عنايتك إلى النقاط التالية:
+              </p>
+              <ul className="list-disc pr-5 space-y-2 text-slate-700">
+                <li>
+                  <strong>ملفات تعريف الارتباط الخاصة بالإعلانات (Google DART Cookie):</strong> تستخدم شركة Google، بصفتها مورداً لطرف ثالث، ملفات تعريف الارتباط لعرض الإعلانات على موقعنا بناءً على زيارات المستخدمين السابقة لهذا الموقع أو لمواقع أخرى على شبكة الإنترنت.
+                </li>
+                <li>
+                  تتيح ملفات تعريف الارتباط للإعلانات لشركة Google وشركائها إمكانية تقديم إعلانات مخصصة للمستخدمين بناءً على اهتماماتهم ومجالات بحثهم التقنية.
+                </li>
+                <li>
+                  <strong>إلغاء الاشتراك في الإعلانات المخصصة:</strong> يمكن للمستخدمين في أي وقت إلغاء استخدام الإعلانات المخصصة من خلال زيارة <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-bold underline inline-flex items-center gap-1">إعدادات إعلانات Google <ExternalLink className="w-3 h-3" /></a> أو عبر زيارة بوابة تعطيل ملفات تعريف الارتباط لمبادرة الإعلان على الشبكة <a href="https://optout.networkadvertising.org" target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-bold underline inline-flex items-center gap-1">www.aboutads.info <ExternalLink className="w-3 h-3" /></a>.
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 4: Cookies & Google Consent Mode v2 */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">4</span>
+              <span>سياسة ملفات تعريف الارتباط (Cookies) وموافقة المستخدم</span>
+            </h2>
+            <p>
+              ملفات تعريف الارتباط هي ملفات نصية صغيرة يتم وضعها على جهازك لتحسين تجربة التصفح وحفظ تفضيلاتك. تطبق منصتنا تقنية <strong>Google Consent Mode v2</strong> التي تمنحك التحكم الكامل في نوعية الملفات المفعلة:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">1. ملفات أساسية وضرورية (Essential)</span>
+                <p className="text-slate-600">لتأمين جلسة تسجيل الدخول، وحماية النماذج ضد هجمات CSRF، وتذكر تفضيلات الخصوصية.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">2. ملفات تحليل الأداء (Google Analytics 4)</span>
+                <p className="text-slate-600">لقياس مصادر الزيارات والصفحات الأكثر قراءة وتطوير جودة المراجعات والمحتوى العربي.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">3. ملفات الإعلانات والتخصيص (Ad Storage)</span>
+                <p className="text-slate-600">تُستخدم من قبل شبكة Google AdSense لعرض إعلانات ملائمة وتفادي تكرار نفس الإعلان.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">4. ملفات التفضيلات والمظهر (Preferences)</span>
+                <p className="text-slate-600">لتذكر فلترة الأدوات المحددة، وعروض الأسعار، والمقارنات النشطة في جلسة التصفح.</p>
+              </div>
+            </div>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem('daleel_cookie_consent');
+                    localStorage.removeItem('daleel_consent_mode_v2');
+                    window.location.reload();
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>إعادة ضبط تفضيلات ملفات تعريف الارتباط (Cookie Preferences)</span>
+              </button>
+            </div>
+          </section>
+
+          {/* Section 5: GDPR and CCPA User Rights */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">5</span>
+              <span>حقوق المستخدم بموجب اللائحة العامة لحماية البيانات (GDPR & CCPA)</span>
+            </h2>
+            <p>
+              بموجب قوانين حماية البيانات الشخصية واللائحة الأوروبية العامة (GDPR) وقانون كاليفورنيا للخصوصية (CCPA)، يتمتع مستخدمو المنصة بالحقوق القانونية التالية:
+            </p>
+            <ul className="list-disc pr-5 space-y-1.5 text-xs sm:text-sm text-slate-600">
+              <li><strong>حق الوصول (Right to Access):</strong> طلب نسخة كاملة من بياناتك الشخصية المخزنة لدينا.</li>
+              <li><strong>حق التصحيح (Right to Rectification):</strong> تعديل أو تصحيح أي معلومات غير دقيقة مرتبطة بحسابك.</li>
+              <li><strong>حق الحذف والنسيان (Right to Erasure):</strong> طلب المسح النهائي لبياناتك وحسابك من قواعد بياناتنا.</li>
+              <li><strong>حق تقييد المعالجة أو الاعتراض (Right to Object):</strong> الاعتراض على معالجة بياناتك لأغراض تسويقية أو تحليلية.</li>
+              <li><strong>حق عدم التمييز (Non-Discrimination):</strong> لن تتعرض لأي تمييز في جودة الخدمة عند ممارستك لأي من حقوق الخصوصية.</li>
             </ul>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">3. عدم بيع البيانات لأي طرف ثالث</h2>
+          {/* Section 6: Affiliate Disclosure & External Links */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">6</span>
+              <span>إخلاء المسؤولية عن روابط الإحالة والمواقع الخارجية</span>
+            </h2>
             <p>
-              نؤكد بشكل قاطع أننا <strong>لا نقوم ولن نقوم ببيع أو تأجير أو مشاركة</strong> أي بيانات شخصية تخص مستخدمينا مع أي جهة إعلانية أو شركة تسويق بيانات تحت أي ظرف كان.
+              تحتوي منصة Daleel AI على روابط تقود إلى مواقع وتطبيقات تابعة لجهات خارجية (أدوات الذكاء الاصطناعي، ومواقع الشركات المطورة). قد يحتوي بعض هذه الروابط على معرّفات إحالة تسويقية (Affiliate Links). يُرجى العلم أننا لا نتحكم في سياسات الخصوصية أو ممارسات جمع البيانات لتلك المواقع الخارجية، وننصحك بمراجعة سياسة الخصوصية لكل موقع تزوره.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">4. حقوقك القانونية</h2>
+          {/* Section 7: Children's Privacy */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">7</span>
+              <span>حماية خصوصية الأطفال (COPPA Compliance)</span>
+            </h2>
             <p>
-              يحق لك في أي وقت طلب نسخة من بياناتك المخزنة، تصحيح أي بيان غير دقيق، أو حذف حسابك بالكامل وجميع مراجعاتك المرتبطة عبر مراسلتنا على: <a href="mailto:privacy@daleel.ai" className="text-indigo-600 font-bold underline dir-ltr">privacy@daleel.ai</a>.
+              منصتنا موجهة للجمهور العام وللمهنيين والمهتمين بالتقنية وليست موجهة للأطفال دون سن 13 عاماً. نحن لا نقوم بجمع أي معلومات تعريفية عن الأطفال عن قصد. إذا علمت أن طفلاً قد زودنا ببيانات شخصية، يرجى التواصل معنا فوراً لحذفها بشكل كامل وفوري.
             </p>
           </section>
+
+          {/* Section 8: Security & Storage */}
+          <section className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-black flex items-center justify-center">8</span>
+              <span>أمن البيانات وتحديثات السياسة</span>
+            </h2>
+            <p>
+              نطبق إجراءات أمنية وفنية وتنظيمية متقدمة لحماية بياناتك من الوصول غير المصرح به أو التغيير أو الإفشاء. قد نقوم بتحديث سياسة الخصوصية بشكل دوري لمواكبة التغييرات التنظيمية أو التقنية، وسيتم إشعار المستخدمين بتاريخ آخر تحديث في أعلى الصفحة.
+            </p>
+          </section>
+
+          {/* Section 9: Contact Information */}
+          <section className="space-y-3 border-t border-slate-200/80 pt-6">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white text-xs font-black flex items-center justify-center">9</span>
+              <span>مسؤول حماية البيانات والتواصل</span>
+            </h2>
+            <p className="text-xs sm:text-sm">
+              إذا كانت لديك أي أسئلة أو استفسارات بخصوص سياسة الخصوصية، أو رغبت في ممارسة أي من حقوقك القانونية، يسعدنا التواصل معك عبر:
+            </p>
+            <div className="flex flex-wrap gap-4 pt-2 text-xs">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-500 block">بريد مسؤول الخصوصية (DPO):</span>
+                <a href="mailto:privacy@daleel.ai" className="font-bold text-indigo-600 hover:text-indigo-800 dir-ltr text-right block font-mono">
+                  privacy@daleel.ai
+                </a>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-500 block">بريد الاستفسارات العامة:</span>
+                <a href="mailto:contact@daleel.ai" className="font-bold text-indigo-600 hover:text-indigo-800 dir-ltr text-right block font-mono">
+                  contact@daleel.ai
+                </a>
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <span className="text-slate-500 block">نموذج التواصل السريع:</span>
+                <button
+                  type="button"
+                  onClick={() => navigate('/contact')}
+                  className="font-bold text-indigo-600 hover:text-indigo-800 underline block"
+                >
+                  صفحة اتصل بنا المباشرة
+                </button>
+              </div>
+            </div>
+          </section>
+
         </div>
       </div>
     );
@@ -497,29 +714,57 @@ export const StaticPages: React.FC<StaticPagesProps> = ({ type, navigate }) => {
   // 7. Cookie Policy
   if (type === 'cookies') {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8" dir="rtl">
         <div className="border-b border-slate-200 pb-6">
-          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">ملفات تعريف الارتباط</span>
+          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">ملفات تعريف الارتباط والتتبع</span>
           <h1 className="text-3xl font-black text-slate-900 mt-2">سياسة ملفات تعريف الارتباط (Cookie Policy)</h1>
-          <p className="text-xs text-slate-500 mt-1">توضيح شفاف لكيفية استخدام الكوكيز في المتصفح</p>
+          <p className="text-xs text-slate-500 mt-1">توضيح شامل لكيفية استخدام ملفات تعريف الارتباط وتقنيات التتبع وفق إرشادات Google</p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6 text-sm sm:text-base text-slate-700 leading-relaxed">
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">ما هي ملفات تعريف الارتباط؟</h2>
+            <h2 className="text-lg font-bold text-slate-900">ما هي ملفات تعريف الارتباط (Cookies)؟</h2>
             <p>
-              ملفات تعريف الارتباط هي ملفات نصية صغيرة يتم تخزينها على جهازك عند زيارة الموقع لتذكر تفضيلاتك وتأمين جلسة تسجيل دخولك.
+              ملفات تعريف الارتباط هي ملفات نصية صغيرة تخزن في متصفحك عند زيارة موقعنا لتسهيل تصفحك وتذكر تفضيلاتك وتأمين جلسة حسابك وتحسين تجربة عرض الإعلانات الملائمة.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900">ملفات تعريف الارتباط الخاصة بالإعلانات و Google AdSense</h2>
+            <p>
+              يستخدم موردو الجهات الخارجية، بمن فيهم Google، ملفات تعريف الارتباط لعرض الإعلانات بناءً على زيارات المستخدمين السابقة لمنصتنا أو لمواقع أخرى. تتيح ملفات DART Cookie لشركة Google وشركائها عرض إعلانات مخصصة للمستخدمين بحسب اهتماماتهم.
+            </p>
+            <p className="text-xs text-slate-500">
+              يمكنك تعطيل ملفات الإعلانات المخصصة عبر زيارة <a href="https://adssettings.google.com" target="_blank" rel="noreferrer" className="text-indigo-600 font-bold underline">إعدادات إعلانات Google</a>.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-lg font-bold text-slate-900">أنواع الكوكيز التي نستخدمها:</h2>
+            <h2 className="text-lg font-bold text-slate-900">أنواع ملفات تعريف الارتباط في موقعنا:</h2>
             <ul className="list-disc pr-6 space-y-2 text-sm">
-              <li><strong>ملفات الجلسة الأساسية (Essential):</strong> ضرورية لحفظ تسجيل دخولك إلى حسابك وتمكينك من حفظ أدواتك في المفضلة بأمان.</li>
-              <li><strong>ملفات تفضيلات الواجهة (Preferences):</strong> تذكر تفضيلات البحث والفرز وموافقتك على إشعارات الخصوصية.</li>
-              <li><strong>لا نستخدم ملفات تتبع إعلانية متطفلة (No Third-Party Ad Trackers).</strong></li>
+              <li><strong>ملفات الجلسة الأساسية والأمان (Essential):</strong> ضرورية لحفظ تسجيل الدخول والأمان وتفضيلات الموافقة.</li>
+              <li><strong>ملفات التحليل والإحصاءات (Google Analytics 4):</strong> لقياس عدد الزيارات والصفحات الأكثر تفاعلاً لتحسين المحتوى.</li>
+              <li><strong>ملفات الإعلانات والتسويق (Google AdSense):</strong> لعرض إعلانات ملائمة ومنع تكرار الإعلانات ذاتها.</li>
+              <li><strong>ملفات التفضيلات والواجهة (Preferences):</strong> لحفظ تفضيلات الفلترة والمقارنات السريعة للأدوات.</li>
             </ul>
           </section>
+
+          <div className="pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('daleel_cookie_consent');
+                  localStorage.removeItem('daleel_consent_mode_v2');
+                  window.location.reload();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>إعادة تخصيص موافقة ملفات تعريف الارتباط (Consent Settings)</span>
+            </button>
+          </div>
         </div>
       </div>
     );
