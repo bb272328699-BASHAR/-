@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Info, ExternalLink } from 'lucide-react';
 import { getSavedConsent } from '../utils/consent.ts';
 
@@ -13,13 +13,13 @@ export type AdPosition =
   | 'tools_feed'
   | 'sticky_footer';
 
-interface AdSlotProps {
+export interface AdSlotProps {
   position: AdPosition;
   className?: string;
   slotId?: string;
 }
 
-interface AdSettings {
+export interface AdSettings {
   ads_enabled?: string;
   ads_publisher_id?: string;
   ads_auto_ads_enabled?: string;
@@ -38,6 +38,9 @@ interface AdSettings {
 
 let cachedSettings: AdSettings | null = null;
 let settingsPromise: Promise<AdSettings> | null = null;
+
+// Global tracking to avoid redundant probes
+let isGloballyBlocked: boolean | null = typeof window !== 'undefined' && (window as any).__ADSENSE_BLOCKED__ === true ? true : null;
 
 export const fetchAdSettings = async (): Promise<AdSettings> => {
   if (cachedSettings) return cachedSettings;
@@ -61,6 +64,15 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
   const [settings, setSettings] = useState<AdSettings | null>(cachedSettings);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [consentGranted, setConsentGranted] = useState(true);
+  
+  // Status: 'loading' | 'filled' | 'unfilled' | 'blocked' | 'error'
+  const [adStatus, setAdStatus] = useState<'loading' | 'filled' | 'unfilled' | 'blocked' | 'error'>(
+    isGloballyBlocked ? 'blocked' : 'loading'
+  );
+  
+  const containerRef = useRef<HTMLDivElement>(null);
+  const insRef = useRef<HTMLModElement>(null);
+  const pushedRef = useRef(false);
 
   useEffect(() => {
     fetchAdSettings().then((s) => setSettings(s));
@@ -79,14 +91,29 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
       }
     };
 
+    const handleBlockedEvent = () => {
+      isGloballyBlocked = true;
+      setAdStatus('blocked');
+    };
+
     window.addEventListener('daleel_consent_updated', handleConsentEvent);
-    return () => window.removeEventListener('daleel_consent_updated', handleConsentEvent);
+    window.addEventListener('daleel_ads_blocked', handleBlockedEvent);
+
+    return () => {
+      window.removeEventListener('daleel_consent_updated', handleConsentEvent);
+      window.removeEventListener('daleel_ads_blocked', handleBlockedEvent);
+    };
   }, []);
 
   const isAdsEnabled = settings?.ads_enabled === 'true' || settings?.ads_enabled === '1' || settings?.ads_enabled === undefined;
   const isAutoAdsEnabled = settings?.ads_auto_ads_enabled === 'true' || settings?.ads_auto_ads_enabled === '1' || settings?.ads_auto_ads_enabled === undefined;
   const isTestMode = settings?.ads_test_mode === 'true';
-  const publisherId = settings?.ads_publisher_id || 'ca-pub-6343594295307676';
+
+  // Normalize publisher ID to ensure ca-pub- format
+  const rawPublisherId = settings?.ads_publisher_id || 'ca-pub-6343594295307676';
+  const cleanPubNumber = rawPublisherId.replace(/^ca-/, '').trim();
+  const formattedPublisherId = cleanPubNumber.startsWith('pub-') ? `ca-${cleanPubNumber}` : `ca-pub-${cleanPubNumber}`;
+  const isValidPublisher = cleanPubNumber !== 'pub-0000000000000000' && cleanPubNumber.length > 5;
 
   // Determine slot ID for AdSense
   let slotId = customSlotId;
@@ -122,14 +149,19 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     }
   }
 
-  // Fallback to active Ad Unit Slot ID
+  // Fallback to active responsive Ad Unit Slot ID
   if (!slotId) {
     slotId = '9685713922';
   }
 
-  // Load AdSense script dynamically if publisherId is set and ads are enabled
+  // Load AdSense script dynamically if not already loaded
   useEffect(() => {
-    if (!isAdsEnabled || isTestMode || !publisherId || publisherId === 'ca-pub-0000000000000000') {
+    if (!isAdsEnabled || isTestMode || !isValidPublisher) {
+      return;
+    }
+
+    if ((window as any).__ADSENSE_BLOCKED__) {
+      setAdStatus('blocked');
       return;
     }
 
@@ -139,62 +171,138 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     if (!existingScript) {
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`;
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${formattedPublisherId}`;
       script.async = true;
       script.crossOrigin = 'anonymous';
       if (isAutoAdsEnabled) {
-        script.setAttribute('data-ad-client', publisherId);
+        script.setAttribute('data-ad-client', formattedPublisherId);
       }
       script.onload = () => setScriptLoaded(true);
+      script.onerror = () => {
+        isGloballyBlocked = true;
+        (window as any).__ADSENSE_BLOCKED__ = true;
+        window.dispatchEvent(new CustomEvent('daleel_ads_blocked'));
+        setAdStatus('blocked');
+      };
       document.head.appendChild(script);
     } else {
       setScriptLoaded(true);
     }
-  }, [isAdsEnabled, isAutoAdsEnabled, isTestMode, publisherId]);
+  }, [isAdsEnabled, isAutoAdsEnabled, isTestMode, formattedPublisherId, isValidPublisher]);
 
-  // Push AdSense ad execution when script is ready
+  // Execute AdSense Push and Setup MutationObserver for Status & Error Diagnostics
   useEffect(() => {
-    if (scriptLoaded && isAdsEnabled && !isTestMode) {
+    if (!isAdsEnabled || isTestMode || !consentGranted || isGloballyBlocked) {
+      return;
+    }
+
+    const insElement = insRef.current;
+    if (!insElement) return;
+
+    // 1. MutationObserver to catch AdSense status updates (filled vs unfilled)
+    const observer = new MutationObserver((mutations) => {
+      const statusAttr = insElement.getAttribute('data-ad-status');
+      if (statusAttr === 'unfilled') {
+        setAdStatus('unfilled');
+      } else if (statusAttr === 'filled') {
+        setAdStatus('filled');
+      }
+
+      // Check for iframe errors inside <ins>
+      const iframes = insElement.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+        iframe.addEventListener('error', () => {
+          setAdStatus('error');
+          isGloballyBlocked = true;
+          window.dispatchEvent(new CustomEvent('daleel_ads_blocked'));
+        });
+      });
+    });
+
+    observer.observe(insElement, {
+      attributes: true,
+      attributeFilter: ['data-ad-status', 'data-adsbygoogle-status'],
+      childList: true,
+      subtree: true,
+    });
+
+    // 2. Push to adsbygoogle once
+    if (!pushedRef.current) {
+      pushedRef.current = true;
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (err) {
-        console.error('AdSense push error:', err);
+        console.warn('Google AdSense push caught error / AdBlocker detected:', err);
+        setAdStatus('blocked');
+        isGloballyBlocked = true;
+        window.dispatchEvent(new CustomEvent('daleel_ads_blocked'));
       }
     }
-  }, [scriptLoaded, isAdsEnabled, isTestMode, position]);
 
-  // If ads are completely disabled globally, don't render anything
-  if (settings && !isAdsEnabled) {
+    // 3. Safety Fallback Timer:
+    // If the ad remains unrendered or blocked by DNS after 3.5 seconds, collapse gracefully
+    const fallbackTimer = setTimeout(() => {
+      const statusAttr = insElement.getAttribute('data-ad-status');
+      if (statusAttr === 'unfilled') {
+        setAdStatus('unfilled');
+      } else if (adStatus !== 'filled') {
+        // Check if there is an iframe with positive height
+        const iframe = insElement.querySelector('iframe');
+        const hasVisibleContent = insElement.clientHeight > 20 || (iframe && iframe.clientHeight > 20);
+        if (!hasVisibleContent) {
+          setAdStatus('unfilled');
+        }
+      }
+    }, 3500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
+  }, [scriptLoaded, isAdsEnabled, isTestMode, consentGranted, isGloballyBlocked, adStatus]);
+
+  // If ads are disabled globally or consent is denied, render nothing
+  if (settings && (!isAdsEnabled || !consentGranted)) {
     return null;
   }
 
-  // Position-specific styling layouts
+  // If the ad failed, is unfilled, or was blocked by AdBlocker/DNS error, COLLAPSE completely:
+  // Zero height, zero margin, zero padding, NO grey box left behind.
+  if (adStatus === 'unfilled' || adStatus === 'blocked' || adStatus === 'error') {
+    return null;
+  }
+
+  // Layout styling applied ONLY when the ad is filled with real content (or in test mode)
   const getLayoutClasses = () => {
     switch (position) {
       case 'article_top':
-        return 'w-full my-6 p-4 bg-gradient-to-r from-amber-50/70 via-indigo-50/40 to-slate-50 border border-slate-200/80 rounded-2xl';
+        return 'w-full my-6 p-3 sm:p-4 bg-gradient-to-r from-amber-50/70 via-indigo-50/40 to-slate-50 border border-slate-200/80 rounded-2xl';
       case 'article_incontent':
-        return 'w-full my-8 p-5 bg-slate-50/90 border border-indigo-100 rounded-2xl shadow-2xs';
+        return 'w-full my-8 p-4 sm:p-5 bg-slate-50/90 border border-indigo-100 rounded-2xl shadow-2xs';
       case 'article_bottom':
-        return 'w-full my-8 p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-amber-50/40 border border-slate-200/90 rounded-2xl shadow-2xs';
+        return 'w-full my-8 p-4 sm:p-5 bg-gradient-to-r from-slate-50 via-indigo-50/30 to-amber-50/40 border border-slate-200/90 rounded-2xl shadow-2xs';
       case 'article_sidebar':
-        return 'w-full my-4 p-4 bg-white border border-slate-200/90 rounded-2xl shadow-2xs';
+        return 'w-full my-4 p-3 sm:p-4 bg-white border border-slate-200/90 rounded-2xl shadow-2xs';
       case 'tool_detail':
-        return 'w-full my-6 p-5 bg-gradient-to-r from-indigo-50/60 via-purple-50/30 to-slate-50 border border-indigo-100 rounded-2xl shadow-2xs';
+        return 'w-full my-6 p-4 sm:p-5 bg-gradient-to-r from-indigo-50/60 via-purple-50/30 to-slate-50 border border-indigo-100 rounded-2xl shadow-2xs';
       case 'home_banner':
-        return 'w-full max-w-7xl mx-auto my-8 p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs';
+        return 'w-full max-w-7xl mx-auto my-6 sm:my-8 p-3 sm:p-4 bg-white border border-slate-200/80 rounded-3xl shadow-xs';
       case 'sticky_footer':
         return 'fixed bottom-0 right-0 left-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2 sm:p-3 shadow-lg';
       default:
-        return 'w-full my-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl';
+        return 'w-full my-4 p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-2xl';
     }
   };
 
-  // Test Mode / Preview Banner Rendering (Used during test mode or when publisher ID is not live yet)
-  if (isTestMode || !slotId) {
+  // Test Mode / Preview Banner Rendering (Used for testing and admin preview)
+  if (isTestMode || !isValidPublisher) {
     return (
-      <div className={`${getLayoutClasses()} ${className}`} dir="rtl">
+      <div 
+        className={`ad-slot-container ${getLayoutClasses()} ${className}`} 
+        data-ad-state="test_mode"
+        dir="rtl"
+      >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-right">
           <div className="flex items-center gap-2.5">
             <span className="text-[10px] font-black uppercase tracking-wider bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md shrink-0">
@@ -205,7 +313,7 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
                 مساحة إعلانية متجاوبة ({position})
               </span>
               <span className="text-[11px] text-slate-500 hidden sm:inline">
-                {publisherId !== 'ca-pub-0000000000000000' ? `Publisher ID: ${publisherId}` : 'وضع المعاينة والتهيئة الإعلانية'}
+                {isValidPublisher ? `Publisher ID: ${formattedPublisherId}` : 'وضع المعاينة والتهيئة الإعلانية'}
               </span>
             </div>
           </div>
@@ -220,20 +328,40 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     );
   }
 
-  // Live AdSense Slot Rendering
+  // Live Mode:
+  // When loading, we use an invisible, zero-padding, zero-border container so that
+  // if AdSense fails, it leaves NO empty grey box behind.
+  // Once status is 'filled', we wrap it in the polished decorative card.
+  const isFilled = adStatus === 'filled';
+
   return (
-    <div className={`${getLayoutClasses()} ${className} text-center overflow-hidden`} dir="rtl">
-      <div className="text-[10px] text-slate-400 font-bold mb-1.5 flex items-center justify-between px-1">
-        <span>إعلان</span>
-        <Info className="w-3 h-3 text-slate-300" />
-      </div>
+    <div
+      ref={containerRef}
+      className={`ad-slot-container transition-all duration-300 w-full max-w-full overflow-hidden text-center ${
+        isFilled ? `${getLayoutClasses()} ${className}` : 'm-0 p-0 border-0 bg-transparent min-h-0'
+      }`}
+      data-ad-state={adStatus}
+      dir="rtl"
+    >
+      {isFilled && (
+        <div className="text-[10px] text-slate-400 font-bold mb-1.5 flex items-center justify-between px-1">
+          <span>إعلان</span>
+          <Info className="w-3 h-3 text-slate-300" />
+        </div>
+      )}
+
       <ins
-        className="adsbygoogle block"
-        data-ad-client={publisherId}
+        ref={insRef}
+        className="adsbygoogle block w-full max-w-full"
+        data-ad-client={formattedPublisherId}
         data-ad-slot={slotId}
         data-ad-format="auto"
         data-full-width-responsive="true"
-        style={{ display: 'block' }}
+        style={{ 
+          display: 'block',
+          minHeight: isFilled ? 'auto' : '0px',
+          overflow: 'hidden'
+        }}
       />
     </div>
   );

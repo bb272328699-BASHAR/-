@@ -37,8 +37,11 @@ async function startServer() {
 
   // Dynamic robots.txt with specialized directives for Googlebot, Bingbot, etc.
   app.get('/robots.txt', (req, res) => {
-    const host = req.get('host') || 'daleel.ai';
-    const protocol = host.includes('localhost') ? 'http' : 'https';
+    let host = req.get('host') || 'ai-toolsar.netlify.app';
+    if (host.includes('run.app') || host.includes('localhost') || host.includes('127.0.0.1')) {
+      host = 'ai-toolsar.netlify.app';
+    }
+    const protocol = 'https';
     const robots = `# ====================================================================
 # robots.txt for Daleel AI - دليل الذكاء الاصطناعي
 # ====================================================================
@@ -134,10 +137,13 @@ Sitemap: ${protocol}://${host}/sitemap.xml
       const pubRes = await query(`SELECT value FROM site_settings WHERE key = 'ads_publisher_id' LIMIT 1`);
       let pubId = pubRes.rows[0]?.value?.trim() || '';
       pubId = pubId.replace(/^ca-/, '');
+      if (pubId && !pubId.startsWith('pub-')) {
+        pubId = `pub-${pubId}`;
+      }
       if (!pubId || pubId === 'pub-0000000000000000') {
         pubId = 'pub-6343594295307676';
       }
-      const adsTxt = `# Google AdSense ads.txt for Daleel AI
+      const adsTxt = `# Google AdSense Authorized Digital Sellers (ads.txt) for Daleel AI
 google.com, ${pubId}, DIRECT, f08c47fec0942fa0
 `;
       res.type('text/plain; charset=utf-8').send(adsTxt);

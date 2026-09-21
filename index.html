@@ -16,9 +16,15 @@
     <meta name="google-site-verification" content="1abfaf47224a861afca6a8db64f5d8b8" />
     
     <!-- Google AdSense Global Official Script (Auto Ads & High Efficiency Placement) -->
+    <script>
+      window.__ADSENSE_LOADED__ = false;
+      window.__ADSENSE_BLOCKED__ = false;
+    </script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6343594295307676"
       data-ad-client="ca-pub-6343594295307676"
-      crossorigin="anonymous"></script>
+      crossorigin="anonymous"
+      onload="window.__ADSENSE_LOADED__=true; window.dispatchEvent(new CustomEvent('daleel_ads_script_loaded'));"
+      onerror="window.__ADSENSE_BLOCKED__=true; window.dispatchEvent(new CustomEvent('daleel_ads_blocked'));"></script>
     <!-- Subdomain / Domain Owner Verification -->
     <meta name="subdomain-owner-verification" content="1abfaf47224a861afca6a8db64f5d8b8" />
     <meta name="1abfaf47224a861afca6a8db64f5d8b8" content="subdomain-owner-verification" />
@@ -40,7 +46,7 @@
     <meta name="keywords" content="دليل الذكاء الاصطناعي, أدوات الذكاء الاصطناعي, شات جي بي تي, ميدجورني, مقارنة أدوات الذكاء الاصطناعي, أفضل أدوات الذكاء الاصطناعي 2026, الذكاء الاصطناعي العربي, ChatGPT, Claude, Midjourney, AI Tools, برومبتات الذكاء الاصطناعي, كورس الذكاء الاصطناعي" />
 
     <!-- Canonical URL & OpenSearch Discovery -->
-    <link rel="canonical" href="https://daleel.ai/" />
+    <link rel="canonical" href="https://ai-toolsar.netlify.app/" />
     <link rel="search" type="application/opensearchdescription+xml" title="دليل الذكاء الاصطناعي | Daleel AI" href="/opensearch.xml" />
 
     <!-- SEO Titles & Descriptions (30-60 & 120-160 chars) -->
@@ -53,7 +59,7 @@
     <meta property="og:title" content="دليل الذكاء الاصطناعي | Daleel AI - المرجع الأول لأدوات ومقارنات الذكاء الاصطناعي" />
     <meta property="og:description" content="المرجع العربي الشامل لاكتشاف وتجربة أفضل أدوات وتطبيقات الذكاء الاصطناعي في 2026. مراجعات حقيقية، مقارنات دقيقة، وشروحات عملية." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://daleel.ai/" />
+    <meta property="og:url" content="https://ai-toolsar.netlify.app/" />
     <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=630&auto=format&fit=crop&q=80" />
     <meta property="og:image:alt" content="دليل الذكاء الاصطناعي - Daleel AI" />
     <meta property="og:image:width" content="1200" />
@@ -74,8 +80,8 @@
       "@graph": [
         {
           "@type": "WebSite",
-          "@id": "https://daleel.ai/#website",
-          "url": "https://daleel.ai/",
+          "@id": "https://ai-toolsar.netlify.app/#website",
+          "url": "https://ai-toolsar.netlify.app/",
           "name": "دليل الذكاء الاصطناعي",
           "alternateName": ["Daleel AI", "دليل الذكاء الاصطناعي العربي"],
           "description": "المرجع العربي الشامل لاكتشاف وتجربة أفضل أدوات وتطبيقات الذكاء الاصطناعي في 2026.",
@@ -84,16 +90,16 @@
             "@type": "SearchAction",
             "target": {
               "@type": "EntryPoint",
-              "urlTemplate": "https://daleel.ai/ai-tools?search={search_term_string}"
+              "urlTemplate": "https://ai-toolsar.netlify.app/ai-tools?search={search_term_string}"
             },
             "query-input": "required name=search_term_string"
           }
         },
         {
           "@type": "Organization",
-          "@id": "https://daleel.ai/#organization",
+          "@id": "https://ai-toolsar.netlify.app/#organization",
           "name": "دليل الذكاء الاصطناعي | Daleel AI",
-          "url": "https://daleel.ai/",
+          "url": "https://ai-toolsar.netlify.app/",
           "logo": {
             "@type": "ImageObject",
             "url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=512&h=512&auto=format&fit=crop&q=80",
@@ -112,7 +118,7 @@
         },
         {
           "@type": "SoftwareApplication",
-          "@id": "https://daleel.ai/#platform",
+          "@id": "https://ai-toolsar.netlify.app/#platform",
           "name": "منصة دليل الذكاء الاصطناعي",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web, iOS, Android",

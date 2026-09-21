@@ -95,12 +95,13 @@ export const AdminAdDiagnostic: React.FC<AdminAdDiagnosticProps> = ({ publisherI
       });
 
       // 4. Test AdBlocker presence
+      const isGlobalBlocked = typeof window !== 'undefined' && !!(window as any).__ADSENSE_BLOCKED__;
       const testAd = document.createElement('div');
       testAd.className = 'adsbygoogle ad-zone ad-space';
       testAd.style.position = 'absolute';
       testAd.style.left = '-9999px';
       document.body.appendChild(testAd);
-      setAdBlockDetected(testAd.offsetHeight === 0 || window.getComputedStyle(testAd).display === 'none');
+      setAdBlockDetected(isGlobalBlocked || testAd.offsetHeight === 0 || window.getComputedStyle(testAd).display === 'none');
       document.body.removeChild(testAd);
 
       setSlotsFound(detectedSlots);

@@ -56,6 +56,59 @@ html.dark footer {
   border-color: #1e293b !important;
 }
 
+/* ==========================================================================
+   Google AdSense Fallback & Responsive Optimization
+   Prevents empty grey boxes, DNS error frames, or layout disruptions
+   when ads are unfilled, blocked by AdBlocker, or network is unavailable.
+   ========================================================================== */
+ins.adsbygoogle[data-ad-status="unfilled"],
+ins.adsbygoogle[data-ad-status="unfilled"] * {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  visibility: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ad-slot-container[data-ad-state="unfilled"],
+.ad-slot-container[data-ad-state="blocked"],
+.ad-slot-container[data-ad-state="error"],
+.ad-slot-container[data-ad-state="hidden"],
+.ad-slot-container.ad-hidden {
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+/* For modern browsers supporting :has */
+.ad-slot-container:has(ins.adsbygoogle[data-ad-status="unfilled"]) {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Responsive constraints for mobile */
+.ad-slot-container {
+  transition: opacity 0.2s ease-in-out;
+}
+
+@media (max-width: 640px) {
+  .ad-slot-container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
 @media print {
   body {
     background: #ffffff !important;

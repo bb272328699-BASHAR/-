@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { query } from './db.ts';
 import { generateToken, authMiddleware, AuthRequest, recordAuditLog } from './middleware/auth.ts';
+import { serverCache } from './services/cacheService.ts';
 
 export const adminRouter = Router();
 
@@ -136,6 +137,9 @@ adminRouter.post('/tools', authMiddleware, async (req: AuthRequest, res: Respons
 
     await recordAuditLog(req.user?.id || null, 'CREATE_TOOL', 'TOOL', toolId, { name, slug }, req.ip);
 
+    // Invalidate Cache for tools
+    serverCache.invalidateToolsCache(slug);
+
     res.status(201).json(inserted.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -189,7 +193,15 @@ adminRouter.put('/tools/:id', authMiddleware, async (req: AuthRequest, res: Resp
 
     await recordAuditLog(req.user?.id || null, 'UPDATE_TOOL', 'TOOL', id, { name, slug }, req.ip);
 
-    res.json(updated.rows[0]);
+    // Invalidate Cache immediately so users see updated data instantly
+    const toolUpdated = updated.rows[0];
+    const invalidationResult = serverCache.invalidateToolsCache(toolUpdated.slug);
+
+    res.json({
+      ...toolUpdated,
+      _cacheInvalidated: true,
+      _cacheVersion: invalidationResult.version
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -198,11 +210,15 @@ adminRouter.put('/tools/:id', authMiddleware, async (req: AuthRequest, res: Resp
 adminRouter.delete('/tools/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const deleted = await query(`DELETE FROM tools WHERE id = $1 RETURNING name`, [id]);
+    const deleted = await query(`DELETE FROM tools WHERE id = $1 RETURNING name, slug`, [id]);
     if (deleted.rows.length === 0) return res.status(404).json({ error: 'الأداة غير موجودة' });
 
     await recordAuditLog(req.user?.id || null, 'DELETE_TOOL', 'TOOL', id, { name: deleted.rows[0].name }, req.ip);
-    res.json({ message: 'تم حذف الأداة بنجاح' });
+
+    // Invalidate Cache for deleted tool
+    serverCache.invalidateToolsCache(deleted.rows[0].slug);
+
+    res.json({ message: 'تم حذف الأداة بنجاح وتحديث الكاش' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -1300,7 +1316,54 @@ adminRouter.post('/settings', authMiddleware, async (req: AuthRequest, res: Resp
       }
     }
     await recordAuditLog(req.user?.id || null, 'UPDATE_SETTINGS', 'SITE_SETTINGS', 'global', { count: settings.length }, req.ip);
-    res.json({ message: 'تم تحديث الإعدادات بنجاح' });
+    serverCache.clearAll();
+    res.json({ message: 'تم تحديث الإعدادات بنجاح وتنظيف الكاش بالكامل' });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Cache Invalidation & Status Management
+adminRouter.get('/cache/status', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const stats = serverCache.getStats();
+    res.json({
+      status: 'active',
+      ...stats,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/cache/purge', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { target, slug } = req.body; // target: 'tools' | 'all' | 'slug'
+    let result: any;
+
+    if (target === 'slug' && slug) {
+      result = serverCache.invalidateToolsCache(slug);
+    } else if (target === 'tools') {
+      result = serverCache.invalidateToolsCache();
+    } else {
+      result = serverCache.clearAll();
+    }
+
+    await recordAuditLog(
+      req.user?.id || null,
+      'CACHE_PURGE',
+      'CACHE',
+      target || 'all',
+      { target, slug, result },
+      req.ip
+    );
+
+    res.json({
+      message: 'تم تنظيف الكاش بنجاح لضمان ظهور التعديلات فوراً للمستخدمين',
+      result,
+      timestamp: new Date().toISOString()
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

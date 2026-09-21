@@ -28,7 +28,8 @@ import { AdminRevenueEstimator } from '../components/AdminRevenueEstimator.tsx';
 import { AdminRevenueGrowth } from '../components/AdminRevenueGrowth.tsx';
 import { AdminKeywordOpportunityManager } from '../components/AdminKeywordOpportunityManager.tsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.tsx';
-import { TrendingUp, Split, KeyRound } from 'lucide-react';
+import { TrendingUp, Split, KeyRound, Zap } from 'lucide-react';
+import { purgeServerCache } from '../utils/cacheManager.ts';
 
 interface AdminDashboardProps {
   navigate: (path: string) => void;
@@ -155,11 +156,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
-        setMessage({ text: `تم حذف الأداة "${name}" بنجاح`, type: 'success' });
+        setMessage({ text: `تم حذف الأداة "${name}" بنجاح وتحديث الكاش`, type: 'success' });
         fetchAdminData();
       }
     } catch {
       setMessage({ text: 'حدث خطأ في عملية الحذف', type: 'error' });
+    }
+  };
+
+  const handlePurgeCache = async (slug?: string) => {
+    try {
+      setMessage({ text: 'جاري تنظيف الكاش وتحديث البيانات...', type: 'success' });
+      const res = await purgeServerCache(token, slug ? 'slug' : 'all', slug);
+      if (res.success) {
+        setMessage({ text: res.message || 'تم تنظيف الكاش بنجاح وستظهر التعديلات لجميع المستخدمين فوراً', type: 'success' });
+        fetchAdminData();
+      } else {
+        setMessage({ text: res.message || 'فشل تنظيف الكاش', type: 'error' });
+      }
+    } catch (e: any) {
+      setMessage({ text: e.message || 'خطأ أثناء تنظيف الكاش', type: 'error' });
     }
   };
 
@@ -178,6 +194,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button
+            onClick={() => handlePurgeCache()}
+            className="text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-xs"
+            title="تنظيف كاش الخادم والمتصفح فوراً لضمان رؤية أحدث التعديلات"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span>تنظيف الكاش الشامل</span>
+          </button>
           <button
             onClick={() => navigate('/')}
             className="text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl"
@@ -395,14 +419,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
                         <button
                           onClick={() => navigate(`/tools/${t.slug}`)}
                           className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded"
-                          title="معاينة"
+                          title="معاينة الأداة"
                         >
                           معاينة
                         </button>
                         <button
+                          onClick={() => handlePurgeCache(t.slug)}
+                          className="p-1.5 text-amber-600 hover:bg-amber-50 rounded"
+                          title="تحديث وتنظيف كاش هذه الأداة فوراً"
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                        </button>
+                        <button
                           onClick={() => handleDeleteTool(t.id, t.name)}
                           className="p-1.5 text-rose-600 hover:bg-rose-50 rounded"
-                          title="حذف"
+                          title="حذف الأداة"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

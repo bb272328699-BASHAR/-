@@ -54,14 +54,20 @@ function escapeXml(unsafe: string): string {
  * Get base URL from environment, host header, or default
  */
 export function getBaseUrl(hostHeader?: string): string {
-  if (process.env.APP_URL) {
-    return process.env.APP_URL.replace(/\/$/, '');
+  if (process.env.SITE_URL) {
+    return process.env.SITE_URL.replace(/\/$/, '');
+  }
+  if (process.env.CANONICAL_DOMAIN) {
+    return process.env.CANONICAL_DOMAIN.replace(/\/$/, '');
   }
   if (hostHeader) {
-    const protocol = hostHeader.includes('localhost') || hostHeader.includes('127.0.0.1') ? 'http' : 'https';
-    return `${protocol}://${hostHeader}`;
+    const cleanHost = hostHeader.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    if (cleanHost.includes('run.app') || cleanHost.includes('localhost') || cleanHost.includes('127.0.0.1')) {
+      return 'https://ai-toolsar.netlify.app';
+    }
+    return `https://${cleanHost}`;
   }
-  return 'https://daleel.ai';
+  return 'https://ai-toolsar.netlify.app';
 }
 
 /**

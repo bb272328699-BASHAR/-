@@ -1,121 +1,221 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/ai-tools</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/ai-tools</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/categories</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/advisor</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/advisor</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/prompts</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/prompts</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/stacks</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/stacks</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/alternatives</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/alternatives</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/calculator</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/calculator</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/comparisons</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/comparisons</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/reviews</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/reviews</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/articles</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/articles</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tutorials</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/tutorials</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/resources</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/resources</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/about</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/about</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/contact</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/contact</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/privacy</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/privacy</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/terms</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/terms</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/affiliate-disclosure</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/affiliate-disclosure</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/editorial-policy</loc>
-    <lastmod>2026-09-20</lastmod>
+    <loc>https://ai-toolsar.netlify.app/editorial-policy</loc>
+    <lastmod>2026-09-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/gamma-app</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/chatpdf</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>شات بي دي إف (ChatPDF)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/opus-clip</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>أوبوس كليب (Opus Clip)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/kling-ai</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>كلينغ (Kling AI)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/leonardo-ai</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>ليوناردو (Leonardo.Ai)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/rytr</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>رايتر (Rytr)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/jasper-ai</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>جاسبر (Jasper AI)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/canva-ai</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>كانفا ذكاء اصطناعي (Canva Magic Studio)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/heygen</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>هي جين (HeyGen Avatar)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/sora-openai</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>سورا (Sora by OpenAI)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/flux-1</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&amp;auto=format&amp;fit=crop&amp;q=80</image:loc>
+      <image:title>FLUX.1 (Black Forest Labs)</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ai-toolsar.netlify.app/tools/gamma-app</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -125,7 +225,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/deepl-translator</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/deepl-translator</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -135,7 +235,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/notion-ai</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/notion-ai</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -145,7 +245,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/canva-magic-studio</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/canva-magic-studio</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -155,7 +255,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/github-copilot</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/github-copilot</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -165,7 +265,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/suno-ai</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/suno-ai</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -175,7 +275,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/v0-dev</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/v0-dev</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -185,7 +285,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/perplexity-ai</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/perplexity-ai</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -195,7 +295,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/gemini-advanced</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/gemini-advanced</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -205,7 +305,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/runway-gen-3</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/runway-gen-3</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -215,7 +315,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/elevenlabs</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/elevenlabs</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -225,7 +325,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/cursor-ai</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/cursor-ai</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -235,7 +335,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/chatgpt-plus</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/chatgpt-plus</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -245,7 +345,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/midjourney-v6</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/midjourney-v6</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -255,7 +355,7 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tools/claude-3-5-sonnet</loc>
+    <loc>https://ai-toolsar.netlify.app/tools/claude-3-5-sonnet</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -265,115 +365,115 @@
     </image:image>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/paraphrasing-grammar</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/paraphrasing-grammar</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/productivity-business</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/productivity-business</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/coding-development</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/coding-development</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/marketing-seo</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/marketing-seo</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/education-research</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/education-research</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/audio-voice</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/audio-voice</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/writing-content</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/writing-content</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/video-production</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/video-production</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/logo-design</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/logo-design</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/image-generation</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/image-generation</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/ai-avatars</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/ai-avatars</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/copywriting</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/copywriting</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/categories/code-assistants</loc>
+    <loc>https://ai-toolsar.netlify.app/categories/code-assistants</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/articles/top-ai-tools-transforming-business-2026</loc>
+    <loc>https://ai-toolsar.netlify.app/articles/top-ai-tools-transforming-business-2026</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/articles/prompt-engineering-mastery-guide</loc>
+    <loc>https://ai-toolsar.netlify.app/articles/prompt-engineering-mastery-guide</loc>
     <lastmod>2026-09-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/comparisons/claude-vs-chatgpt</loc>
+    <loc>https://ai-toolsar.netlify.app/comparisons/claude-vs-chatgpt</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/comparisons/cursor-ai-vs-github-copilot</loc>
+    <loc>https://ai-toolsar.netlify.app/comparisons/cursor-ai-vs-github-copilot</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/tutorials/how-to-build-fullstack-app-with-cursor</loc>
+    <loc>https://ai-toolsar.netlify.app/tutorials/how-to-build-fullstack-app-with-cursor</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ais-dev-q5hd4tzcwsajvx3h3elvdu-11724582893.europe-west2.run.app/reviews/claude-3-5-sonnet-review</loc>
+    <loc>https://ai-toolsar.netlify.app/reviews/claude-3-5-sonnet-review</loc>
     <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

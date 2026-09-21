@@ -40,6 +40,7 @@ import { usePageTracking } from './hooks/usePageTracking.ts';
 import { fetchAdSettings } from './components/AdSlot.tsx';
 import { getSavedConsent } from './utils/consent.ts';
 import { applyRouteSEO } from './utils/seo.ts';
+import { syncClientCache } from './utils/cacheManager.ts';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname || '/');
@@ -180,8 +181,22 @@ export default function App() {
 
     loadData();
 
+    // Cache sync check & live reload on admin cache purge
+    syncClientCache().then(res => {
+      if (res.updated) {
+        loadData();
+      }
+    });
+
+    const handleCacheInvalidated = () => {
+      loadData();
+    };
+
+    window.addEventListener('daleel:cache_invalidated', handleCacheInvalidated);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('daleel:cache_invalidated', handleCacheInvalidated);
     };
   }, []);
 
@@ -194,9 +209,15 @@ export default function App() {
       const isAdsEnabled = settings?.ads_enabled === 'true' || settings?.ads_enabled === '1';
       const isAutoAdsEnabled = settings?.ads_auto_ads_enabled === 'true' || settings?.ads_auto_ads_enabled === '1' || settings?.ads_auto_ads_enabled === undefined;
       const isTestMode = settings?.ads_test_mode === 'true';
-      const publisherId = settings?.ads_publisher_id;
+      const rawPubId = settings?.ads_publisher_id || '';
+      const cleanPub = rawPubId.replace(/^ca-/, '').trim();
+      const publisherId = cleanPub.startsWith('pub-') ? `ca-${cleanPub}` : `ca-pub-${cleanPub}`;
 
-      if (!isAdsEnabled || !isAutoAdsEnabled || isTestMode || !publisherId || publisherId === 'ca-pub-0000000000000000') {
+      if (!isAdsEnabled || !isAutoAdsEnabled || isTestMode || !cleanPub || cleanPub === 'pub-0000000000000000') {
+        return;
+      }
+
+      if ((window as any).__ADSENSE_BLOCKED__) {
         return;
       }
 
@@ -210,6 +231,10 @@ export default function App() {
         script.async = true;
         script.crossOrigin = 'anonymous';
         script.setAttribute('data-ad-client', publisherId);
+        script.onerror = () => {
+          (window as any).__ADSENSE_BLOCKED__ = true;
+          window.dispatchEvent(new CustomEvent('daleel_ads_blocked'));
+        };
         document.head.appendChild(script);
       } else if (!script.getAttribute('data-ad-client')) {
         script.setAttribute('data-ad-client', publisherId);

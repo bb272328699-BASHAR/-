@@ -8,6 +8,7 @@ import { AiService } from './services/aiService.ts';
 import { query } from './db.ts';
 import { generateToken, authMiddleware, AuthRequest } from './middleware/auth.ts';
 import { generateSitemapXml, getSitemapEntries } from './services/sitemapService.ts';
+import { serverCache } from './services/cacheService.ts';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'daleel-ai-super-secret-jwt-key-2026';
 
@@ -56,6 +57,11 @@ publicRouter.get('/seo/sitemap-stats', async (req: Request, res: Response) => {
 publicRouter.get('/tools', async (req: Request, res: Response) => {
   try {
     const { search, category, pricing, filter, sort, page, limit } = req.query;
+    const stats = serverCache.getStats();
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.setHeader('ETag', `W/"tools-${stats.version}"`);
+    res.setHeader('X-Cache-Version', stats.version.toString());
+
     const result = await ToolsService.getAll({
       search: search as string,
       category: category as string,
@@ -74,6 +80,11 @@ publicRouter.get('/tools', async (req: Request, res: Response) => {
 // Single Tool Details by Slug
 publicRouter.get('/tools/:slug', async (req: Request, res: Response) => {
   try {
+    const stats = serverCache.getStats();
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.setHeader('ETag', `W/"tool-${req.params.slug}-${stats.version}"`);
+    res.setHeader('X-Cache-Version', stats.version.toString());
+
     const tool = await ToolsService.getBySlug(req.params.slug);
     if (!tool) {
       return res.status(404).json({ error: 'الأداة المطلوبة غير موجودة' });
@@ -87,11 +98,27 @@ publicRouter.get('/tools/:slug', async (req: Request, res: Response) => {
 // Featured Collections (Trending, Popular, New) for Home
 publicRouter.get('/collections/home', async (req: Request, res: Response) => {
   try {
+    const stats = serverCache.getStats();
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+    res.setHeader('ETag', `W/"collections-${stats.version}"`);
+    res.setHeader('X-Cache-Version', stats.version.toString());
+
     const data = await ToolsService.getFeaturedCollections();
     res.json(data);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Cache version check endpoint for clients
+publicRouter.get('/cache/version', async (req: Request, res: Response) => {
+  const stats = serverCache.getStats();
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.json({
+    version: stats.version,
+    lastInvalidatedAt: stats.lastInvalidatedAt,
+    entriesCount: stats.size
+  });
 });
 
 // Categories & Subcategories

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+
+# Google Search Console XML Sitemaps
+Sitemap: https://ai-toolsar.netlify.app/sitemap.xml
