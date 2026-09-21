@@ -90,6 +90,39 @@ export const DEFAULT_CATEGORIES: Category[] = [
     is_featured: true,
     tools_count: 7,
   },
+  {
+    id: 'cat-agents',
+    name: 'الوكلاء الأذكياء والأتمتة',
+    name_en: 'AI Agents & Automation',
+    slug: 'ai-agents-automation',
+    description: 'وكلاء ذكاء اصطناعي ذاتيون لتنفيذ تدفقات العمل المعقدة، ربط الخدمات، وإدارة المهام الآلية',
+    icon: 'Bot',
+    color: '#8B5CF6',
+    is_featured: true,
+    tools_count: 8,
+  },
+  {
+    id: 'cat-3d-design',
+    name: 'التصميم ثلاثي الأبعاد والمكانية',
+    name_en: '3D & Spatial AI',
+    slug: '3d-spatial-design',
+    description: 'تحويل النصوص والصور إلى مجسمات 3D وعوالم تفاعلية وأصول ألعاب ورسوم متحركة',
+    icon: 'Box',
+    color: '#06B6D4',
+    is_featured: true,
+    tools_count: 6,
+  },
+  {
+    id: 'cat-data-analytics',
+    name: 'تحليل البيانات وذكاء الأعمال',
+    name_en: 'Data Analytics & BI',
+    slug: 'data-analytics-bi',
+    description: 'معالجة ملفات Excel والبيانات الضخمة، توليد المخططات والرسوم البيانية التنبؤية بالذكاء الاصطناعي',
+    icon: 'BarChart3',
+    color: '#F97316',
+    is_featured: true,
+    tools_count: 7,
+  },
 ];
 
 // Comprehensive Default Fallback Tools
@@ -997,6 +1030,204 @@ export const DEFAULT_TOOLS: Tool[] = [
       { question: 'هل يدعم ChatPDF الأبحاث العلمية المكتوبة بالعربية؟', answer: 'نعم، يقرأ ملفات PDF العربية بدقة عالية ويجيب باللغة العربية الفصحى مع المصادر.' }
     ]
   },
+  {
+    id: 'tool-notebooklm',
+    name: 'نوتبوك إل إم (NotebookLM by Google)',
+    slug: 'notebooklm-google',
+    tagline: 'المساعد البحثي الذكي من جوجل لتحويل مستنداتك ومصادرك إلى بودكاست صوتي ونقاشات تفاعلية',
+    description: 'أداة بحثية متطورة من Google تعتمد على نموذج Gemini 1.5 Pro، تتيح لك رفع ملفات PDF والملاحظات والمستندات، ثم إنشاء بودكاست صوتي مذهل (Audio Overview) يحاور فيه شخصان تفاصيل أبحاثك بأسلوب جذاب للغاية.',
+    website_url: 'https://notebooklm.google.com',
+    logo_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Free',
+    starting_price: 'مجاني بالكامل',
+    rating: 4.96,
+    review_count: 3890,
+    upvotes_count: 420,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Google Labs',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-research', name: 'التعليم والبحث العلمي', slug: 'education-research', color: '#E11D48' },
+      { id: 'cat-productivity', name: 'الإنتاجية وإدارة الأعمال', slug: 'productivity-business', color: '#3B82F6' },
+      { id: 'cat-audio', name: 'الصوتيات والتعليق الصوتي', slug: 'audio-voice', color: '#8B5CF6' }
+    ],
+    features: [
+      { title: 'توليد حوارات بودكاست صوتية عميقة', description: 'تحويل أي دراسة أو ملخص إلى نقاش صوتي واقعي ثنائي بأسلوب مشوق.' },
+      { title: 'استشهادات دقيقة ومؤرخة من مصادرك', description: 'كل إجابة مرتبطة بدقة بالفقرة والصفحة الأصلية في ملفاتك المرفوعة.' },
+      { title: 'نافذة سياق ضخمة (Gemini 1.5 Pro)', description: 'قدرة على استيعاب عشرات الكتب والمراجع ومقاطع يوتيوب في مستودع بحثي واحد.' }
+    ],
+    pros: ['مجاني 100% من Google بدون إعلانات أو قيود معقدة', 'ميزة Audio Overviews تعتبر ثورة في التعلم والمراجعة', 'دعم استثنائي لقراءة وتحليل المستندات العربية'],
+    cons: ['توليد البودكاست الصوتي حالياً يخرج بالإنجليزية بينما النصوص بالعربية'],
+    pricingPlans: [
+      { plan_name: 'Google Workspace / Personal', price: '0$', period: 'دائم', features: ['وصول مجاني كامل', 'حتى 50 مصدراً لكل دفتر ملاحظات', 'ملخصات ذكية فورية'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل بياناتي ومستنداتي آمنة ولا تستخدم لتدريب النماذج؟', answer: 'تلتزم Google بعدم استخدام بياناتك الشخصية المرفوعة في NotebookLM لتدريب نماذج الذكاء الاصطناعي العامة.' }
+    ]
+  },
+  {
+    id: 'tool-kling-ai',
+    name: 'كلينج (Kling AI)',
+    slug: 'kling-ai',
+    tagline: 'النموذج الرائد عالمياً في إنتاج الفيديو السينمائي عالي الدقة بحركة فيزيائية واقعية جداً',
+    description: 'أقوى نموذج صيني وعالمي لتوليد مقاطع الفيديو من النصوص والصور بدقة 1080p وحركة كاميرا دراماتيكية مع محاكاة فيزيائية مبهرة لحركة الأجسام والماء والرياح والتعبيرات الوجهية الطبيعية.',
+    website_url: 'https://klingai.com',
+    logo_url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '10$ / شهر',
+    rating: 4.93,
+    review_count: 2150,
+    upvotes_count: 310,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'جيد جداً',
+    developer_org: 'Kuaishou Technology',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production', color: '#F59E0B' }
+    ],
+    features: [
+      { title: 'محاكاة فيزيائية واقعية للمشاهد', description: 'حركة طبيعية متقنة لتساقط السوائل ورياح الشعر وحركة الأجسام المعقدة.' },
+      { title: 'توليد فيديو يصل حتى 2 دقيقة', description: 'إمكانية تمديد المقاطع واستمرار المشهد بسلاسة عالية مع ثبات الشخصيات.' },
+      { title: 'تحكم بالكاميرا والزوايا السينمائية', description: 'أدوات دقيقة لتحريك الكاميرا (Pan, Tilt, Zoom, Roll) بحرية تامة.' }
+    ],
+    pros: ['واقعية مذهلة تتفوق على العديد من المنافسين', 'أرصدة تجريبية يومية مجانية', 'واجهة ويب سريعة وسهلة الاستخدام'],
+    cons: ['وقت المعالجة في الخطة المجانية قد يستغرق دقائق في أوقات الذروة'],
+    pricingPlans: [
+      { plan_name: 'Free Trial', price: '0$', period: 'يومياً', features: ['66 رصيد يومياً مجاناً', 'توليد فيديو حتى 5 ثوانٍ', 'جودة 720p'], is_popular: false },
+      { plan_name: 'Standard VIP', price: '10$', period: 'شهرياً', features: ['660 رصيد شهرياً', 'توليد فيديو عالي الدقة 1080p', 'أولوية معالجة سريعة', 'إزالة العلامة المائية'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يمكن تحويل الصور الثابتة إلى فيديو في Kling AI؟', answer: 'نعم، يتميز Kling بقدرته العالية على أخذ أي صورة ثابتة وتحريكها بدقة متناهية وفق أوامرك.' }
+    ]
+  },
+  {
+    id: 'tool-make-ai',
+    name: 'ميك أوتوميشن (Make AI & Agents)',
+    slug: 'make-automation',
+    tagline: 'المنصة البصرية الأقوى في العالم لربط التطبيقات وبناء وكلاء الأتمتة الذاتية بدون كود',
+    description: 'بيئة عمل تفاعلية مرئية تسمح لك بربط أكثر من 1,500 تطبيق وخدمة سحابية مع نماذج الذكاء الاصطناعي (OpenAI, Claude, Gemini) لبناء تدفقات عمل وأتمتة المهام اليومية بالكامل بدون كتابة كود.',
+    website_url: 'https://www.make.com',
+    logo_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '9$ / شهر',
+    rating: 4.91,
+    review_count: 4200,
+    upvotes_count: 275,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: false,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Celonis / Make',
+    release_year: 2023,
+    categories: [
+      { id: 'cat-agents', name: 'الوكلاء الأذكياء والأتمتة', slug: 'ai-agents-automation', color: '#8B5CF6' },
+      { id: 'cat-productivity', name: 'الإنتاجية وإدارة الأعمال', slug: 'productivity-business', color: '#3B82F6' }
+    ],
+    features: [
+      { title: 'بناء سيناريوهات مرئية بالسحب والإفلات', description: 'واجهة رسومية انسيابية تمكنك من رؤية مسار البيانات خطوة بخطوة.' },
+      { title: 'تكامل مباشر مع نماذج الذكاء الاصطناعي', description: 'وحدات مخصصة لـ ChatGPT و Claude لمعالجة النصوص وتلخيص الرسائل آلياً.' },
+      { title: 'أكثر من 1,500 تطبيق مدعوم', description: 'ربط سلس مع WhatsApp, Google Sheets, Notion, Slack, Shopify, وغيرها.' }
+    ],
+    pros: ['مرونة غير محدودة في بناء وكلاء أتمتة معقدين', 'خطة مجانية توفر 1,000 عملية شهرياً', 'سعر اقتصادي ومناسب مقارنة بـ Zapier'],
+    cons: ['يتطلب منحنى تعلم بسيط لفهم هيكلة المتغيرات والروابط'],
+    pricingPlans: [
+      { plan_name: 'Free Core', price: '0$', period: 'شهرياً', features: ['1,000 عملية شهرياً', 'فترات تشغيل كل 15 دقيقة', 'سيناريوهات غير محدودة'], is_popular: false },
+      { plan_name: 'Core Plan', price: '9$', period: 'شهرياً', features: ['10,000 عملية شهرياً', 'فترات تشغيل كل 1 دقيقة', 'تنفيذ فوري وتخزين سجلات أطول'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يمكن أتمتة الرد على رسائل الواتساب بالذكاء الاصطناعي عبر Make؟', answer: 'نعم، يمكنك بناء روبوت ذكي بالكامل يستقبل رسائل الواتساب ويعالجها بنماذج GPT ويرد على العميل فورياً.' }
+    ]
+  },
+  {
+    id: 'tool-meshy-3d',
+    name: 'ميشي ثري دي (Meshy 3D)',
+    slug: 'meshy-3d',
+    tagline: 'تحويل النصوص والصور ثنائية الأبعاد إلى مجسمات وأصول 3D جاهزة للألعاب والطباعة في دقائق',
+    description: 'أداة رائدة للمصممين ومطوري الألعاب تمكنك من إدخال وصف نصي أو رفع صورة، لتقوم بتوليد مجسم 3D كامل بالإكساءات والألوان (Texturing) وبصيغ قياسية مثل FBX و GLB و OBJ.',
+    website_url: 'https://www.meshy.ai',
+    logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '16$ / شهر',
+    rating: 4.88,
+    review_count: 1450,
+    upvotes_count: 190,
+    is_verified: true,
+    is_trending: true,
+    is_popular: false,
+    is_featured: false,
+    status: 'published',
+    arabic_support: 'جيد',
+    developer_org: 'Meshy AI Inc.',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-3d-design', name: 'التصميم ثلاثي الأبعاد والمكانية', slug: '3d-spatial-design', color: '#06B6D4' }
+    ],
+    features: [
+      { title: 'Text-to-3D & Image-to-3D', description: 'توليد أشكال ومجسمات كاملة ومعقدة في أقل من دقيقتين.' },
+      { title: 'إكساء ذكي عالي الدقة (AI Texturing)', description: 'تطبيق خامات PBR واقعية مع خرائط الإضاءة والخشونة والانعكاس.' },
+      { title: 'تصدير لصيغ محركات الألعاب', description: 'توافق فوري مع Unity و Unreal Engine و Blender و WebGL.' }
+    ],
+    pros: ['اختصار أيام من العمل اليدوي في النمذجة ثلاثية الأبعاد', 'إكساءات PBR متوافقة مع معايير الصناعة', 'خطة مجانية تقدم 200 رصيد شهرياً'],
+    cons: ['المجسمات شديدة التعقيد أو الأشكال الهندسية الميكانيكية تحتاج تشذيباً بسيطاً'],
+    pricingPlans: [
+      { plan_name: 'Free Plan', price: '0$', period: 'شهرياً', features: ['200 رصيد شهرياً', 'توليد مجسمات قياسية', 'تنزيل بصيغة GLB'], is_popular: false },
+      { plan_name: 'Pro Tier', price: '16$', period: 'شهرياً', features: ['1,000 رصيد شهرياً', 'إكساء بدقة 4K', 'تصدير بكافة الصيغ التجارية بدون قيود'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل المجسمات قابلة للطباعة ثلاثية الأبعاد (3D Printing)؟', answer: 'نعم، يمكنك تصدير الملفات بصيغة STL أو OBJ وإرسالها مباشرة لبرامج التقطيع والطباعة ثلاثية الأبعاد.' }
+    ]
+  },
+  {
+    id: 'tool-julius-ai',
+    name: 'يوليوس (Julius AI)',
+    slug: 'julius-ai',
+    tagline: 'محلل البيانات الذكي لتحويل ملفات Excel و SQL إلى رسوم بيانية تفاعلية ورؤى استراتيجية',
+    description: 'أفضل مساعد ذكاء اصطناعي لمعالجة البيانات والإحصاء. يكفي رفع ملف Excel أو CSV أو ربط قاعدة بياناتك، ليقوم Julius بكتابة شيفرات Python، تنظيف البيانات، وتوليد مخططات احترافية ورؤى استثمارية عميقة بأسئلة بسيطة.',
+    website_url: 'https://julius.ai',
+    logo_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '20$ / شهر',
+    rating: 4.92,
+    review_count: 2780,
+    upvotes_count: 240,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Julius AI Labs',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-data-analytics', name: 'تحليل البيانات وذكاء الأعمال', slug: 'data-analytics-bi', color: '#F97316' },
+      { id: 'cat-productivity', name: 'الإنتاجية وإدارة الأعمال', slug: 'productivity-business', color: '#3B82F6' }
+    ],
+    features: [
+      { title: 'تحليل فوري لجداول البيانات المعقدة', description: 'استخراج الأنماط، المقارنات، والانحرافات الإحصائية دون كتابة معادلات معقدة.' },
+      { title: 'إنشاء رسوم بيانية ومخططات تنفيذية', description: 'توليد مخططات جاهزة للعروض التقديمية مع تصدير عالي الدقة.' },
+      { title: 'تنفيذ كود Python في بيئة معزولة', description: 'تشغيل نماذج الانحدار الخطي والتعلم الآلي على بياناتك بلغة بايثون مباشرة.' }
+    ],
+    pros: ['فهم عميق للجداول والبيانات المالية والمبيعات', 'دعم ممتاز للبيانات والأسئلة باللغة العربية', 'تصدير التقارير بصيغ PDF و Excel ورسوم بيانية تفاعلية'],
+    cons: ['الخطة المجانية تقتصر على 15 رسالة تحليلية شهرياً'],
+    pricingPlans: [
+      { plan_name: 'Free Trial', price: '0$', period: 'شهرياً', features: ['15 رسالة شهرياً', 'رفع ملفات CSV و Excel', 'رسوم بيانية قياسية'], is_popular: false },
+      { plan_name: 'Pro Analyst', price: '20$', period: 'شهرياً', features: ['250 رسالة شهرياً', 'تحليل ملفات ضخمة بلا حدود', 'دعم النمذجة الإحصائية المتقدمة'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم Julius قراءة الجداول العربية في ملفات الإكسل؟', answer: 'نعم، يتعامل مع الأعمدة والبيانات المكتوبة باللغة العربية والأرقام بمختلف تنسيقاتها بسلاسة تامة.' }
+    ]
+  },
 ];
 
 // Fallback Comparisons
@@ -1127,6 +1358,30 @@ export const DEFAULT_ARTICLES: Article[] = [
     is_featured: true,
     published_at: '2026-01-11T10:00:00Z',
     categories: [{ id: 'cat-writing', name: 'الكتابة وصناعة المحتوى', slug: 'writing-content' }],
+  },
+  {
+    id: 'art-notebooklm-audio-guide',
+    slug: 'how-to-use-google-notebooklm-study-guide',
+    title: 'دليل Google NotebookLM الكامل: كيف تحول مئات صفحات الـ PDF إلى بودكاست ومساعد بحثي؟',
+    excerpt: 'شرح عملي لاستغلال قوة نموذج Gemini 1.5 Pro داخل نوتبوك إل إم لتلخيص المراجع ومذاكرة المواد المعقدة.',
+    content: 'أحدثت جوجل ثورة حقيقية في طريقة تعامل الباحثين والطلاب مع المستندات الضخمة من خلال ميزة Audio Overviews التي تنشئ حوارات تفاعلية ذكية تناقش نقاط بحثك وتجيب على أي تساؤل بدقة متناهية مع الاستشهاد برقم الصفحة والفقرة.',
+    author_name: 'د. حسام الشريف',
+    read_time: '6 دقائق',
+    is_featured: true,
+    published_at: '2026-01-18T10:00:00Z',
+    categories: [{ id: 'cat-research', name: 'التعليم والبحث العلمي', slug: 'education-research' }, { id: 'cat-productivity', name: 'الإنتاجية وإدارة الأعمال', slug: 'productivity-business' }],
+  },
+  {
+    id: 'art-video-ai-kling-sora',
+    slug: 'future-of-cinematic-ai-video-2026',
+    title: 'مستقبل صناعة الأفلام بالذكاء الاصطناعي: مقارنة بين Kling AI وسورا و Runway Gen-3',
+    excerpt: 'تحليل شامل لنضج نماذج توليد الفيديو السينمائي، ثبات حركة الكاميرا، والفيزياء الواقعية للأجسام.',
+    content: 'لم يعد إنتاج لقطات سينمائية عالية الدقة حكراً على استوديوهات هوليوود؛ فالجيل الجديد من نماذج الفيديو مثل Kling و Sora يمكن صناع المحتوى من توليد مشاهد كاملة بتفاصيل إضاءة وفيزياء سوائل ورياح واقعية ومبهرة.',
+    author_name: 'محرر الذكاء الاصطناعي',
+    read_time: '9 دقائق',
+    is_featured: false,
+    published_at: '2026-01-19T10:00:00Z',
+    categories: [{ id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production' }],
   },
 ];
 

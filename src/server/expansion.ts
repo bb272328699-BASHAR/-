@@ -403,6 +403,133 @@ export async function runExpansion() {
         { question: 'هل يدعم FLUX.1 اللغة العربية؟', answer: 'نعم، يفهم الأوامر باللغة العربية ويولد النصوص والزخارف بشكل ممتاز.' },
         { question: 'ما الفرق بين إصدارات FLUX؟', answer: 'تتضمن الإصدارات Schnell للسرعة الفائقة، وDev للتطوير والأبحاث، وPro للاستخدام التجاري الاحترافي.' }
       ]
+    },
+    {
+      name: 'نوتبوك إل إم (NotebookLM by Google)',
+      slug: 'notebooklm-google',
+      tagline: 'المساعد البحثي الذكي من جوجل لتحويل مستنداتك ومصادرك إلى بودكاست صوتي ونقاشات تفاعلية',
+      description: 'أداة بحثية متطورة من Google تعتمد على نموذج Gemini 1.5 Pro، تتيح لك رفع ملفات PDF والملاحظات والمستندات، ثم إنشاء بودكاست صوتي مذهل (Audio Overview) يحاور فيه شخصان تفاصيل أبحاثك بأسلوب جذاب للغاية.',
+      website_url: 'https://notebooklm.google.com',
+      logo_url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=160&auto=format&fit=crop&q=80',
+      pricing_type: 'Free',
+      rating: 4.96,
+      review_count: 3890,
+      arabic_support: 'ممتاز',
+      release_year: 2024,
+      developer_org: 'Google Labs',
+      is_featured: true,
+      is_trending: true,
+      is_editor_choice: true,
+      categories: ['education-research', 'productivity-business', 'audio-voice'],
+      features: [
+        { title: 'توليد حوارات بودكاست صوتية عميقة', description: 'تحويل أي دراسة أو ملخص إلى نقاش صوتي واقعي ثنائي بأسلوب مشوق.' },
+        { title: 'استشهادات دقيقة ومؤرخة من مصادرك', description: 'كل إجابة مرتبطة بدقة بالفقرة والصفحة الأصلية في ملفاتك المرفوعة.' },
+        { title: 'نافذة سياق ضخمة (Gemini 1.5 Pro)', description: 'قدرة على استيعاب عشرات الكتب والمراجع ومقاطع يوتيوب في مستودع بحثي واحد.' }
+      ],
+      pros: ['مجاني 100% من Google بدون إعلانات أو قيود معقدة', 'ميزة Audio Overviews تعتبر ثورة في التعلم والمراجعة', 'دعم استثنائي لقراءة وتحليل المستندات العربية'],
+      cons: ['توليد البودكاست الصوتي حالياً يخرج بالإنجليزية بينما النصوص بالعربية'],
+      pricing: [
+        { plan_name: 'Google Workspace / Personal', price: '$0', period: 'دائم', features: ['وصول مجاني كامل', 'حتى 50 مصدراً لكل دفتر ملاحظات', 'ملخصات ذكية فورية'], is_popular: true }
+      ],
+      faqs: [
+        { question: 'هل بياناتي ومستنداتي آمنة ولا تستخدم لتدريب النماذج؟', answer: 'تلتزم Google بعدم استخدام بياناتك الشخصية المرفوعة في NotebookLM لتدريب نماذج الذكاء الاصطناعي العامة.' }
+      ]
+    },
+    {
+      name: 'كلينج (Kling AI)',
+      slug: 'kling-ai',
+      tagline: 'النموذج الرائد عالمياً في إنتاج الفيديو السينمائي عالي الدقة بحركة فيزيائية واقعية جداً',
+      description: 'أقوى نموذج صيني وعالمي لتوليد مقاطع الفيديو من النصوص والصور بدقة 1080p وحركة كاميرا دراماتيكية مع محاكاة فيزيائية مبهرة لحركة الأجسام والماء والرياح والتعبيرات الوجهية الطبيعية.',
+      website_url: 'https://klingai.com',
+      logo_url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&auto=format&fit=crop&q=80',
+      pricing_type: 'Freemium',
+      rating: 4.93,
+      review_count: 2150,
+      arabic_support: 'جيد جداً',
+      release_year: 2024,
+      developer_org: 'Kuaishou Technology',
+      is_featured: true,
+      is_trending: true,
+      is_editor_choice: true,
+      categories: ['video-production'],
+      features: [
+        { title: 'محاكاة فيزيائية واقعية للمشاهد', description: 'حركة طبيعية متقنة لتساقط السوائل ورياح الشعر وحركة الأجسام المعقدة.' },
+        { title: 'توليد فيديو يصل حتى 2 دقيقة', description: 'إمكانية تمديد المقاطع واستمرار المشهد بسلاسة عالية مع ثبات الشخصيات.' },
+        { title: 'تحكم بالكاميرا والزوايا السينمائية', description: 'أدوات دقيقة لتحريك الكاميرا (Pan, Tilt, Zoom, Roll) بحرية تامة.' }
+      ],
+      pros: ['واقعية مذهلة تتفوق على العديد من المنافسين', 'أرصدة تجريبية يومية مجانية', 'واجهة ويب سريعة وسهلة الاستخدام'],
+      cons: ['وقت المعالجة في الخطة المجانية قد يستغرق دقائق في أوقات الذروة'],
+      pricing: [
+        { plan_name: 'Free Trial', price: '$0', period: 'يومياً', features: ['66 رصيد يومياً مجاناً', 'توليد فيديو حتى 5 ثوانٍ', 'جودة 720p'], is_popular: false },
+        { plan_name: 'Standard VIP', price: '$10', period: 'شهرياً', features: ['660 رصيد شهرياً', 'توليد فيديو عالي الدقة 1080p', 'أولوية معالجة سريعة', 'إزالة العلامة المائية'], is_popular: true }
+      ],
+      faqs: [
+        { question: 'هل يمكن تحويل الصور الثابتة إلى فيديو في Kling AI؟', answer: 'نعم، يتميز Kling بقدرته العالية على أخذ أي صورة ثابتة وتحريكها بدقة متناهية وفق أوامرك.' }
+      ]
+    },
+    {
+      name: 'ميك أوتوميشن (Make AI & Agents)',
+      slug: 'make-automation',
+      tagline: 'المنصة البصرية الأقوى في العالم لربط التطبيقات وبناء وكلاء الأتمتة الذاتية بدون كود',
+      description: 'بيئة عمل تفاعلية مرئية تسمح لك بربط أكثر من 1,500 تطبيق وخدمة سحابية مع نماذج الذكاء الاصطناعي (OpenAI, Claude, Gemini) لبناء تدفقات عمل وأتمتة المهام اليومية بالكامل بدون كتابة كود.',
+      website_url: 'https://www.make.com',
+      logo_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=160&auto=format&fit=crop&q=80',
+      pricing_type: 'Freemium',
+      rating: 4.91,
+      review_count: 4200,
+      arabic_support: 'ممتاز',
+      release_year: 2023,
+      developer_org: 'Celonis / Make',
+      is_featured: false,
+      is_trending: true,
+      is_editor_choice: true,
+      categories: ['productivity-business', 'coding-development'],
+      features: [
+        { title: 'بناء سيناريوهات مرئية بالسحب والإفلات', description: 'واجهة رسومية انسيابية تمكنك من رؤية مسار البيانات خطوة بخطوة.' },
+        { title: 'تكامل مباشر مع نماذج الذكاء الاصطناعي', description: 'وحدات مخصصة لـ ChatGPT و Claude لمعالجة النصوص وتلخيص الرسائل آلياً.' },
+        { title: 'أكثر من 1,500 تطبيق مدعوم', description: 'ربط سلس مع WhatsApp, Google Sheets, Notion, Slack, Shopify, وغيرها.' }
+      ],
+      pros: ['مرونة غير محدودة في بناء وكلاء أتمتة معقدين', 'خطة مجانية توفر 1,000 عملية شهرياً', 'سعر اقتصادي ومناسب مقارنة بـ Zapier'],
+      cons: ['يتطلب منحنى تعلم بسيط لفهم هيكلة المتغيرات والروابط'],
+      pricing: [
+        { plan_name: 'Free Core', price: '$0', period: 'شهرياً', features: ['1,000 عملية شهرياً', 'فترات تشغيل كل 15 دقيقة', 'سيناريوهات غير محدودة'], is_popular: false },
+        { plan_name: 'Core Plan', price: '$9', period: 'شهرياً', features: ['10,000 عملية شهرياً', 'فترات تشغيل كل 1 دقيقة', 'تنفيذ فوري وتخزين سجلات أطول'], is_popular: true }
+      ],
+      faqs: [
+        { question: 'هل يمكن أتمتة الرد على رسائل الواتساب بالذكاء الاصطناعي عبر Make؟', answer: 'نعم، يمكنك بناء روبوت ذكي بالكامل يستقبل رسائل الواتساب ويعالجها بنماذج GPT ويرد على العميل فورياً.' }
+      ]
+    },
+    {
+      name: 'يوليوس (Julius AI)',
+      slug: 'julius-ai',
+      tagline: 'محلل البيانات الذكي لتحويل ملفات Excel و SQL إلى رسوم بيانية تفاعلية ورؤى استراتيجية',
+      description: 'أفضل مساعد ذكاء اصطناعي لمعالجة البيانات والإحصاء. يكفي رفع ملف Excel أو CSV أو ربط قاعدة بياناتك، ليقوم Julius بكتابة شيفرات Python، تنظيف البيانات، وتوليد مخططات احترافية ورؤى استثمارية عميقة بأسئلة بسيطة.',
+      website_url: 'https://julius.ai',
+      logo_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=160&auto=format&fit=crop&q=80',
+      pricing_type: 'Freemium',
+      rating: 4.92,
+      review_count: 2780,
+      arabic_support: 'ممتاز',
+      release_year: 2024,
+      developer_org: 'Julius AI Labs',
+      is_featured: true,
+      is_trending: true,
+      is_editor_choice: false,
+      categories: ['productivity-business'],
+      features: [
+        { title: 'تحليل فوري لجداول البيانات المعقدة', description: 'استخراج الأنماط، المقارنات، والانحرافات الإحصائية دون كتابة معادلات معقدة.' },
+        { title: 'إنشاء رسوم بيانية ومخططات تنفيذية', description: 'توليد مخططات جاهزة للعروض التقديمية مع تصدير عالي الدقة.' },
+        { title: 'تنفيذ كود Python في بيئة معزولة', description: 'تشغيل نماذج الانحدار الخطي والتعلم الآلي على بياناتك بلغة بايثون مباشرة.' }
+      ],
+      pros: ['فهم عميق للجداول والبيانات المالية والمبيعات', 'دعم ممتاز للبيانات والأسئلة باللغة العربية', 'تصدير التقارير بصيغ PDF و Excel ورسوم بيانية تفاعلية'],
+      cons: ['الخطة المجانية تقتصر على 15 رسالة تحليلية شهرياً'],
+      pricing: [
+        { plan_name: 'Free Trial', price: '$0', period: 'شهرياً', features: ['15 رسالة شهرياً', 'رفع ملفات CSV و Excel', 'رسوم بيانية قياسية'], is_popular: false },
+        { plan_name: 'Pro Analyst', price: '$20', period: 'شهرياً', features: ['250 رسالة شهرياً', 'تحليل ملفات ضخمة بلا حدود', 'دعم النمذجة الإحصائية المتقدمة'], is_popular: true }
+      ],
+      faqs: [
+        { question: 'هل يدعم Julius قراءة الجداول العربية في ملفات الإكسل؟', answer: 'نعم، يتعامل مع الأعمدة والبيانات المكتوبة باللغة العربية والأرقام بمختلف تنسيقاتها بسلاسة تامة.' }
+      ]
     }
   ];
 
