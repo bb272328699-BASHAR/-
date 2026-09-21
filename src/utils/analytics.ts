@@ -1,100 +1,121 @@
 /**
- * Google Analytics 4 (GA4) Integration Utilities
+ * Daleel AI Real-time Analytics & Click/View Tracker Client Utility
+ * Tracks genuine page views, outbound tool visits, search events, and user engagement
  */
 
-declare global {
-  interface Window {
-    dataLayer: any[];
-    gtag?: (...args: any[]) => void;
+import { recordFirestoreToolClick } from '../lib/firestoreService.ts';
+
+// Generate or retrieve persistent anonymous visitor session ID
+export function getVisitorSessionId(): string {
+  if (typeof window === 'undefined') return 'server';
+  let sessionId = sessionStorage.getItem('daleel_visitor_session_id');
+  if (!sessionId) {
+    sessionId = 'sess_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
+    sessionStorage.setItem('daleel_visitor_session_id', sessionId);
   }
+  return sessionId;
 }
 
-export const GA_MEASUREMENT_ID = 
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GA_MEASUREMENT_ID) || 'G-T1X92GT5YK';
-
-/**
- * Safely send a Google Analytics command
- */
-export function sendGACommand(...args: any[]) {
-  if (typeof window !== 'undefined') {
-    if (typeof window.gtag === 'function') {
-      window.gtag(...args);
-    } else {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push(args);
-    }
-  }
-}
-
-/**
- * Tracks a page view in Google Analytics 4
- * @param path The relative path or URL of the page (e.g., /tools/chatgpt)
- * @param title The page title
- */
-export function trackPageView(path: string, title?: string) {
+// Track a real page view (deduplicated per session per path within 10 minutes)
+export async function trackPageView(pagePath: string, entityType?: string, entityId?: string, entitySlug?: string): Promise<void> {
   if (typeof window === 'undefined') return;
 
-  const pageTitle = title || document.title || 'دليل الذكاء الاصطناعي | Daleel AI';
-  const pageLocation = window.location.href;
+  const currentPath = pagePath || window.location.pathname;
+  const cacheKey = `pv_${currentPath}_${entitySlug || ''}`;
+  const lastTracked = sessionStorage.getItem(cacheKey);
+  const now = Date.now();
 
-  sendGACommand('event', 'page_view', {
-    page_path: path,
-    page_title: pageTitle,
-    page_location: pageLocation,
-    send_to: GA_MEASUREMENT_ID,
-  });
+  // Don't duplicate ping if tracked in the last 3 minutes in this browser session
+  if (lastTracked && now - parseInt(lastTracked, 10) < 3 * 60 * 1000) {
+    return;
+  }
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug(`[GA4 Analytics] 📊 Page View Tracked: ${path} ("${pageTitle}")`);
+  sessionStorage.setItem(cacheKey, now.toString());
+
+  try {
+    const payload = {
+      event_type: 'page_view',
+      page_path: currentPath,
+      entity_type: entityType || 'page',
+      entity_id: entityId || null,
+      entity_slug: entitySlug || null,
+      session_id: getVisitorSessionId(),
+      referrer: document.referrer || null,
+      device: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
+    };
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon('/api/analytics/track', blob);
+    } else {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch {
+    // Ignore silent network tracking errors
   }
 }
 
-/**
- * Tracks custom user interactions and events
- * @param eventName The standard or custom GA4 event name
- * @param params Event parameters
- */
-export function trackEvent(eventName: string, params: Record<string, any> = {}) {
-  sendGACommand('event', eventName, {
-    ...params,
-    send_to: GA_MEASUREMENT_ID,
-  });
+// Track Outbound Tool Clicks (Real Click-through rate & external referral with Firestore Persistence)
+export async function trackOutboundClick(
+  toolId: string, 
+  toolSlug: string, 
+  targetUrl: string, 
+  isAffiliate: boolean = false,
+  toolName?: string
+): Promise<void> {
+  if (typeof window === 'undefined') return;
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug(`[GA4 Analytics] ⚡ Event: ${eventName}`, params);
+  // 1. Log directly to Firestore for live contextual auditing and admin dash
+  recordFirestoreToolClick({
+    toolId,
+    toolSlug,
+    toolName: toolName || toolSlug,
+    targetUrl,
+    isAffiliate
+  }).catch(() => {});
+
+  // 2. Also log to SQL/server backend analytics stream
+  try {
+    const payload = {
+      event_type: 'outbound_click',
+      entity_type: 'tool',
+      entity_id: toolId,
+      entity_slug: toolSlug,
+      target_url: targetUrl,
+      is_affiliate: isAffiliate,
+      session_id: getVisitorSessionId(),
+      device: window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop',
+    };
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      navigator.sendBeacon('/api/analytics/track', blob);
+    } else {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch {
+    // Ignore silent network errors
   }
 }
 
-/**
- * Specialized Tracker: Tool Profile Visits
- */
-export function trackToolView(toolSlug: string, toolName: string, category?: string) {
-  trackEvent('view_item', {
-    item_id: toolSlug,
-    item_name: toolName,
-    item_category: category || 'AI Tool',
-    content_type: 'tool',
-  });
-}
-
-/**
- * Specialized Tracker: Outbound Affiliate / Website Link Clicks
- */
-export function trackOutboundToolClick(toolSlug: string, toolName: string, outboundUrl: string) {
-  trackEvent('outbound_click', {
-    item_id: toolSlug,
-    item_name: toolName,
-    link_url: outboundUrl,
-  });
-}
-
-/**
- * Specialized Tracker: Site Search Queries
- */
-export function trackSearchQuery(searchTerm: string, resultCount?: number) {
-  if (!searchTerm || searchTerm.trim().length === 0) return;
-  trackEvent('search', {
-    search_term: searchTerm.trim(),
-    results_count: resultCount,
-  });
+// Format numbers nicely (e.g. 1500 -> 1.5k, 25000 -> 25k) in Arabic / English
+export function formatMetricCount(num: number | undefined | null): string {
+  const n = Number(num || 0);
+  if (n >= 1000000) {
+    return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (n >= 1000) {
+    return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return n.toLocaleString('ar-EG');
 }

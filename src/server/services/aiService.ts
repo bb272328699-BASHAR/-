@@ -54,7 +54,274 @@ export interface MapsGroundingResponse {
   locations?: MapsGroundingLocation[];
 }
 
+export interface SemanticMatchItem {
+  toolSlug: string;
+  toolName: string;
+  confidence: number;
+  semanticReason: string;
+  matchedTags?: string[];
+  keyUseCases?: string[];
+}
+
+export interface SemanticSearchResult {
+  query: string;
+  interpretedIntent: string;
+  correctedKeywords: string[];
+  matchedTools: any[];
+  matchedCategories: any[];
+  matchedArticles: any[];
+  suggestedQueries: string[];
+  isAiPowered: boolean;
+}
+
 export const AiService = {
+  /**
+   * Semantic Search Engine powered by Gemini 3.8 Flash.
+   * Understands ambiguous natural language, Arabic synonyms, typos, and use-case descriptions.
+   */
+  async semanticSearch(userQuery: string): Promise<SemanticSearchResult> {
+    const cleanQuery = (userQuery || '').trim();
+    if (!cleanQuery) {
+      return {
+        query: '',
+        interpretedIntent: '',
+        correctedKeywords: [],
+        matchedTools: [],
+        matchedCategories: [],
+        matchedArticles: [],
+        suggestedQueries: [],
+        isAiPowered: false,
+      };
+    }
+
+    // 1. Fetch available tools, categories, and articles catalog from database
+    let allTools: any[] = [];
+    let allCategories: any[] = [];
+    let allArticles: any[] = [];
+
+    try {
+      const [toolsDb, catsDb, artsDb] = await Promise.all([
+        query(`
+          SELECT id, name, slug, tagline, description, pricing_type, arabic_support, 
+                 rating, review_count, logo_url, is_verified, is_featured, is_trending,
+                 website_url, affiliate_url
+          FROM tools 
+          WHERE status = 'published'
+          ORDER BY rating DESC
+          LIMIT 80
+        `),
+        query(`SELECT id, name, slug, description FROM categories ORDER BY tool_count DESC`),
+        query(`SELECT id, title, slug, excerpt, read_time FROM articles ORDER BY published_at DESC LIMIT 20`)
+      ]);
+      allTools = toolsDb.rows;
+      allCategories = catsDb.rows;
+      allArticles = artsDb.rows;
+    } catch (e) {
+      console.warn('DB query error during semantic search catalog fetch:', e);
+    }
+
+    const toolsContext = allTools
+      .map(t => `ID: ${t.slug} | Name: ${t.name} | Pricing: ${t.pricing_type} | Arabic: ${t.arabic_support || 'نعم'} | Tagline: ${t.tagline} | Desc: ${t.description?.slice(0, 100) || ''}`)
+      .join('\n');
+
+    const categoriesContext = allCategories
+      .map(c => `Category: ${c.name} (slug: ${c.slug})`)
+      .join(' | ');
+
+    const ai = getAiClient();
+    if (ai) {
+      try {
+        const systemInstruction = `
+أنت "محرك البحث الدلالي الذكي باللغة العربية لدليل الذكاء الاصطناعي (Daleel AI Semantic Search Engine)".
+مهمتك: تحليل استعلام المستخدم مهما كان غير دقيق، أو يحوي أخطاء إملائية، أو كُتب بلهجة عامية، أو كان وصفاً لاحتياج (مثال: "أبي أداة تسوي لي فيديو بدون ما أظهر"، "برنامج يرتب لي الأكواد"، "محرر صور مجاني ذكي").
+
+قائمة الأدوات المتاحة في قاعدة البيانات:
+${toolsContext}
+
+قائمة التصنيفات:
+${categoriesContext}
+
+المطلوب:
+1. فهم نية المستخدم الدلالية (Interpreted Intent) وصياغتها في جملة عربية واضحة ومباشرة.
+2. تصحيح الكلمات وتوليد كلمات مفتاحية مرادفة دقيقة (Corrected Keywords).
+3. اختيار وترتيب الأدوات الأكثر مطابقة لنية المستخدم من القائمة أعلاه فقط، مع إعطاء:
+   - toolSlug: نفس الـ slug المذكور في القائمة أعلاه تماماً.
+   - confidence: نسبة الثقة والمطابقة من 70 إلى 99.
+   - semanticReason: شرح موجز جداً باللغة العربية (جملة واحدة) يوضح للمستخدم لماذا تم ترشيح هذه الأداة بناءً على ما يقصده.
+   - keyUseCases: من 1 إلى 2 حالة استخدام رئيسية.
+4. ترشيح التصنيفات ذات الصلة (categorySlugs).
+5. اقتراح من 2 إلى 3 عبارات بحث بديلة وذكية قد تفيد المستخدم.
+
+أرجع النتيجة بتنسيق JSON حصراً:
+{
+  "interpretedIntent": "فهم الذكاء الاصطناعي لما يقصده المستخدم باللغة العربية الفصحى",
+  "correctedKeywords": ["كلمة 1", "كلمة 2"],
+  "matchedTools": [
+    {
+      "toolSlug": "slug-here",
+      "toolName": "اسم الأداة",
+      "confidence": 95,
+      "semanticReason": "سبب المطابقة الدلالية باختصار",
+      "keyUseCases": ["حالة استخدام 1"]
+    }
+  ],
+  "matchedCategorySlugs": ["slug-here"],
+  "suggestedQueries": ["استعلام مقترح 1", "استعلام مقترح 2"]
+}
+`;
+
+        const result = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: `استعلام البحث الصوتي أو النصي للمستخدم: "${cleanQuery}"`,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            temperature: 0.1,
+          },
+        });
+
+        const text = result.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          const aiToolsList: SemanticMatchItem[] = parsed.matchedTools || [];
+          
+          // Hydrate with full DB tool records
+          const hydratedTools: any[] = [];
+          const seenSlugs = new Set<string>();
+
+          for (const item of aiToolsList) {
+            const foundTool = allTools.find(t => t.slug === item.toolSlug || t.name.toLowerCase() === (item.toolName || '').toLowerCase());
+            if (foundTool && !seenSlugs.has(foundTool.slug)) {
+              seenSlugs.add(foundTool.slug);
+              hydratedTools.push({
+                ...foundTool,
+                semanticMatch: {
+                  confidence: item.confidence || 90,
+                  reason: item.semanticReason || 'مطابقة دلالية عالية لطلبك',
+                  useCases: item.keyUseCases || [],
+                  isAiMatched: true,
+                }
+              });
+            }
+          }
+
+          // If AI matched tools is small, append keyword fallbacks that aren't already included
+          if (hydratedTools.length < 5) {
+            const lower = cleanQuery.toLowerCase();
+            const keywordMatches = allTools.filter(t => 
+              !seenSlugs.has(t.slug) && (
+                t.name.toLowerCase().includes(lower) || 
+                t.tagline.toLowerCase().includes(lower) || 
+                (t.description && t.description.toLowerCase().includes(lower))
+              )
+            );
+            for (const kwTool of keywordMatches.slice(0, 5 - hydratedTools.length)) {
+              seenSlugs.add(kwTool.slug);
+              hydratedTools.push({
+                ...kwTool,
+                semanticMatch: {
+                  confidence: 78,
+                  reason: 'مطابقة نصية للكلمات المفتاحية',
+                  useCases: [],
+                  isAiMatched: false,
+                }
+              });
+            }
+          }
+
+          const matchedCategories = (parsed.matchedCategorySlugs || [])
+            .map((slug: string) => allCategories.find(c => c.slug === slug))
+            .filter(Boolean);
+
+          const matchedArticles = allArticles.filter(a => {
+            const lower = cleanQuery.toLowerCase();
+            return a.title.toLowerCase().includes(lower) || (a.excerpt && a.excerpt.toLowerCase().includes(lower));
+          }).slice(0, 3);
+
+          return {
+            query: cleanQuery,
+            interpretedIntent: parsed.interpretedIntent || `البحث الدلالي حول: "${cleanQuery}"`,
+            correctedKeywords: parsed.correctedKeywords || [cleanQuery],
+            matchedTools: hydratedTools,
+            matchedCategories: matchedCategories.length > 0 ? matchedCategories : allCategories.slice(0, 3),
+            matchedArticles,
+            suggestedQueries: parsed.suggestedQueries || [],
+            isAiPowered: true,
+          };
+        }
+      } catch (err) {
+        console.error('Gemini semantic search error, using intelligent fallback:', err);
+      }
+    }
+
+    // Heuristic Fallback with smart synonyms & token normalization
+    const norm = cleanQuery
+      .toLowerCase()
+      .replace(/[أإآٱ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/[ىي]/g, 'ي')
+      .replace(/[\u064B-\u065F]/g, '');
+
+    let detectedIntent = `البحث عن أدوات وخدمات الذكاء الاصطناعي المرتبطة بـ "${cleanQuery}"`;
+    let catHint = '';
+
+    if (norm.includes('صور') || norm.includes('رسم') || norm.includes('تصميم') || norm.includes('شعار') || norm.includes('image') || norm.includes('art') || norm.includes('design')) {
+      detectedIntent = 'أنت تبحث عن أدوات توليد الصور، التعديل البصري، وتصميم الشعارات والجرافيك.';
+      catHint = 'image-generation';
+    } else if (norm.includes('كود') || norm.includes('برمج') || norm.includes('تطبيق') || norm.includes('موقع') || norm.includes('code') || norm.includes('dev')) {
+      detectedIntent = 'أنت تبحث عن مساعدات برمجية ذكية لكتابة الأكواد وتصحيح الأخطاء وبناء التطبيقات.';
+      catHint = 'coding-development';
+    } else if (norm.includes('نص') || norm.includes('كتاب') || norm.includes('مقال') || norm.includes('محتو') || norm.includes('شات') || norm.includes('write')) {
+      detectedIntent = 'أنت تبحث عن نماذج لغوية ومساعدات كتابة المحتوى وصياغة المقالات.';
+      catHint = 'content-writing';
+    } else if (norm.includes('فيديو') || norm.includes('مونتاج') || norm.includes('video')) {
+      detectedIntent = 'أنت تبحث عن أدوات توليد ومونتاج الفيديو التوليدي والمؤثرات البصرية.';
+      catHint = 'video-generation';
+    } else if (norm.includes('صوت') || norm.includes('تفريغ') || norm.includes('دبلج') || norm.includes('audio') || norm.includes('voice')) {
+      detectedIntent = 'أنت تبحث عن حلول التعليق الصوتي وتوليد النبرات وتفريغ التسجيلات الصوتية.';
+      catHint = 'audio-voice';
+    }
+
+    const matchedTools = allTools.filter(t => {
+      const tNorm = (t.name + ' ' + t.tagline + ' ' + (t.description || ''))
+        .toLowerCase()
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/[ىي]/g, 'ي');
+      return tNorm.includes(norm);
+    }).map((t, idx) => ({
+      ...t,
+      semanticMatch: {
+        confidence: Math.max(75, 95 - idx * 4),
+        reason: 'مطابقة دلالية ذكية للاحتياج المطلوب',
+        useCases: [],
+        isAiMatched: true,
+      }
+    }));
+
+    return {
+      query: cleanQuery,
+      interpretedIntent: detectedIntent,
+      correctedKeywords: [cleanQuery],
+      matchedTools: matchedTools.length > 0 ? matchedTools : allTools.slice(0, 6).map(t => ({
+        ...t,
+        semanticMatch: {
+          confidence: 82,
+          reason: 'أداة رائدة ومقترحة لاحتياجاتك العامة',
+          useCases: [],
+          isAiMatched: false,
+        }
+      })),
+      matchedCategories: allCategories.filter(c => catHint ? c.slug.includes(catHint) : true).slice(0, 4),
+      matchedArticles: allArticles.slice(0, 3),
+      suggestedQueries: [
+        'أفضل أدوات الذكاء الاصطناعي المجانية',
+        'مقارنة بين ChatGPT و Claude 3.5',
+        'أدوات تدعم اللغة العربية بدقة عالية'
+      ],
+      isAiPowered: false,
+    };
+  },
   /**
    * Search Grounding: Live Google Search Data integration using Gemini 3.8 Flash.
    */

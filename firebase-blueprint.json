@@ -51,6 +51,108 @@
         "created_at": { "type": "string" }
       },
       "required": ["name", "email", "message"]
+    },
+    "ToolClick": {
+      "title": "ToolClick",
+      "description": "Contextual outbound click event for an external AI tool link",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "toolId": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "toolName": { "type": "string" },
+        "targetUrl": { "type": "string" },
+        "isAffiliate": { "type": "boolean" },
+        "device": { "type": "string", "enum": ["desktop", "mobile", "tablet", "other"] },
+        "browser": { "type": "string" },
+        "os": { "type": "string" },
+        "referrer": { "type": "string" },
+        "sessionId": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "date": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["toolSlug", "targetUrl", "device", "date"]
+    },
+    "PriceAlert": {
+      "title": "PriceAlert",
+      "description": "User subscription for tool discount or price drop alert",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "toolName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "targetPriceType": { "type": "string" },
+        "discountPreference": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["toolSlug", "email"]
+    },
+    "CustomStack": {
+      "title": "CustomStack",
+      "description": "User created custom AI tool workflow stack",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "targetRole": { "type": "string" },
+        "description": { "type": "string" },
+        "toolSlugs": { "type": "array", "items": { "type": "string" } },
+        "totalMonthlyCost": { "type": "number" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "targetRole", "toolSlugs"]
+    },
+    "ArabicQualityReview": {
+      "title": "ArabicQualityReview",
+      "description": "Deep evaluation of AI tool's Arabic language proficiency and RTL support",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "overallScore": { "type": "number" },
+        "rtlSupportScore": { "type": "number" },
+        "dialectSupportScore": { "type": "number" },
+        "grammarScore": { "type": "number" },
+        "testedUseCase": { "type": "string" },
+        "sampleOutput": { "type": "string" },
+        "verdict": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["toolSlug", "userName", "overallScore", "verdict"]
+    },
+    "ToolQuestion": {
+      "title": "ToolQuestion",
+      "description": "Community question regarding tool compatibility, pricing or setup",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "toolSlug": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "question": { "type": "string" },
+        "answersCount": { "type": "number" },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "userName": { "type": "string" },
+              "answer": { "type": "string" },
+              "isStaff": { "type": "boolean" },
+              "createdAt": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["toolSlug", "userName", "question"]
     }
   },
   "firestore": {
@@ -69,6 +171,26 @@
     "/contact_messages/{messageId}": {
       "schema": "ContactMessage",
       "description": "Submitted contact inquiries"
+    },
+    "/tool_clicks/{clickId}": {
+      "schema": "ToolClick",
+      "description": "Outbound tool click tracking events with contextual data"
+    },
+    "/price_alerts/{alertId}": {
+      "schema": "PriceAlert",
+      "description": "User subscriptions for discounts & deal notifications"
+    },
+    "/custom_stacks/{stackId}": {
+      "schema": "CustomStack",
+      "description": "User curated custom tool stacks and cost estimates"
+    },
+    "/arabic_reviews/{reviewId}": {
+      "schema": "ArabicQualityReview",
+      "description": "Arabic AI quality index reviews and tests"
+    },
+    "/tool_questions/{questionId}": {
+      "schema": "ToolQuestion",
+      "description": "Community questions and answers on tools"
     }
   }
 }

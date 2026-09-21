@@ -82,6 +82,8 @@ export async function initDatabase() {
       status VARCHAR(20) DEFAULT 'published', -- published, draft, archived
       who_is_it_for TEXT,
       view_count INT DEFAULT 0,
+      clicks_count INT DEFAULT 0,
+      shares_count INT DEFAULT 0,
       bookmark_count INT DEFAULT 0,
       meta_title VARCHAR(200),
       meta_description TEXT,
@@ -278,7 +280,35 @@ export async function initDatabase() {
       ip_address VARCHAR(50),
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
+
+    -- 15. Real-Time Analytics & Event Tracking
+    CREATE TABLE IF NOT EXISTS analytics_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      event_type VARCHAR(50) NOT NULL,
+      entity_type VARCHAR(50),
+      entity_id UUID,
+      entity_slug VARCHAR(200),
+      target_url TEXT,
+      session_id VARCHAR(100),
+      ip_address VARCHAR(50),
+      user_agent TEXT,
+      referrer TEXT,
+      device VARCHAR(20),
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_type ON analytics_events(event_type);
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_slug ON analytics_events(entity_slug);
+    CREATE INDEX IF NOT EXISTS idx_analytics_events_session ON analytics_events(session_id);
   `);
+
+  // Non-destructive migrations for existing database
+  await query(`
+    ALTER TABLE tools ADD COLUMN IF NOT EXISTS clicks_count INT DEFAULT 0;
+    ALTER TABLE tools ADD COLUMN IF NOT EXISTS shares_count INT DEFAULT 0;
+    ALTER TABLE tools ADD COLUMN IF NOT EXISTS view_count INT DEFAULT 0;
+  `).catch(() => {});
 
   console.log('PostgreSQL schema verification and creation completed.');
 

@@ -1,11 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, ArrowUpDown, Layers, Loader2, Sparkles, X, ChevronRight, ChevronLeft, SlidersHorizontal, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { 
+  Search, 
+  Filter, 
+  ArrowUpDown, 
+  Layers, 
+  Loader2, 
+  Sparkles, 
+  X, 
+  ChevronRight, 
+  ChevronLeft, 
+  SlidersHorizontal, 
+  RotateCcw,
+  Mic,
+  MicOff,
+  Bot,
+  Zap,
+  Tag
+} from 'lucide-react';
 import { Tool, Category } from '../types.ts';
 import { DEFAULT_TOOLS } from '../data/defaultCatalog.ts';
 import { ToolCard } from '../components/ToolCard.tsx';
 import { ToolsSidebarFilter, FilterState } from '../components/ToolsSidebarFilter.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
+import { useSpeechRecognition } from '../utils/speechRecognition.ts';
 
 interface ToolsPageProps {
   categories: Category[];
@@ -18,6 +36,9 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
   const [tools, setTools] = useState<Tool[]>(DEFAULT_TOOLS);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [isSemanticMode, setIsSemanticMode] = useState(false);
+  const [semanticIntent, setSemanticIntent] = useState('');
+  const [semanticSuggestions, setSemanticSuggestions] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory || 'all');
   const [selectedPricing, setSelectedPricing] = useState('all');
   const [selectedFilter, setSelectedFilter] = useState(initialFilter || 'all'); // trending, popular, new
@@ -47,7 +68,70 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  // Voice Search setup
+  const handleVoiceResult = useCallback((recognizedText: string) => {
+    if (recognizedText.trim()) {
+      setSearch(recognizedText.trim());
+    }
+  }, []);
+
+  const handleVoiceEnd = useCallback((finalText: string) => {
+    if (finalText.trim()) {
+      setSearch(finalText.trim());
+      setCurrentPage(1);
+      // Automatically activate semantic mode for natural voice queries
+      setIsSemanticMode(true);
+      fetchSemanticTools(finalText.trim());
+    }
+  }, []);
+
+  const {
+    isListening,
+    transcript,
+    error: voiceError,
+    startListening,
+    stopListening
+  } = useSpeechRecognition({
+    lang: 'ar-SA',
+    onResult: handleVoiceResult,
+    onEnd: handleVoiceEnd
+  });
+
+  const fetchSemanticTools = async (queryText: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/search/semantic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queryText.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data?.matchedTools) && data.matchedTools.length > 0) {
+          setTools(data.matchedTools);
+          setTotalPages(1);
+          setTotalCount(data.matchedTools.length);
+          setSemanticIntent(data.interpretedIntent || '');
+          setSemanticSuggestions(data.suggestedQueries || []);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('Semantic search error on tools page:', e);
+    }
+    // Fallback to standard fetch
+    fetchTools();
+  };
+
   const fetchTools = async () => {
+    if (isSemanticMode && search.trim()) {
+      fetchSemanticTools(search.trim());
+      return;
+    }
+
+    setSemanticIntent('');
+    setSemanticSuggestions([]);
     setLoading(true);
     try {
       const queryParams = new URLSearchParams({
@@ -342,26 +426,90 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
         {/* Search Input Row */}
         <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 flex items-center gap-1.5">
+              {isSemanticMode ? (
+                <Sparkles className="w-5 h-5 text-indigo-600" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
+            </div>
+            
             <input
               type="text"
-              placeholder="ابحث بالاسم أو التخصص أو الميزات المفتاحية..."
+              placeholder={
+                isSemanticMode 
+                  ? "تحدث أو اكتب ما تبحث عنه بالمعنى (مثال: أداة مجانية لتوليد الصور والتعديل عليها)..." 
+                  : "ابحث بالاسم أو التخصص أو الميزات المفتاحية..."
+              }
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pr-11 pl-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:border-indigo-500 outline-none text-slate-800"
+              className={`w-full pr-11 pl-20 py-2.5 rounded-xl border text-sm outline-none text-slate-800 transition-all ${
+                isSemanticMode 
+                  ? 'border-indigo-300 focus:border-indigo-600 ring-2 ring-indigo-500/10 bg-indigo-50/20' 
+                  : 'border-slate-200 focus:border-indigo-500 bg-white'
+              }`}
             />
-            {search && (
+
+            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => { setSearch(''); setSemanticIntent(''); fetchTools(); }}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-md"
+                  title="مسح النص"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Voice Search Button */}
               <button
                 type="button"
-                onClick={() => { setSearch(''); fetchTools(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                onClick={() => {
+                  if (isListening) {
+                    stopListening();
+                  } else {
+                    startListening({ lang: 'ar-SA' });
+                  }
+                }}
+                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                  isListening 
+                    ? 'bg-rose-500 text-white shadow-md animate-pulse ring-2 ring-rose-200' 
+                    : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
+                }`}
+                title={isListening ? 'إيقاف الاستماع' : 'البحث الصوتي الذكي'}
               >
-                <X className="w-4 h-4" />
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
-            )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Semantic Mode Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                const nextMode = !isSemanticMode;
+                setIsSemanticMode(nextMode);
+                if (search.trim()) {
+                  if (nextMode) {
+                    fetchSemanticTools(search.trim());
+                  } else {
+                    fetchTools();
+                  }
+                }
+              }}
+              className={`flex items-center gap-1.5 font-bold px-3.5 py-2.5 rounded-xl text-xs transition-all cursor-pointer shrink-0 border ${
+                isSemanticMode 
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                  : 'bg-indigo-50 text-indigo-700 border-indigo-200/80 hover:bg-indigo-100'
+              }`}
+              title="تفعيل محرك البحث الدلالي بالذكاء الاصطناعي"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>بحث دلالي (AI)</span>
+            </button>
+
             <button
               type="submit"
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm cursor-pointer shrink-0"
@@ -380,6 +528,61 @@ export const ToolsPage: React.FC<ToolsPageProps> = ({ categories, initialCategor
             </button>
           </div>
         </form>
+
+        {/* Listening Status Banner */}
+        {isListening && (
+          <div className="px-4 py-2.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between text-xs text-rose-800 animate-pulse">
+            <div className="flex items-center gap-2">
+              <Mic className="w-4 h-4 text-rose-600" />
+              <span>نحن نستمع إليك الآن... تحدث باسم الأداة أو طبيعة الوظيفة المطلوبة</span>
+            </div>
+            <button
+              onClick={stopListening}
+              className="font-bold text-rose-700 hover:underline cursor-pointer"
+            >
+              إنهاء وتطبيق البحث
+            </button>
+          </div>
+        )}
+
+        {/* Semantic Comprehension Result Box */}
+        {semanticIntent && (
+          <div className="p-3.5 bg-gradient-to-r from-indigo-50/90 to-blue-50/90 border border-indigo-200/70 rounded-2xl flex items-start gap-3">
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-indigo-950">فهم الذكاء الاصطناعي لطلبك:</span>
+                <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.2 rounded-full font-bold">
+                  Gemini Semantic Engine
+                </span>
+              </div>
+              <p className="text-xs text-indigo-900 mt-0.5 leading-relaxed font-medium">
+                {semanticIntent}
+              </p>
+
+              {semanticSuggestions.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap mt-2 pt-2 border-t border-indigo-200/60">
+                  <span className="text-[10px] font-bold text-indigo-800">اقتراحات ذات صلة:</span>
+                  {semanticSuggestions.map((sug, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSearch(sug);
+                        fetchSemanticTools(sug);
+                      }}
+                      className="text-[11px] bg-white text-indigo-700 hover:bg-indigo-600 hover:text-white px-2 py-0.5 rounded-md border border-indigo-200 font-medium transition-colors cursor-pointer"
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Quick Filter Tags & Reset */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">

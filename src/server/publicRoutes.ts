@@ -9,6 +9,7 @@ import { query } from './db.ts';
 import { generateToken, authMiddleware, AuthRequest } from './middleware/auth.ts';
 import { generateSitemapXml, getSitemapEntries } from './services/sitemapService.ts';
 import { serverCache } from './services/cacheService.ts';
+import { AnalyticsService } from './services/analyticsService.ts';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'daleel-ai-super-secret-jwt-key-2026';
 
@@ -241,6 +242,42 @@ publicRouter.get('/search/suggestions', async (req: Request, res: Response) => {
     res.json(suggestions);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Semantic Smart Search (Powered by Gemini AI)
+publicRouter.get('/search/semantic', async (req: Request, res: Response) => {
+  try {
+    const q = (req.query.q as string) || '';
+    if (!q || !q.trim()) {
+      return res.json({
+        query: '',
+        interpretedIntent: '',
+        correctedKeywords: [],
+        matchedTools: [],
+        matchedCategories: [],
+        matchedArticles: [],
+        suggestedQueries: [],
+        isAiPowered: false,
+      });
+    }
+    const result = await AiService.semanticSearch(q.trim());
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'خطأ في البحث الدلالي' });
+  }
+});
+
+publicRouter.post('/search/semantic', async (req: Request, res: Response) => {
+  try {
+    const { query: searchQuery } = req.body;
+    if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) {
+      return res.status(400).json({ error: 'الرجاء إدخال نص البحث الدلالي' });
+    }
+    const result = await AiService.semanticSearch(searchQuery.trim());
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'خطأ في البحث الدلالي' });
   }
 });
 
@@ -1119,3 +1156,98 @@ publicRouter.get('/alternatives-directory', async (req: Request, res: Response) 
     res.status(500).json({ error: err.message });
   }
 });
+
+// Real-Time Analytics Event Ingestion (Beacon & Fetch compatible)
+publicRouter.post('/analytics/track', async (req: Request, res: Response) => {
+  try {
+    const {
+      event_type,
+      entity_type,
+      entity_id,
+      entity_slug,
+      target_url,
+      session_id,
+      referrer,
+      device,
+    } = req.body || {};
+
+    if (!event_type) {
+      return res.status(400).json({ error: 'event_type is required' });
+    }
+
+    const ip_address = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || req.ip;
+    const user_agent = req.headers['user-agent'] || '';
+
+    await AnalyticsService.recordEvent({
+      event_type,
+      entity_type,
+      entity_id,
+      entity_slug,
+      target_url,
+      session_id,
+      ip_address,
+      user_agent,
+      referrer: referrer || (req.headers['referer'] as string),
+      device,
+    });
+
+    res.status(200).json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get Public Live Overview Stats (Visitors, Tools, Outbound clicks)
+publicRouter.get('/analytics/overview', async (req: Request, res: Response) => {
+  try {
+    const overview = await AnalyticsService.getSiteOverviewStats();
+    res.json(overview);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Increment/Get Tool Stats Endpoint
+publicRouter.post('/tools/:slug/click', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const { target_url, session_id } = req.body || {};
+    const ip_address = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || req.ip;
+
+    await AnalyticsService.recordEvent({
+      event_type: 'outbound_click',
+      entity_type: 'tool',
+      entity_slug: slug,
+      target_url,
+      session_id,
+      ip_address,
+    });
+
+    const updatedStats = await AnalyticsService.getToolLiveStats(slug);
+    res.json({ success: true, stats: updatedStats });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+publicRouter.post('/tools/:slug/view', async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const { session_id } = req.body || {};
+    const ip_address = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || req.ip;
+
+    await AnalyticsService.recordEvent({
+      event_type: 'page_view',
+      entity_type: 'tool',
+      entity_slug: slug,
+      session_id,
+      ip_address,
+    });
+
+    const updatedStats = await AnalyticsService.getToolLiveStats(slug);
+    res.json({ success: true, stats: updatedStats });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+

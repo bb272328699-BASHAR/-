@@ -9,6 +9,7 @@ import { OptimizedImage } from '../components/OptimizedImage.tsx';
 import { RelatedArticlesSection } from '../components/RelatedArticlesSection.tsx';
 import { RelatedToolsSection } from '../components/RelatedToolsSection.tsx';
 import { AdSlot } from '../components/AdSlot.tsx';
+import { trackPageView } from '../utils/analytics.ts';
 
 interface ArticlesPageProps {
   navigate: (path: string) => void;
@@ -37,6 +38,7 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({ navigate, articleSlu
             setSingleArticle(data);
             const seoConfig = generateArticleSEO(data, origin);
             updateDocumentSEO(seoConfig);
+            trackPageView(`/articles/${data.slug || articleSlug}`, 'article', data.id, data.slug || articleSlug);
           } else if (fallbackArticle) {
             setSingleArticle(fallbackArticle);
             const seoConfig = generateArticleSEO(fallbackArticle, origin);

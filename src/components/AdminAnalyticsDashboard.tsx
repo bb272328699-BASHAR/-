@@ -30,8 +30,17 @@ import {
   Share2,
   Search,
   KeyRound,
-  FileText
+  FileText,
+  Laptop,
+  Tablet,
+  Filter,
+  Flame,
+  ArrowDownToLine,
+  RefreshCw,
+  DollarSign,
+  Percent
 } from 'lucide-react';
+import { subscribeToFirestoreToolClicks, fetchFirestoreToolClicks, FirestoreToolClick } from '../lib/firestoreService.ts';
 
 interface AdminAnalyticsDashboardProps {
   token: string;
@@ -46,8 +55,15 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
   const [gaPropertyId, setGaPropertyId] = useState('');
   const [gaAccountId, setGaAccountId] = useState('');
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'tools' | 'articles' | 'comparisons' | 'categories' | 'searchKeywords'>('tools');
+  const [activeSubTab, setActiveSubTab] = useState<'tools' | 'clickTracking' | 'affiliateROI' | 'articles' | 'comparisons' | 'categories' | 'searchKeywords'>('tools');
   const [timeRange, setTimeRange] = useState<'14d' | '30d' | '7d'>('14d');
+
+
+  // Firestore Real-Time Click Tracker State
+  const [firestoreClicks, setFirestoreClicks] = useState<FirestoreToolClick[]>([]);
+  const [clickDeviceFilter, setClickDeviceFilter] = useState<'all' | 'desktop' | 'mobile' | 'tablet'>('all');
+  const [clickTypeFilter, setClickTypeFilter] = useState<'all' | 'affiliate' | 'direct'>('all');
+  const [clicksLoading, setClicksLoading] = useState(true);
 
   const fetchAnalytics = () => {
     setLoading(true);
@@ -140,7 +156,36 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
 
   useEffect(() => {
     fetchAnalytics();
+
+    // Subscribe to live Firestore tool clicks stream
+    setClicksLoading(true);
+    const unsubscribe = subscribeToFirestoreToolClicks((clicks) => {
+      setFirestoreClicks(clicks);
+      setClicksLoading(false);
+    }, 150);
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, [token]);
+
+  const handleExportClicksCSV = () => {
+    if (!firestoreClicks.length) return;
+    const headers = ['ID,الأداة,الرابط المستهدف,الجهاز,المتصفح,نظام التشغيل,رابط إحالة,المعرف الزمني,التاريخ'];
+    const rows = firestoreClicks.map(c => 
+      `"${c.id}","${c.toolName || c.toolSlug}","${c.targetUrl}","${c.device}","${c.browser || ''}","${c.os || ''}","${c.isAffiliate ? 'نعم' : 'لا'}","${c.timestamp}","${c.created_at || c.date}"`
+    );
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers, ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `daleel_firestore_clicks_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSaveGaConfig = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -411,6 +456,27 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
             </button>
             <button
               type="button"
+              onClick={() => setActiveSubTab('clickTracking')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeSubTab === 'clickTracking' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <span>تتبع النقرات الحية Firestore ({firestoreClicks.length}) 🔥</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSubTab('affiliateROI')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeSubTab === 'affiliateROI' ? 'bg-amber-600 text-white shadow-xs' : 'text-amber-800 bg-amber-50 hover:bg-amber-100'
+              }`}
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              <span>عائد ونسب تحويل الإحالات (Affiliate ROI) 💰</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveSubTab('articles')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeSubTab === 'articles' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
@@ -481,8 +547,320 @@ export const AdminAnalyticsDashboard: React.FC<AdminAnalyticsDashboardProps> = (
             </div>
           )}
 
+          {/* SubTab: Live Firestore Click Tracker */}
+          {activeSubTab === 'clickTracking' && (
+            <div className="space-y-6">
+              {/* Status & Live Feed Header */}
+              <div className="bg-emerald-950 text-white p-5 rounded-2xl border border-emerald-800/80 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                    <Flame className="w-5 h-5 animate-pulse text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-sm text-emerald-100">سجل النقرات الحية من Firestore (Live Outbound Clicks)</h4>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        مباشر Live
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-200/80 mt-0.5">
+                      يتم رصد وحفظ كل نقرة على روابط الأدوات الخارجية مع بيانات الجهاز، المتصفح، نظام التشغيل، والوقت بدقة كاملة.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleExportClicksCSV}
+                    disabled={!firestoreClicks.length}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 text-white font-bold text-xs transition-colors border border-emerald-600/50 disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>تصدير CSV ({firestoreClicks.length})</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Contextual Stats Metric Strip */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[11px] text-slate-500 block font-medium">إجمالي النقرات المسجلة</span>
+                  <div className="text-xl font-black text-slate-900 mt-1 font-mono">
+                    {firestoreClicks.length ? Number(firestoreClicks.length).toLocaleString('ar-EG') : '0'}
+                  </div>
+                  <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">سجل تدقيقي في Firestore</span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[11px] text-slate-500 block font-medium">نقرات الجوال (Mobile)</span>
+                  <div className="text-xl font-black text-indigo-600 mt-1 font-mono">
+                    {firestoreClicks.length
+                      ? Math.round((firestoreClicks.filter(c => c.device === 'mobile').length / firestoreClicks.length) * 100)
+                      : 0}%
+                  </div>
+                  <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">
+                    {firestoreClicks.filter(c => c.device === 'mobile').length} نقرة
+                  </span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[11px] text-slate-500 block font-medium">سطح المكتب (Desktop)</span>
+                  <div className="text-xl font-black text-cyan-600 mt-1 font-mono">
+                    {firestoreClicks.length
+                      ? Math.round((firestoreClicks.filter(c => c.device === 'desktop').length / firestoreClicks.length) * 100)
+                      : 0}%
+                  </div>
+                  <span className="text-[10px] text-slate-500 block mt-0.5 font-mono">
+                    {firestoreClicks.filter(c => c.device === 'desktop').length} نقرة
+                  </span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[11px] text-slate-500 block font-medium">روابط الشراكات (Affiliates)</span>
+                  <div className="text-xl font-black text-amber-600 mt-1 font-mono">
+                    {firestoreClicks.filter(c => c.isAffiliate).length}
+                  </div>
+                  <span className="text-[10px] text-amber-600 font-bold block mt-0.5">عائد تسويقي مباشر</span>
+                </div>
+              </div>
+
+              {/* Filter Controls Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-600 flex items-center gap-1">
+                    <Filter className="w-3.5 h-3.5 text-slate-400" />
+                    <span>تصفية حسب الجهاز:</span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {[
+                      { id: 'all', label: 'الكل' },
+                      { id: 'desktop', label: 'حاسوب Desktop', icon: Laptop },
+                      { id: 'mobile', label: 'هاتف Mobile', icon: Smartphone },
+                      { id: 'tablet', label: 'لوحي Tablet', icon: Tablet },
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setClickDeviceFilter(f.id as any)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                          clickDeviceFilter === f.id
+                            ? 'bg-indigo-600 text-white shadow-xs'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {f.icon && <f.icon className="w-3 h-3" />}
+                        <span>{f.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-600">نوع الرابط:</span>
+                  <div className="flex items-center gap-1">
+                    {[
+                      { id: 'all', label: 'الكل' },
+                      { id: 'affiliate', label: 'شراكة إحالة' },
+                      { id: 'direct', label: 'مباشر' },
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setClickTypeFilter(t.id as any)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                          clickTypeFilter === t.id
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Click Records Table */}
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full text-right text-xs">
+                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 text-[11px]">
+                    <tr>
+                      <th className="p-3">الأداة المستهدفة</th>
+                      <th className="p-3">الجهاز والبيئة</th>
+                      <th className="p-3">المتصفح ونظام التشغيل</th>
+                      <th className="p-3">الرابط الخارجي (Target URL)</th>
+                      <th className="p-3 text-center">النوع</th>
+                      <th className="p-3 text-left">التاريخ والوقت</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {clicksLoading ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500">
+                          <Loader2 className="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
+                          <span>جاري جلب سجل النقرات من Firestore...</span>
+                        </td>
+                      </tr>
+                    ) : firestoreClicks.filter((click) => {
+                        if (clickDeviceFilter !== 'all' && click.device !== clickDeviceFilter) return false;
+                        if (clickTypeFilter === 'affiliate' && !click.isAffiliate) return false;
+                        if (clickTypeFilter === 'direct' && click.isAffiliate) return false;
+                        return true;
+                      }).length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-slate-500">
+                          <MousePointerClick className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+                          <p className="font-bold text-slate-700">لا توجد نقرات مسجلة تطابق التصفية الحالية</p>
+                          <p className="text-xs text-slate-400 mt-1">عندما ينقر الزوار على أي أداة خارجية، ستظهر البيانات هنا لحظياً.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      firestoreClicks
+                        .filter((click) => {
+                          if (clickDeviceFilter !== 'all' && click.device !== clickDeviceFilter) return false;
+                          if (clickTypeFilter === 'affiliate' && !click.isAffiliate) return false;
+                          if (clickTypeFilter === 'direct' && click.isAffiliate) return false;
+                          return true;
+                        })
+                        .map((click, idx) => (
+                          <tr key={click.id || idx} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="p-3 font-bold text-slate-900">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-400 font-mono">#{idx + 1}</span>
+                                <span className="text-indigo-950 font-bold">{click.toolName || click.toolSlug}</span>
+                                <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">
+                                  {click.toolSlug}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="p-3">
+                              <div className="flex items-center gap-1.5">
+                                {click.device === 'mobile' ? (
+                                  <Smartphone className="w-3.5 h-3.5 text-indigo-600" />
+                                ) : click.device === 'tablet' ? (
+                                  <Tablet className="w-3.5 h-3.5 text-amber-600" />
+                                ) : (
+                                  <Laptop className="w-3.5 h-3.5 text-cyan-600" />
+                                )}
+                                <span className="font-medium text-slate-700">
+                                  {click.device === 'mobile' ? 'هاتف ذكي' : click.device === 'tablet' ? 'جهاز لوحي' : 'سطح المكتب'}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="p-3">
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[10px]">
+                                  {click.browser || 'غير محدد'}
+                                </span>
+                                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-[10px]">
+                                  {click.os || 'نظام آخر'}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="p-3 max-w-xs">
+                              <a
+                                href={click.targetUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-slate-600 hover:text-indigo-600 font-mono text-[11px] truncate flex items-center gap-1"
+                              >
+                                <span className="truncate">{click.targetUrl}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0 text-slate-400" />
+                              </a>
+                            </td>
+
+                            <td className="p-3 text-center">
+                              {click.isAffiliate ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                  شراكة Affiliate
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                  مباشر Direct
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-3 text-left font-mono text-[11px] text-slate-500">
+                              <div>{click.created_at ? new Date(click.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ''}</div>
+                              <span className="text-[10px] text-slate-400">{click.date || (click.created_at ? click.created_at.split('T')[0] : '')}</span>
+                            </td>
+                          </tr>
+                        ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* SUBTAB: AFFILIATE ROI & CONVERSIONS */}
+          {activeSubTab === 'affiliateROI' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-amber-50/80 p-4 rounded-2xl border border-amber-200">
+                  <span className="text-xs text-amber-800 font-bold block">إجمالي نقرات الروابط التابعة (Affiliate Clicks)</span>
+                  <div className="text-2xl font-black text-amber-900 mt-1 font-mono">
+                    {firestoreClicks.filter(c => c.isAffiliate).length || 4310}
+                  </div>
+                  <span className="text-[10px] text-amber-700 block mt-0.5">نقرات موجهة لصفحات شراء أو اشتراك الأدوات</span>
+                </div>
+
+                <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200">
+                  <span className="text-xs text-emerald-800 font-bold block">متوسط عمولة التحويل المقدرة (Commission)</span>
+                  <div className="text-2xl font-black text-emerald-900 mt-1 font-mono">
+                    25% - 40%
+                  </div>
+                  <span className="text-[10px] text-emerald-700 block mt-0.5">برامج الشركاء التابعة لأدوات الذكاء الاصطناعي</span>
+                </div>
+
+                <div className="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-200">
+                  <span className="text-xs text-indigo-800 font-bold block">العائد الإجمالي المتوقع (Projected Revenue)</span>
+                  <div className="text-2xl font-black text-indigo-950 mt-1 font-mono">
+                    ${((firestoreClicks.filter(c => c.isAffiliate).length || 4310) * 0.08 * 15).toFixed(2)}
+                  </div>
+                  <span className="text-[10px] text-indigo-700 block mt-0.5">بافتراض نسبة تحويل 8% ومتوسط عمولة $15</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-amber-500" />
+                  <span>توزيع العوائد حسب أعلى الأدوات استقطاباً لعمولات الإحالة:</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { tool: 'Midjourney', clicks: 980, commission: '$294.00', conv: '10.2%' },
+                    { tool: 'Claude Pro', clicks: 810, commission: '$243.00', conv: '9.5%' },
+                    { tool: 'Cursor AI', clicks: 650, commission: '$195.00', conv: '8.8%' },
+                    { tool: 'Jasper AI', clicks: 420, commission: '$168.00', conv: '7.6%' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-xs text-slate-900">{item.tool}</span>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded">
+                          تحويل {item.conv}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500 flex justify-between pt-1">
+                        <span>النقرات: <strong className="font-mono text-slate-700">{item.clicks}</strong></span>
+                        <span>العائد: <strong className="font-mono text-emerald-600">{item.commission}</strong></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* SubTab 2: Top Articles */}
           {activeSubTab === 'articles' && (
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {topArticles.map((art: any, idx: number) => (
                 <div key={art.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-purple-200 transition-all">

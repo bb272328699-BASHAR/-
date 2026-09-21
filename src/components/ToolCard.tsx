@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Star, CheckCircle, ExternalLink, ArrowLeft, Bookmark, Scale, Globe, ThumbsUp, ChevronUp } from 'lucide-react';
+import { Star, CheckCircle, ExternalLink, ArrowLeft, Bookmark, Scale, Globe, ThumbsUp, ChevronUp, Eye, MousePointerClick } from 'lucide-react';
 import { Tool } from '../types.ts';
 import { OptimizedImage } from './OptimizedImage.tsx';
 import { useCompare } from '../context/CompareContext.tsx';
 import { useToolBookmark } from '../utils/bookmarks.ts';
 import { hasUserUpvoted, toggleToolUpvote } from '../utils/upvotes.ts';
+import { formatMetricCount } from '../utils/analytics.ts';
 
 interface ToolCardProps {
   tool: Tool;
@@ -180,14 +181,31 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect, onCategoryCl
         </div>
       </div>
 
-      {/* Card Footer: Starting Price, Compare Button & CTA */}
+      {/* Card Footer: Starting Price, Clicks/Views Metric, Compare Button & CTA */}
       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
-        <div className="text-xs text-slate-500 font-medium">
+        <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
           {tool.starting_price ? (
             <span>يبدأ من <strong className="text-slate-800 font-bold">{tool.starting_price}</strong></span>
           ) : (
             <span className="text-emerald-600 font-bold">متاح للتجربة</span>
           )}
+
+          {/* Social Proof Analytics: Clicks & Views */}
+          {(Number(tool.clicks_count || 0) > 0 || Number(tool.view_count || 0) > 0) ? (
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200/60" title="عدد الزيارات والنقرات الحقيقية للأداة">
+              {Number(tool.clicks_count || 0) > 0 ? (
+                <span className="flex items-center gap-0.5 text-indigo-600 font-semibold">
+                  <MousePointerClick className="w-3 h-3" />
+                  <span>{formatMetricCount(tool.clicks_count)}</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-0.5 text-slate-500">
+                  <Eye className="w-3 h-3" />
+                  <span>{formatMetricCount(tool.view_count)}</span>
+                </span>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2">

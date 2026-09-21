@@ -45,6 +45,17 @@ import { syncClientCache } from './utils/cacheManager.ts';
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname || '/');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVoiceMode, setSearchVoiceMode] = useState(false);
+
+  const openSearch = () => {
+    setSearchVoiceMode(false);
+    setSearchOpen(true);
+  };
+
+  const openVoiceSearch = () => {
+    setSearchVoiceMode(true);
+    setSearchOpen(true);
+  };
 
   // Google Analytics 4 automatic page view tracking on route changes
   usePageTracking(currentPath);
@@ -286,7 +297,8 @@ export default function App() {
           latestTutorials={latestTutorials}
           latestArticles={latestArticles}
           navigate={navigate}
-          openSearch={() => setSearchOpen(true)}
+          openSearch={openSearch}
+          openVoiceSearch={openVoiceSearch}
         />
       );
     }
@@ -486,7 +498,8 @@ export default function App() {
       <Navbar
         currentPath={currentPath}
         navigate={navigate}
-        openSearch={() => setSearchOpen(true)}
+        openSearch={openSearch}
+        openVoiceSearch={openVoiceSearch}
         openAdmin={() => navigate(adminToken ? '/admin' : '/admin/login')}
         isAdminLoggedIn={!!adminToken}
       />
@@ -505,8 +518,12 @@ export default function App() {
       <ErrorBoundary isWidget widgetName="نافذة البحث">
         <SearchModal
           isOpen={searchOpen}
-          onClose={() => setSearchOpen(false)}
+          onClose={() => {
+            setSearchOpen(false);
+            setSearchVoiceMode(false);
+          }}
           navigate={navigate}
+          initialVoiceMode={searchVoiceMode}
         />
       </ErrorBoundary>
 

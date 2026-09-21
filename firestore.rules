@@ -52,6 +52,59 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // Smart Outbound Tool Click Tracking Events (Real-time Analytics)
+    match /tool_clicks/{clickId} {
+      allow read: if true;
+      allow create: if isValidId(clickId)
+        && request.resource.data.toolSlug is string
+        && request.resource.data.toolSlug.size() > 0
+        && request.resource.data.targetUrl is string
+        && request.resource.data.targetUrl.size() > 0
+        && request.resource.data.device is string;
+      allow update, delete: if false;
+    }
+
+    // Price Drop & Deal Alerts
+    match /price_alerts/{alertId} {
+      allow read: if true;
+      allow create: if isValidId(alertId)
+        && request.resource.data.toolSlug is string
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3;
+      allow update, delete: if false;
+    }
+
+    // Custom AI Stacks Builder
+    match /custom_stacks/{stackId} {
+      allow read: if true;
+      allow create: if isValidId(stackId)
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.toolSlugs is list;
+      allow update, delete: if true;
+    }
+
+    // Arabic AI Quality Index Reviews
+    match /arabic_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidId(reviewId)
+        && request.resource.data.toolSlug is string
+        && request.resource.data.overallScore >= 1
+        && request.resource.data.overallScore <= 10;
+      allow update, delete: if true;
+    }
+
+    // Community Tool Q&A
+    match /tool_questions/{questionId} {
+      allow read: if true;
+      allow create: if isValidId(questionId)
+        && request.resource.data.toolSlug is string
+        && request.resource.data.question is string
+        && request.resource.data.question.size() > 0;
+      allow update: if isValidId(questionId) && request.resource.data.question is string;
+      allow delete: if false;
+    }
+
     // Connection validation test probe
     match /test/{docId} {
       allow read: if true;

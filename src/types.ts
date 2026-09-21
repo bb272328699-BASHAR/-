@@ -15,6 +15,9 @@ export interface Tool {
   review_count: number;
   upvotes_count?: number;
   has_upvoted?: boolean;
+  view_count?: number;
+  clicks_count?: number;
+  shares_count?: number;
   is_verified: boolean;
   is_trending: boolean;
   is_popular: boolean;
@@ -193,3 +196,58 @@ export interface Resource {
   icon?: string;
   is_free: boolean;
 }
+
+export interface PriceAlert {
+  id: string;
+  toolSlug: string;
+  toolName: string;
+  email: string;
+  targetPriceType?: string;
+  discountPreference?: string;
+  createdAt: string;
+}
+
+export interface CustomStack {
+  id: string;
+  userId?: string;
+  title: string;
+  targetRole: string;
+  description?: string;
+  toolSlugs: string[];
+  totalMonthlyCost: number;
+  isPublic: boolean;
+  createdAt: string;
+}
+
+export interface ArabicQualityReview {
+  id: string;
+  toolSlug: string;
+  userId?: string;
+  userName: string;
+  overallScore: number; // 1-10
+  rtlSupportScore: number; // 1-10
+  dialectSupportScore: number; // 1-10
+  grammarScore: number; // 1-10
+  testedUseCase: string;
+  sampleOutput?: string;
+  verdict: string;
+  createdAt: string;
+}
+
+export interface ToolQuestion {
+  id: string;
+  toolSlug: string;
+  userId?: string;
+  userName: string;
+  question: string;
+  answersCount: number;
+  answers?: {
+    id: string;
+    userName: string;
+    answer: string;
+    isStaff: boolean;
+    createdAt: string;
+  }[];
+  createdAt: string;
+}
+
