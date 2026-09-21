@@ -97,7 +97,21 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
       setLoading(true);
       setError(null);
       const sanitizedSlug = sanitizeSlug(slug);
-      const fallback = DEFAULT_TOOLS.find(t => sanitizeSlug(t.slug) === sanitizedSlug || t.slug.toLowerCase() === slug.toLowerCase() || t.slug.toLowerCase() === sanitizedSlug);
+      
+      const isFlux = (s: string) => {
+        const norm = (s || '').toLowerCase();
+        return norm === 'flux' || norm === 'flux-1' || norm === 'flux-1-black-forest-labs' || norm === 'flux.1' || norm.includes('flux');
+      };
+
+      const fallback = DEFAULT_TOOLS.find(t => {
+        const tSanitized = sanitizeSlug(t.slug);
+        if (tSanitized === sanitizedSlug) return true;
+        if (t.slug.toLowerCase() === slug.toLowerCase()) return true;
+        if (t.slug.toLowerCase() === sanitizedSlug) return true;
+        if (isFlux(slug) && isFlux(t.slug)) return true;
+        if (sanitizedSlug.length > 3 && t.slug.toLowerCase().includes(sanitizedSlug)) return true;
+        return false;
+      });
       
       try {
         let res = await fetch(`/api/tools/${encodeURIComponent(sanitizedSlug)}`);

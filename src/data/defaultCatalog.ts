@@ -459,6 +459,161 @@ export const DEFAULT_TOOLS: Tool[] = [
     ],
   },
   {
+    id: 'tool-flux-1',
+    name: 'فلوكس (FLUX.1 by Black Forest Labs)',
+    slug: 'flux-1',
+    tagline: 'الجيل الجديد الأقوى في توليد الصور وتجسيد النصوص المكتوبة داخل الصور بدقة متناهية',
+    description: 'نموذج توليد الصور الثوري المفتوح والمغلق المصدر من Black Forest Labs، والذي يتميز بقدرة غير مسبوقة على كتابة النصوص والأرقام داخل الصور بدقة تامة وفهم مذهل لتفاصيل الأوامر والواقعية البصرية.',
+    overview: 'يُعتبر FLUX.1 ثورة في عالم التصميم المرئي، ويتضمن إصدارات سريعة جداً مثل Schnell وإصدارات للأبحاث والتجارة Pro & Dev.',
+    logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&auto=format&fit=crop&q=80',
+    website_url: 'https://blackforestlabs.ai',
+    pricing_type: 'Freemium',
+    starting_price: 'مجاناً / حسب الاستخدام',
+    rating: 4.88,
+    review_count: 245,
+    upvotes_count: 142,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Black Forest Labs',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-images', name: 'توليد وتعديل الصور', slug: 'image-generation', color: '#EC4899' },
+    ],
+    features: [
+      { title: 'كتابة النصوص داخل الصور بدقة', description: 'قدرة فريدة على إظهار الكلمات والجمل بدقة إملائية مذهلة' },
+      { title: 'واقعية بصرية فائقة', description: 'تفاصيل دقيقة للبشرة، الإضاءة، والملامح الطبيعية' },
+      { title: 'مرونة الأنماط (Dev & Schnell)', description: 'إصدارات مخصصة للسرعة الفائقة وإصدارات للأبحاث والدقة العالية' }
+    ],
+    pros: ['دقة لا تصدق في كتابة النصوص واللوحات', 'خيارات مفتوحة المصدر للاستخدام المحلي', 'جودة تفاصيل تضاهي بل تفوق النماذج التجارية الكبرى'],
+    cons: ['يحتاج موارد حاسوبية قوية عند التشغيل المحلي', 'الواجهات السحابية قد تفرض حدوداً للاستخدام المجاني'],
+    pricingPlans: [
+      { plan_name: 'إصدارات Schnell & Dev', price: 'مجاني', period: 'مفتوح المصدر', features: ['ترخيص للاستخدام الشخصي والبحثي', 'تحميل الأوزان للتشغيل محلياً', 'سرعة توليد فائقة'], is_popular: true },
+      { plan_name: 'إصدار Pro الاحترافي', price: 'حسب الاستخدام', period: 'سحابي', features: ['جودة فائقة للاستخدام التجاري', 'أولوية معالجة قصوى عبر API', 'دعم فني وتطوير مخصص'], is_popular: false }
+    ],
+    faqs: [
+      { question: 'هل يدعم FLUX.1 اللغة العربية؟', answer: 'نعم، يفهم الأوامر باللغة العربية ويولد النصوص والزخارف بشكل ممتاز.' },
+      { question: 'ما الفرق بين إصدارات FLUX؟', answer: 'تتضمن الإصدارات Schnell للسرعة الفائقة، وDev للتطوير والأبحاث، وPro للاستخدام التجاري الاحترافي.' }
+    ]
+  },
+  {
+    id: 'tool-sora',
+    name: 'سورا (Sora by OpenAI)',
+    slug: 'sora-openai',
+    tagline: 'نموذج توليد المشاهد السينمائية عالي الدقة يمتد حتى دقيقة كاملة مع حركة واقعية',
+    description: 'نموذج تحويل النص إلى فيديو الثوري من OpenAI القادر على إنشاء مشاهد معقدة تشتمل على شخصيات متعددة وأنواع حركة محددة وتفاصيل دقيقة للخلفية والموضوع.',
+    website_url: 'https://openai.com/sora',
+    logo_url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Paid',
+    starting_price: '20$ / شهر',
+    rating: 4.89,
+    review_count: 512,
+    upvotes_count: 110,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'جيد',
+    developer_org: 'OpenAI',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production', color: '#F59E0B' },
+    ],
+    features: [
+      { title: 'مشاهد طولية حتى 60 ثانية', description: 'توليد لقطات فيديو مستمرة بدون انقطاع مع ثبات الشخصيات والعناصر.' },
+      { title: 'حركة كاميرا سينمائية متقدمة', description: 'محاكاة كاملة لحركات الدوران والتقريب والإضاءة الواقعية.' }
+    ],
+    pros: ['واقعية بصرية وفيزيائية مذهلة', 'تكامل مميز مع منظومة OpenAI'],
+    cons: ['تتطلب اشتراك ChatGPT Plus أو Pro للحصول على نقاط توليد'],
+    pricingPlans: [
+      { plan_name: 'Plus / Pro Tier', price: '20$', period: 'شهرياً', features: ['توليد فيديو عالي الدقة', 'تصدير 1080p', 'حقوق تجارية'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم سورا دقة 4K؟', answer: 'نعم، يدعم خيارات تصدير عالية الدقة متوافقة مع الشاشات العريضة والهواتف.' }
+    ]
+  },
+  {
+    id: 'tool-heygen',
+    name: 'هي جين (HeyGen Avatar)',
+    slug: 'heygen',
+    tagline: 'توليد الفيديوهات التقديمية والشخصيات الرقمية المتحدثة بلغات متعددة وحركة شفاه مطابقة',
+    description: 'أفضل أداة لتحويل النصوص إلى فيديوهات احترافية بقيادة أفراتار (Avatar) رقمي ناطق يطابق حركة الشفاه والصوت بدقة متناهية مع دعم رائع للغة العربية.',
+    website_url: 'https://heygen.com',
+    logo_url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '29$ / شهر',
+    rating: 4.90,
+    review_count: 1840,
+    upvotes_count: 128,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'HeyGen Inc.',
+    release_year: 2023,
+    categories: [
+      { id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production', color: '#F59E0B' },
+    ],
+    features: [
+      { title: 'أفاتار مخصص وصوت شخصي', description: 'إنشاء نسخة رقمية منك بالكامل تتحدث بأي لغة اختيارية.' },
+      { title: 'ترجمة وتغيير لغة الفيديو تلقائياً', description: 'ترجمة الفيديو الأصلي مع تغيير نطق وصوت وتعبيرات الشفاه.' }
+    ],
+    pros: ['واقعية تامة في حركة الشفاه والوجه', 'توفير تكاليف التصوير والاستوديوهات والتمثيل'],
+    cons: ['الاشتراك المدفوع مرتفع السعر للمستقلين الصغار'],
+    pricingPlans: [
+      { plan_name: 'Free Trial', price: '0$', period: 'مرة واحدة', features: ['1 رصيد مجاني (1 دقيقة)', 'وصول لأكثر من 100 أفاتار'], is_popular: false },
+      { plan_name: 'Creator Plan', price: '29$', period: 'شهرياً', features: ['15 رصيد شهرياً', 'تصدير بجودة 4K', 'أفاتار مخصص فوري'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم HeyGen اللغة العربية بطلاقة؟', answer: 'نعم، يدعم اللغة العربية مع مطابقة دقيقة جداً لحركة الشفاه الصوتية.' }
+    ]
+  },
+  {
+    id: 'tool-canva-ai',
+    name: 'كانفا ذكاء اصطناعي (Canva Magic Studio)',
+    slug: 'canva-ai',
+    tagline: 'منظومة التصميم الشاملة المزودة بأدوات توليد وتعديل الصور وتوسيع الخلفيات وتحرير المستندات',
+    description: 'أجمل بيئة تصميم متكاملة للمبتدئين والمحترفين تضم أدوات Magic Media و Magic Expand و Magic Eraser لإنشاء وتعديل الصور والتصاميم بسهولة مطلق.',
+    website_url: 'https://canva.com',
+    logo_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '12.99$ / شهر',
+    rating: 4.92,
+    review_count: 8500,
+    upvotes_count: 230,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Canva Pty Ltd',
+    release_year: 2023,
+    categories: [
+      { id: 'cat-images', name: 'توليد وتعديل الصور', slug: 'image-generation', color: '#EC4899' },
+      { id: 'cat-marketing', name: 'التسويق وتحسين محركات البحث', slug: 'marketing-seo', color: '#14B8A6' }
+    ],
+    features: [
+      { title: 'Magic Eraser & Expand', description: 'حذف أي عنصر غير مرغوب من الصورة أو توسيع إطارها بتناسق فائق.' },
+      { title: 'توليد منشورات وقوالب فورية', description: 'إنشاء تصاميم كاملة لمواقع التواصل الاجتماعي بأوامر بسيطة.' }
+    ],
+    pros: ['واجهة عربية سهلة وبسيطة جداً', 'مكتبة صور وقوالب ضخمة جداً'],
+    cons: ['توليد الصور من الصفر أقل تفصيلاً مقارنة بميدجورني'],
+    pricingPlans: [
+      { plan_name: 'Free Plan', price: '0$', period: 'دائم', features: ['استخدام أدوات الماجيك الأساسية', '5GB مساحة سحابية'], is_popular: false },
+      { plan_name: 'Canva Pro', price: '12.99$', period: 'شهرياً', features: ['استخدام غير محدود لكافة أدوات الذكاء الاصطناعي', '1TB مساحة تخزين'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل تدعم كانفا اللغة العربية؟', answer: 'نعم، المنصة والخطوط والأدوات تعمل باللغة العربية بالكامل وبسلاسة.' }
+    ]
+  },
+  {
     id: 'tool-suno',
     name: 'سونو (Suno AI v3.5)',
     slug: 'suno-ai',
