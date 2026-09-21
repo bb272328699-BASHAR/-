@@ -57,7 +57,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'claude-3-5-sonnet',
         name: 'Claude 3.5 Sonnet',
-        slug: 'claude',
+        slug: 'claude-3-5-sonnet',
         logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop',
         tagline: 'النموذج الأرقى في الكتابة الأدبية والأكاديمية وصياغة النصوص الطويلة بفهم سياقي فائق.',
         badge: 'الأفضل للكتابة الأدبية والتحليل',
@@ -72,7 +72,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'chatgpt',
         name: 'ChatGPT (GPT-4o)',
-        slug: 'chatgpt',
+        slug: 'chatgpt-plus',
         logo_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=100&h=100&fit=crop',
         tagline: 'المساعد الذكي الأكثر شمولاً وتكاملاً للبحث والتلخيص وصناعة الأفكار والعصف الذهني.',
         badge: 'الأشمل والأكثر تنوعاً',
@@ -87,7 +87,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'jasper-ai',
         name: 'Jasper AI',
-        slug: 'jasper',
+        slug: 'jasper-ai',
         logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop',
         tagline: 'منصة متخصصة في كتابة المحتوى التسويقي، حملات الإعلانات، وبناء نبرة الصوت للمؤسسات.',
         badge: 'الأفضل لفرق التسويق والشركات',
@@ -126,7 +126,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'midjourney',
         name: 'Midjourney v6.1',
-        slug: 'midjourney',
+        slug: 'midjourney-v6',
         logo_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=100&h=100&fit=crop',
         tagline: 'المعيار الذهبي لتوليد الصور الفوتوغرافية والفنية السينمائية بأدق التفاصيل والواقعية.',
         badge: 'الأعلى جودة وواقعية بصرية',
@@ -141,7 +141,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'flux-1',
         name: 'FLUX.1 (Black Forest Labs)',
-        slug: 'flux',
+        slug: 'flux-1',
         logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop',
         tagline: 'الجيل الجديد الأقوى في توليد الصور وتجسيد النصوص المكتوبة داخل الصور بدقة متناهية.',
         badge: 'دقة لا تصدق في كتابة النصوص',
@@ -234,7 +234,7 @@ const NEED_CATEGORIES: TaskNeedCategory[] = [
       {
         id: 'runway-gen3',
         name: 'Runway Gen-3 Alpha',
-        slug: 'runway',
+        slug: 'runway-gen-3',
         logo_url: 'https://images.unsplash.com/photo-1536240478700-b869070f9279?w=100&h=100&fit=crop',
         tagline: 'منصة إنتاج سينمائي تحول الأفكار والصور إلى مشاهد واقعية بحركات كاميرا واحترافية عالية.',
         badge: 'الأعلى واقعية لحركة الكاميرا',

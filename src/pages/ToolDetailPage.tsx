@@ -98,23 +98,51 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
       setError(null);
       const sanitizedSlug = sanitizeSlug(slug);
       
-      const isFlux = (s: string) => {
-        const norm = (s || '').toLowerCase();
-        return norm === 'flux' || norm === 'flux-1' || norm === 'flux-1-black-forest-labs' || norm === 'flux.1' || norm.includes('flux');
+      const SLUG_ALIASES: Record<string, string> = {
+        'claude': 'claude-3-5-sonnet',
+        'claude-3': 'claude-3-5-sonnet',
+        'claude-3-5': 'claude-3-5-sonnet',
+        'chatgpt': 'chatgpt-plus',
+        'chatgpt-4': 'chatgpt-plus',
+        'gpt-4': 'chatgpt-plus',
+        'gpt-4o': 'chatgpt-plus',
+        'midjourney': 'midjourney-v6',
+        'flux': 'flux-1',
+        'flux-1-black-forest-labs': 'flux-1',
+        'flux.1': 'flux-1',
+        'runway': 'runway-gen-3',
+        'runway-gen3': 'runway-gen-3',
+        'gemini': 'gemini-advanced',
+        'sora': 'sora-openai',
+        'canva': 'canva-ai',
+        'suno': 'suno-ai',
+        'deepl': 'deepl-translator',
+        'gamma': 'gamma-app',
+        'jasper': 'jasper-ai',
+        'copilot': 'github-copilot',
+        'kling': 'kling-ai',
+        'opus': 'opus-clip',
+        'leonardo': 'leonardo-ai',
+        'dalle': 'dall-e-3',
+        'dalle3': 'dall-e-3'
       };
 
+      const targetCanonical = SLUG_ALIASES[sanitizedSlug.toLowerCase()] || SLUG_ALIASES[slug.toLowerCase()] || sanitizedSlug.toLowerCase();
+
       const fallback = DEFAULT_TOOLS.find(t => {
-        const tSanitized = sanitizeSlug(t.slug);
-        if (tSanitized === sanitizedSlug) return true;
-        if (t.slug.toLowerCase() === slug.toLowerCase()) return true;
-        if (t.slug.toLowerCase() === sanitizedSlug) return true;
-        if (isFlux(slug) && isFlux(t.slug)) return true;
-        if (sanitizedSlug.length > 3 && t.slug.toLowerCase().includes(sanitizedSlug)) return true;
+        const tSlug = t.slug.toLowerCase();
+        if (tSlug === targetCanonical) return true;
+        if (tSlug === sanitizedSlug.toLowerCase()) return true;
+        if (tSlug === slug.toLowerCase()) return true;
+        if (sanitizedSlug.length >= 4 && (tSlug.includes(sanitizedSlug.toLowerCase()) || sanitizedSlug.toLowerCase().includes(tSlug))) return true;
         return false;
       });
       
       try {
-        let res = await fetch(`/api/tools/${encodeURIComponent(sanitizedSlug)}`);
+        let res = await fetch(`/api/tools/${encodeURIComponent(targetCanonical)}`);
+        if (!res.ok) {
+          res = await fetch(`/api/tools/${encodeURIComponent(sanitizedSlug)}`);
+        }
         if (!res.ok) {
           res = await fetch(`/api/tools/${encodeURIComponent(slug)}`);
         }

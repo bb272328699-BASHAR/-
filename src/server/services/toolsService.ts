@@ -94,10 +94,37 @@ export const ToolsService = {
 
   async getBySlug(slug: string) {
     const decodedSlug = decodeURIComponent(slug || '').trim().toLowerCase();
-    let lookupSlug = decodedSlug;
-    if (decodedSlug === 'flux' || decodedSlug === 'flux-1-black-forest-labs' || decodedSlug === 'flux.1' || decodedSlug === 'flux-1') {
-      lookupSlug = 'flux-1';
-    }
+
+    const SLUG_ALIASES: Record<string, string> = {
+      'claude': 'claude-3-5-sonnet',
+      'claude-3': 'claude-3-5-sonnet',
+      'claude-3-5': 'claude-3-5-sonnet',
+      'chatgpt': 'chatgpt-plus',
+      'chatgpt-4': 'chatgpt-plus',
+      'gpt-4': 'chatgpt-plus',
+      'gpt-4o': 'chatgpt-plus',
+      'midjourney': 'midjourney-v6',
+      'flux': 'flux-1',
+      'flux-1-black-forest-labs': 'flux-1',
+      'flux.1': 'flux-1',
+      'runway': 'runway-gen-3',
+      'runway-gen3': 'runway-gen-3',
+      'gemini': 'gemini-advanced',
+      'sora': 'sora-openai',
+      'canva': 'canva-ai',
+      'suno': 'suno-ai',
+      'deepl': 'deepl-translator',
+      'gamma': 'gamma-app',
+      'jasper': 'jasper-ai',
+      'copilot': 'github-copilot',
+      'kling': 'kling-ai',
+      'opus': 'opus-clip',
+      'leonardo': 'leonardo-ai',
+      'dalle': 'dall-e-3',
+      'dalle3': 'dall-e-3'
+    };
+
+    const lookupSlug = SLUG_ALIASES[decodedSlug] || decodedSlug;
 
     const toolRes = await query(`
       SELECT t.*,
@@ -107,9 +134,12 @@ export const ToolsService = {
       LEFT JOIN tool_categories tc ON t.id = tc.tool_id
       LEFT JOIN categories c ON tc.category_id = c.id
       WHERE LOWER(t.slug) = $1 
-         OR (LOWER(t.slug) IN ('flux', 'flux-1', 'flux-1-black-forest-labs', 'flux.1') AND $1 IN ('flux', 'flux-1', 'flux-1-black-forest-labs', 'flux.1'))
+         OR LOWER(t.slug) = $2
+         OR (length($2) >= 4 AND LOWER(t.slug) LIKE '%' || $2 || '%')
       GROUP BY t.id
-    `, [lookupSlug]);
+      ORDER BY (CASE WHEN LOWER(t.slug) = $1 THEN 1 WHEN LOWER(t.slug) = $2 THEN 2 ELSE 3 END)
+      LIMIT 1
+    `, [lookupSlug, decodedSlug]);
 
     if (toolRes.rows.length === 0) return null;
     const tool = toolRes.rows[0];

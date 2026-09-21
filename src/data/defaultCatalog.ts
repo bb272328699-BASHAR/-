@@ -729,6 +729,274 @@ export const DEFAULT_TOOLS: Tool[] = [
       { question: 'هل يمكن التعديل اليدوي على الشرائح بعد توليدها بالذكاء الاصطناعي؟', answer: 'نعم، المنصة توفر محرر بطاقات سحب وإفلات مرن جداً يتيح تعديل النصوص والألوان وتغيير أماكن الصور بسهولة تامة.' },
     ],
   },
+  {
+    id: 'tool-jasper',
+    name: 'جاسبر (Jasper AI)',
+    slug: 'jasper-ai',
+    tagline: 'منصة متخصصة في كتابة المحتوى التسويقي، حملات الإعلانات، وبناء نبرة الصوت للمؤسسات',
+    description: 'أقوى أداة ذكاء اصطناعي مخصصة لفرق التسويق والمؤسسات لكتابة المقالات الإعلانية، ومنشورات مواقع التواصل، ورسائل البريد الإلكتروني، مع الحفاظ الكامل على نبرة هوية العلامة التجارية.',
+    website_url: 'https://www.jasper.ai',
+    logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Paid',
+    starting_price: '39$ / شهر',
+    rating: 4.74,
+    review_count: 1420,
+    upvotes_count: 89,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: false,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Jasper AI, Inc.',
+    release_year: 2021,
+    categories: [
+      { id: 'cat-writing', name: 'الكتابة وصناعة المحتوى', slug: 'writing-content', color: '#6366F1' },
+      { id: 'cat-marketing', name: 'التسويق وتحسين محركات البحث', slug: 'marketing-seo', color: '#14B8A6' },
+    ],
+    features: [
+      { title: 'نبرة صوت العلامة التجارية (Brand Voice)', description: 'تدريب الأداة على نبرة شركتك لضمان توحيد الأسلوب التسويقي في كل النصوص.' },
+      { title: 'حملات تسويقية متكاملة (Marketing Campaigns)', description: 'توليد خطة إعلانية ومقالات ومنشورات متسلسلة بضغطة زر واحدة.' }
+    ],
+    pros: ['قوالب تسويقية جاهزة ومجربة', 'دعم ممتاز للغة العربية واللهجات التجارية', 'تكامل مباشر مع أدوات تحسين السيو مثل Surfer SEO'],
+    cons: ['لا تتوفر خطة مجانية دائمة (فترة تجربة فقط)', 'السعر أعلى مقارنة بـ ChatGPT العادي'],
+    pricingPlans: [
+      { plan_name: 'Creator Plan', price: '39$', period: 'شهرياً', features: ['توليد كلمات غير محدود', 'صوت علامة تجارية واحد', 'أكثر من 50 قالب تسويقي'], is_popular: true },
+      { plan_name: 'Pro Plan', price: '59$', period: 'شهرياً', features: ['3 أصوات علامات تجارية', 'التعاون الجماعي لـ 3 أعضاء', 'أصول وتصاميم بالذكاء الاصطناعي'], is_popular: false }
+    ],
+    faqs: [
+      { question: 'هل يدعم Jasper اللغة العربية بشكل جيد؟', answer: 'نعم، يدعم كتابة النصوص والترجمة العربية الاحترافية بأكثر من 30 لغة عالمية.' }
+    ]
+  },
+  {
+    id: 'tool-rytr',
+    name: 'رايتر (Rytr)',
+    slug: 'rytr',
+    tagline: 'مساعد كتابة ذكي وسريع واقتصادي لإنشاء مقالات ومحتوى تسويقي باللغة العربية بأقل تكلفة',
+    description: 'أداة كتابة خفيفة ومحبوبة تتيح للمدونين وصناع المحتوى كتابة رسائل البريد، ووصف المنتجات، والمقالات القصيرة بسرعة وسهولة وبتكلفة منخفضة مع باقة مجانية دائمة.',
+    website_url: 'https://rytr.me',
+    logo_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '9$ / شهر',
+    rating: 4.62,
+    review_count: 870,
+    upvotes_count: 65,
+    is_verified: true,
+    is_trending: false,
+    is_popular: true,
+    is_featured: false,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Copysmith Group',
+    release_year: 2021,
+    categories: [
+      { id: 'cat-writing', name: 'الكتابة وصناعة المحتوى', slug: 'writing-content', color: '#6366F1' }
+    ],
+    features: [
+      { title: 'أكثر من 40 حالة استخدام وقالب جاهز', description: 'كتابة رسائل بريد، مقالات مدونات، منشورات إنستغرام وتويتر وغيرها.' },
+      { title: 'فاحص الانتحال والسرقة الأدبية مدمج', description: 'التأكد من أصالة المحتوى المكتوب قبل نشره.' }
+    ],
+    pros: ['خطة مجانية دائمة تتجدد شهرياً', 'واجهة بسيطة جداً وغير معقدة للمبتدئين', 'أسعار اشتراك في متناول الجميع'],
+    cons: ['توليد المقالات الطويلة جداً يحتاج خطوات يدوية إضافية'],
+    pricingPlans: [
+      { plan_name: 'Free Plan', price: '0$', period: 'دائم', features: ['10,000 حرف شهرياً', 'أكثر من 40 قالب', 'فاحص انتحال مدمج'], is_popular: false },
+      { plan_name: 'Unlimited Plan', price: '9$', period: 'شهرياً', features: ['توليد حروف غير محدود', 'صوت نبرة مخصص', 'دعم فني سريع'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم Rytr اللغة العربية؟', answer: 'نعم، يدعم الكتابة باللغة العربية بدقة جيدة وبأكثر من 20 نبرة صوت مختلفة.' }
+    ]
+  },
+  {
+    id: 'tool-leonardo',
+    name: 'ليوناردو (Leonardo.Ai)',
+    slug: 'leonardo-ai',
+    tagline: 'منصة استوديو متكاملة لتوليد الصور وأصول الألعاب والأنيمي مع لوحة كانفاس وتعديل أجزاء الصور',
+    description: 'أحد أشهر وأقوى بدائل ميدجورني، يتميز بواجهة ويب استثنائية توفر لوحة كانفاس تفاعلية، وتدريب نماذج مخصصة، وإزالة الخلفيات، مع 150 نقطة توليد مجانية تتجدد يومياً.',
+    website_url: 'https://leonardo.ai',
+    logo_url: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '10$ / شهر',
+    rating: 4.83,
+    review_count: 2450,
+    upvotes_count: 156,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Leonardo Interactive Pty Ltd',
+    release_year: 2022,
+    categories: [
+      { id: 'cat-images', name: 'توليد وتعديل الصور', slug: 'image-generation', color: '#EC4899' }
+    ],
+    features: [
+      { title: 'لوحة كانفاس تفاعلية (Live Canvas)', description: 'رسم ومسح وتعديل أجزاء من الصور في الوقت الحقيقي.' },
+      { title: '150 نقطة مجانية يومياً', description: 'توليد صور عالية الجودة يومياً بدون الحاجة إلى إدخال بطاقة بنكية.' }
+    ],
+    pros: ['خطة مجانية سخية تتجدد يومياً', 'أدوات تحكم احترافية في الأبعاد وزوايا الكاميرا', 'محرك سريع جداً مع دعم نماذج متعددة مثل Phoenix و Flux'],
+    cons: ['الخطط المدفوعة مطلوبة للسرعة القصوى وتوليد الفيديوهات الطويلة'],
+    pricingPlans: [
+      { plan_name: 'Free Tier', price: '0$', period: 'يومياً', features: ['150 نقطة تتجدد كل 24 ساعة', 'وصول لنماذج كانفاس الأساسية', 'تنزيل الصور بدقة عادية'], is_popular: false },
+      { plan_name: 'Apprentice Plan', price: '10$', period: 'شهرياً', features: ['8,500 نقطة شهرياً', 'توليد سريع غير محدود للنماذج الأساسية', 'توليد خاص غير مرئي للعامة'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم Leonardo توليد الفيديوهات أيضاً؟', answer: 'نعم، يوفر ميزة Motion لتحويل أي صورة ثابتة إلى مقطع فيديو متحرك قصير.' }
+    ]
+  },
+  {
+    id: 'tool-copilot',
+    name: 'جيت هب كوبايلوت (GitHub Copilot)',
+    slug: 'github-copilot',
+    tagline: 'مساعد البرمجة الذكي الأول عالمياً داخل محررات الأكواد مدعوماً بأحدث النماذج البرمجية',
+    description: 'الأداة الرسمية المعتمدة من GitHub وMicrosoft لمساعدة المطورين داخل VS Code وJetBrains، تقدم إكمالاً تلقائياً للأكواد وشات ذكياً لشرح الأخطاء وبناء الاختبارات البرمجية.',
+    website_url: 'https://github.com/features/copilot',
+    logo_url: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Paid',
+    starting_price: '10$ / شهر',
+    rating: 4.78,
+    review_count: 4200,
+    upvotes_count: 198,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'GitHub / Microsoft',
+    release_year: 2021,
+    categories: [
+      { id: 'cat-coding', name: 'البرمجة وتطوير البرمجيات', slug: 'coding-development', color: '#10B981' }
+    ],
+    features: [
+      { title: 'إكمال تلقائي فوري للكود (Autocompletion)', description: 'اقتراح أسطر ودوال كاملة بمجرد كتابة التعليق أو سياق الكود.' },
+      { title: 'شات تفاعلي للمحرر (Copilot Chat)', description: 'طرح أسئلة حول الكود، اكتشاف الثغرات، وتوليد وحدات الاختبار Unit Tests.' }
+    ],
+    pros: ['تكامل لا مثيل له داخل بيئات العمل البرمجية', 'مجاني تماماً للطلاب وأصحاب المشاريع مفتوحة المصدر', 'أمان عالي وخصوصية معتمدة للشركات'],
+    cons: ['يتطلب اشتراكاً مدفوعاً بعد فترة التجربة المجانية (30 يوماً)'],
+    pricingPlans: [
+      { plan_name: 'Individual', price: '10$', period: 'شهرياً', features: ['إكمال كود غير محدود', 'محادثة Copilot Chat المباشرة', 'دعم لجميع لغات البرمجة'], is_popular: true },
+      { plan_name: 'Business', price: '19$', period: 'لكل مستخدم/شهر', features: ['إدارة صلاحيات الفريق', 'حماية خصوصية الكود ومنع تدريب النماذج عليه', 'دعم فني مخصص للمؤسسات'], is_popular: false }
+    ],
+    faqs: [
+      { question: 'هل يعمل GitHub Copilot مع أي لغة برمجة؟', answer: 'نعم، يدعم Python وJavaScript وTypeScript وC++ وGo وPHP وRust ومعظم لغات البرمجة الشائعة.' }
+    ]
+  },
+  {
+    id: 'tool-kling',
+    name: 'كلينغ (Kling AI)',
+    slug: 'kling-ai',
+    tagline: 'توليد مقاطع فيديو سينمائية عالية الدقة تصل إلى 1080p مع مرونة حركة بشرية وتفاصيل فيزيائية متطورة',
+    description: 'نموذج توليد الفيديو العالمي الذي أحدث ضجة بفضل قدرته على توليد مقاطع فيديو تصل إلى دقيقتين بحركة بشرية واقعية للغاية وتفاصيل وجه وفيزياء حركة طبيعية جداً للملابس والماء والإضاءة.',
+    website_url: 'https://klingai.com',
+    logo_url: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '10$ / شهر',
+    rating: 4.86,
+    review_count: 1750,
+    upvotes_count: 142,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Kuaishou Technology',
+    release_year: 2024,
+    categories: [
+      { id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production', color: '#F59E0B' }
+    ],
+    features: [
+      { title: 'توليد فيديو حتى 1080p بمعدل 30 إطاراً', description: 'دقة بصرية سينمائية مع سلاسة حركة ومحاكاة ممتازة للضوء والظلال.' },
+      { title: 'دعم تحريك الصور (Image-to-Video)', description: 'تحويل أي صورة شخصية أو لقطة ثابتة إلى مشهد متحرك مذهل.' }
+    ],
+    pros: ['أفضل محاكاة لحركة الأجسام والوجوه البشرية', 'رصيد مجاني يومي للتجربة', 'دعم لقطات فيديو طويلة نسبياً مقارنة بالمنافسين'],
+    cons: ['طوابير الانتظار في الخطة المجانية قد تستغرق وقتاً في أوقات الذروة'],
+    pricingPlans: [
+      { plan_name: 'Free Trial', price: '0$', period: 'يومياً', features: ['66 رصيد مجاني يومياً', 'توليد فيديو بدقة قياسية', 'سرعة معالجة عادية'], is_popular: false },
+      { plan_name: 'Standard Plan', price: '10$', period: 'شهرياً', features: ['660 رصيد شهرياً', 'أولوية معالجة في السيرفرات', 'تصدير بجودة عالية بدون علامة مائية'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم Kling AI إنشاء مقاطع فيديو عمودية للهواتف؟', answer: 'نعم، يدعم نسب العرض 16:9 للشاشات و 9:16 للتيك توك والريلز واليوتيوب شورتس.' }
+    ]
+  },
+  {
+    id: 'tool-opus',
+    name: 'أوبوس كليب (Opus Clip)',
+    slug: 'opus-clip',
+    tagline: 'تحويل مقاطع الفيديو الطويلة والبودكاست إلى ريلز وشورتس مع كابشن عربي تلقائي وتتبع حركة الوجه',
+    description: 'الأداة الأقوى لصناع المحتوى والبودكاست لتحويل الفيديوهات الطويلة إلى مقاطع قصيرة جذابة تلقائياً، مع وضع النصوص الملونة (Captions)، وتقطيع اللحظات الأكثر تفاعلاً بالذكاء الاصطناعي.',
+    website_url: 'https://www.opus.pro',
+    logo_url: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '9$ / شهر',
+    rating: 4.82,
+    review_count: 1980,
+    upvotes_count: 118,
+    is_verified: true,
+    is_trending: true,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'Opus Pro',
+    release_year: 2023,
+    categories: [
+      { id: 'cat-video', name: 'إنتاج الفيديو والمونتاج', slug: 'video-production', color: '#F59E0B' }
+    ],
+    features: [
+      { title: 'كابشن تلقائي ملون باللغة العربية', description: 'توليد نصوص متحركة على الفيديو بنمط هرموزي المشهور مع تمييز الكلمات الهامة.' },
+      { title: 'اكتشاف اللحظات الذهبية (Virality Score)', description: 'تحليل الفيديو واقتراح أفضل اللحظات القابلة للانتشار مع تقييم احتمالية نجاحها.' }
+    ],
+    pros: ['توفير هائل في وقت المونتاج اليدوي', 'دعم ممتاز ودقيق للكلام العربي', 'تتبع ذكي لوجه المتحدث ووضعه في منتصف الشاشة العمودية'],
+    cons: ['الخطة المجانية تضع علامة مائية بسيطة'],
+    pricingPlans: [
+      { plan_name: 'Free Trial', price: '0$', period: 'مرة واحدة', features: ['60 دقيقة معالجة مجانية', 'توليد الكابشن التلقائي', 'تقييم الفيروسية'], is_popular: false },
+      { plan_name: 'Starter Plan', price: '9$', period: 'شهرياً', features: ['150 دقيقة شهرياً', 'إزالة العلامة المائية', 'تصدير بجودة 1080p'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يمكن وضع رابط يوتيوب مباشرة؟', answer: 'نعم، يكفي لصق رابط فيديو يوتيوب أو زووم وسيقوم Opus Clip بسحب المقطع وتقطيعه فورياً.' }
+    ]
+  },
+  {
+    id: 'tool-chatpdf',
+    name: 'شات بي دي إف (ChatPDF)',
+    slug: 'chatpdf',
+    tagline: 'التحدث المباشر مع ملفات PDF والكتب والأبحاث العلمية واستخراج الأجوبة مع أرقام الصفحات',
+    description: 'أبسط وأسرع أداة لقراءة وتلخيص الكتب والمستندات الأكاديمية وملفات PDF، تتيح لك طرح أي أسئلة والحصول على إجابات دقيقة موثقة برقم الصفحة مباشرة.',
+    website_url: 'https://www.chatpdf.com',
+    logo_url: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=160&auto=format&fit=crop&q=80',
+    pricing_type: 'Freemium',
+    starting_price: '5$ / شهر',
+    rating: 4.79,
+    review_count: 2200,
+    upvotes_count: 135,
+    is_verified: true,
+    is_trending: false,
+    is_popular: true,
+    is_featured: true,
+    status: 'published',
+    arabic_support: 'ممتاز',
+    developer_org: 'ChatPDF Inc.',
+    release_year: 2023,
+    categories: [
+      { id: 'cat-research', name: 'التعليم والبحث العلمي', slug: 'education-research', color: '#E11D48' },
+      { id: 'cat-productivity', name: 'الإنتاجية وإدارة الأعمال', slug: 'productivity-business', color: '#3B82F6' }
+    ],
+    features: [
+      { title: 'إجابات موثقة بأرقام الصفحات', description: 'الضغط على أي استشهاد ينقلك مباشرة للفقرة الأصلية داخل ملف الـ PDF.' },
+      { title: 'تلخيص سريع للمستند بمجرد رفعه', description: 'توليد نظرة عامة و3 أسئلة مقترحة فور رفع الملف لفهم مضمونه بسرعة.' }
+    ],
+    pros: ['خطة مجانية سخية تكفي لمعظم الطلاب', 'دعم كامل لقراءة المستندات المكتوبة باللغة العربية', 'لا يتطلب تسجيل دخول للاستخدام الأولي السريع'],
+    cons: ['الخطة المجانية تقتصر على ملفات بحجم 120 صفحة أو 10 ميجابايت'],
+    pricingPlans: [
+      { plan_name: 'Free Plan', price: '0$', period: 'دائم', features: ['3 ملفات PDF يومياً حتى 120 صفحة', '50 سؤالاً يومياً', 'مستندات حتى 10MB'], is_popular: false },
+      { plan_name: 'Plus Plan', price: '5$', period: 'شهرياً', features: ['ملفات غير محدودة حتى 2,000 صفحة', 'أسئلة غير محدودة', 'ملفات حتى 32MB'], is_popular: true }
+    ],
+    faqs: [
+      { question: 'هل يدعم ChatPDF الأبحاث العلمية المكتوبة بالعربية؟', answer: 'نعم، يقرأ ملفات PDF العربية بدقة عالية ويجيب باللغة العربية الفصحى مع المصادر.' }
+    ]
+  },
 ];
 
 // Fallback Comparisons

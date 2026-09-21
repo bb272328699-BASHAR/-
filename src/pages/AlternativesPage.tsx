@@ -33,16 +33,55 @@ interface AlternativeGroup {
   alternatives: AlternativeOption[];
 }
 
+const DEFAULT_ALTERNATIVE_GROUPS: AlternativeGroup[] = [
+  {
+    id: 'alt-1',
+    originalTool: { name: 'ChatGPT Plus (GPT-4o)', slug: 'chatgpt-plus', price: '$20/شهر' },
+    alternatives: [
+      { name: 'Claude 3.5 Sonnet', slug: 'claude-3-5-sonnet', advantage: 'خطة مجانية قوية مع صياغة كتابية فائقة الدقة والتحليل البرمجي', price: 'مجاني / $20' },
+      { name: 'Google Gemini', slug: 'gemini-advanced', advantage: 'مجاني ومتصل بالويب مباشرة مع نافذة سياق ضخمة جداً', price: 'مجاني' },
+      { name: 'Perplexity AI', slug: 'perplexity-ai', advantage: 'محرك بحث إجاباتي دقيق جداً موثق بروابط المصادر الحية', price: 'مجاني / $20' }
+    ]
+  },
+  {
+    id: 'alt-2',
+    originalTool: { name: 'Midjourney v6', slug: 'midjourney-v6', price: '$10 - $60/شهر' },
+    alternatives: [
+      { name: 'FLUX.1', slug: 'flux-1', advantage: 'نموذج مفتوح المصدر يضاهي الواقعية مع دقة فائقة في رسم الحروف والنصوص', price: 'مجاني / Freemium' },
+      { name: 'Leonardo AI', slug: 'leonardo-ai', advantage: '150 نقطة توليد مجانية يومياً مع أدوات تحكم واسعة وكانفاس مباشر', price: 'مجاني يومياً / $10' },
+      { name: 'Canva Magic Studio', slug: 'canva-ai', advantage: 'استوديو تصميم متكامل وسهل جداً للمبتدئين مع دعم عربي كامل', price: 'مجاني / $12.99' }
+    ]
+  },
+  {
+    id: 'alt-3',
+    originalTool: { name: 'GitHub Copilot', slug: 'github-copilot', price: '$10/شهر' },
+    alternatives: [
+      { name: 'Cursor AI', slug: 'cursor-ai', advantage: 'بيئة تطوير كاملة تعتمد على VS Code مع ميزات ذكاء تفاعلية وتعديل عدة ملفات', price: 'مجاني / $20' },
+      { name: 'v0 by Vercel', slug: 'v0-dev', advantage: 'توليد واجهات مستخدم React و Tailwind CSS مباشرة وفورية', price: 'مجاني / $20' },
+      { name: 'Claude 3.5 Sonnet', slug: 'claude-3-5-sonnet', advantage: 'أعلى دقة في فهم منطق المشروعات البرمجية وتصحيح الأخطاء', price: 'مجاني / $20' }
+    ]
+  }
+];
+
 export const AlternativesPage: React.FC<AlternativesPageProps> = ({ navigate }) => {
-  const [groups, setGroups] = useState<AlternativeGroup[]>([]);
+  const [groups, setGroups] = useState<AlternativeGroup[]>(DEFAULT_ALTERNATIVE_GROUPS);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('/api/alternatives-directory')
-      .then((res) => res.json())
-      .then((data) => setGroups(data || []))
-      .catch((err) => console.error('Error fetching alternatives:', err))
+      .then((res) => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setGroups(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default alternatives data:', err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
