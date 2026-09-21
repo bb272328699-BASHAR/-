@@ -79,13 +79,31 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
   const [isUpvoted, setIsUpvoted] = useState<boolean>(false);
   const [upvoting, setUpvoting] = useState<boolean>(false);
 
+  const sanitizeSlug = (rawSlug: string): string => {
+    try {
+      const decoded = decodeURIComponent(rawSlug || '');
+      return decoded
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\-_\.]+/g, '-')
+        .replace(/-+/g, '-');
+    } catch {
+      return (rawSlug || '').trim().toLowerCase();
+    }
+  };
+
   useEffect(() => {
     const fetchTool = async () => {
       setLoading(true);
       setError(null);
-      const fallback = DEFAULT_TOOLS.find(t => t.slug === slug);
+      const sanitizedSlug = sanitizeSlug(slug);
+      const fallback = DEFAULT_TOOLS.find(t => sanitizeSlug(t.slug) === sanitizedSlug || t.slug.toLowerCase() === slug.toLowerCase() || t.slug.toLowerCase() === sanitizedSlug);
+      
       try {
-        const res = await fetch(`/api/tools/${slug}`);
+        let res = await fetch(`/api/tools/${encodeURIComponent(sanitizedSlug)}`);
+        if (!res.ok) {
+          res = await fetch(`/api/tools/${encodeURIComponent(slug)}`);
+        }
         if (!res.ok) {
           throw new Error('الأداة غير موجودة');
         }
@@ -96,6 +114,9 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({ slug, navigate }
         // Automatically generate rich Document Title, OpenGraph, Canonical, and Schema.org for SEO
         const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
         const seoConfig = generateToolSEO(data, origin);
+        if (data.status && data.status !== 'published') {
+          seoConfig.robots = 'noindex, nofollow';
+        }
         updateDocumentSEO(seoConfig);
 
         // Check bookmark status & upvote status

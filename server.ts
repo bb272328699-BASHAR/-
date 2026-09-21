@@ -59,6 +59,9 @@ Allow: /calculator
 Allow: /advisor
 Disallow: /admin
 Disallow: /api/admin/
+Disallow: /tools/?*status=unpublished
+Disallow: /*?*status=unpublished
+Disallow: /*?*unpublished=1
 
 User-agent: Googlebot-Image
 Allow: /

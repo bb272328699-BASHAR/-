@@ -388,16 +388,66 @@ export default function App() {
 
     // 14. 404 Fallback
     return (
-      <div className="max-w-xl mx-auto py-28 text-center space-y-4">
-        <span className="text-6xl font-black text-indigo-600 block">404</span>
-        <h2 className="text-2xl font-bold text-slate-900">الصفحة المطلوبة غير موجودة</h2>
-        <p className="text-slate-500 text-sm">تأكد من صحة الرابط أو تصفح الأقسام الرئيسية مباشرة.</p>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
-        >
-          العودة للرئيسية
-        </button>
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-8">
+        <div className="space-y-3">
+          <span className="text-7xl font-black text-indigo-600 block tracking-tight">404</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">عذراً، الصفحة المطلوبة غير موجودة أو تم نقلها</h2>
+          <p className="text-slate-500 text-sm sm:text-base max-w-lg mx-auto">تأكد من صحة الرابط أو تصفح أبرز أدوات الذكاء الاصطناعي الأكثر شهرة واستخداماً أدناه.</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => navigate('/')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition-colors shadow-sm cursor-pointer"
+            >
+              العودة للرئيسية
+            </button>
+            <button
+              onClick={() => navigate('/ai-tools')}
+              className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-6 py-2.5 rounded-xl text-sm transition-colors cursor-pointer"
+            >
+              تصفح جميع الأدوات
+            </button>
+            <button
+              onClick={() => navigate('/advisor')}
+              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-6 py-2.5 rounded-xl text-sm transition-colors cursor-pointer"
+            >
+              المستشار الذكي
+            </button>
+          </div>
+        </div>
+
+        {/* Popular Tools Suggestions */}
+        <div className="border-t border-slate-200 pt-8 mt-8 text-right">
+          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+            أبرز الأدوات الشائعة التي يقصدها الزوار:
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {[
+              { name: 'Claude 3.5 Sonnet', slug: 'claude-3-5-sonnet', tagline: 'المساعد الرائد للبرمجة وكتابة المحتوى المتقدم', rating: '4.95', logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop' },
+              { name: 'Midjourney v6', slug: 'midjourney-v6', tagline: 'المعيار الذهبي لتوليد الصور السينمائية والواقعية', rating: '4.90', logo: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=100&h=100&fit=crop' },
+              { name: 'FLUX.1 (Black Forest Labs)', slug: 'flux-1', tagline: 'دقة لا تصدق في كتابة النصوص داخل الصور المبتكرة', rating: '4.88', logo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop' },
+              { name: 'ChatGPT Plus', slug: 'chatgpt-plus', tagline: 'المساعد الذكي الأكثر انتشاراً مع البحث الحي', rating: '4.88', logo: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=100&h=100&fit=crop' },
+              { name: 'Cursor AI', slug: 'cursor-ai', tagline: 'محرر الأكواد الذكي المشتق من VS Code', rating: '4.98', logo: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=100&h=100&fit=crop' },
+              { name: 'Gemini Advanced', slug: 'gemini-advanced', tagline: 'نافذة سياق عملاقة وتكامل عميق مع خدمات جوجل', rating: '4.87', logo: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=100&h=100&fit=crop' }
+            ].map((tool) => (
+              <div
+                key={tool.slug}
+                onClick={() => navigate(`/tools/${tool.slug}`)}
+                className="bg-white p-4 rounded-xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer flex items-start gap-3.5 group text-right"
+              >
+                <img src={tool.logo} alt={tool.name} className="w-11 h-11 rounded-lg object-cover bg-slate-100 shrink-0 border border-slate-100" referrerPolicy="no-referrer" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <h4 className="font-bold text-sm text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{tool.name}</h4>
+                    <span className="text-xs font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded shrink-0">★ {tool.rating}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{tool.tagline}</p>
+                  <span className="text-[11px] text-indigo-600 font-medium mt-1 inline-block">استكشف الأداة ←</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   };

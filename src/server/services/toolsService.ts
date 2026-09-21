@@ -93,6 +93,12 @@ export const ToolsService = {
   },
 
   async getBySlug(slug: string) {
+    const decodedSlug = decodeURIComponent(slug || '').trim().toLowerCase();
+    let lookupSlug = decodedSlug;
+    if (decodedSlug === 'flux' || decodedSlug === 'flux-1-black-forest-labs' || decodedSlug === 'flux.1' || decodedSlug === 'flux-1') {
+      lookupSlug = 'flux-1';
+    }
+
     const toolRes = await query(`
       SELECT t.*,
         COALESCE(json_agg(DISTINCT jsonb_build_object('id', c.id, 'name', c.name, 'slug', c.slug, 'color', c.color)) 
@@ -100,9 +106,10 @@ export const ToolsService = {
       FROM tools t
       LEFT JOIN tool_categories tc ON t.id = tc.tool_id
       LEFT JOIN categories c ON tc.category_id = c.id
-      WHERE t.slug = $1
+      WHERE LOWER(t.slug) = $1 
+         OR (LOWER(t.slug) IN ('flux', 'flux-1', 'flux-1-black-forest-labs', 'flux.1') AND $1 IN ('flux', 'flux-1', 'flux-1-black-forest-labs', 'flux.1'))
       GROUP BY t.id
-    `, [slug]);
+    `, [lookupSlug]);
 
     if (toolRes.rows.length === 0) return null;
     const tool = toolRes.rows[0];

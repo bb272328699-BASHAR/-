@@ -370,11 +370,44 @@ export async function runExpansion() {
       faqs: [
         { question: 'هل يمكن التعديل اليدوي على الشرائح بعد توليدها بالذكاء الاصطناعي؟', answer: 'نعم، المنصة توفر محرر بطاقات سحب وإفلات مرن جداً يتيح تعديل النصوص والألوان وتغيير أماكن الصور بسهولة تامة.' }
       ]
+    },
+    {
+      name: 'FLUX.1 (Black Forest Labs)',
+      slug: 'flux-1',
+      tagline: 'الجيل الجديد الأقوى في توليد الصور وتجسيد النصوص المكتوبة داخل الصور بدقة متناهية',
+      description: 'نموذج توليد الصور الثوري المفتوح والمغلق المصدر من Black Forest Labs، والذي يتميز بقدرة غير مسبوقة على كتابة النصوص والأرقام داخل الصور بدقة تامة وفهم مذهل لتفاصيل الأوامر والواقعية البصرية.',
+      website_url: 'https://blackforestlabs.ai',
+      logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=160&auto=format&fit=crop&q=80',
+      pricing_type: 'Freemium',
+      rating: 4.88,
+      review_count: 245,
+      arabic_support: 'ممتاز',
+      release_year: 2024,
+      developer_org: 'Black Forest Labs',
+      is_featured: true,
+      is_trending: true,
+      is_editor_choice: true,
+      categories: ['image-generation'],
+      features: [
+        { title: 'كتابة النصوص داخل الصور بدقة', description: 'قدرة فريدة على إظهار الكلمات والجمل بدقة إملائية مذهلة' },
+        { title: 'واقعية بصرية فائقة', description: 'تفاصيل دقيقة للبشرة، الإضاءة، والملامح الطبيعية' },
+        { title: 'مرونة الأنماط (Dev & Schnell)', description: 'إصدارات مخصصة للسرعة الفائقة وإصدارات للأبحاث والدقة العالية' }
+      ],
+      pros: ['دقة لا تصدق في كتابة النصوص واللوحات', 'خيارات مفتوحة المصدر للاستخدام المحلي', 'جودة تفاصيل تضاهي بل تفوق النماذج التجارية الكبرى'],
+      cons: ['يحتاج موارد حاسوبية قوية عند التشغيل المحلي', 'الواجهات السحابية قد تفرض حدوداً للاستخدام المجاني'],
+      pricing: [
+        { plan_name: 'إصدارات Schnell & Dev', price: 'مجاني', period: 'مفتوح المصدر', features: ['ترخيص للاستخدام الشخصي والبحثي', 'تحميل الأوزان للتشغيل محلياً', 'سرعة توليد فائقة'], is_popular: true },
+        { plan_name: 'إصدار Pro الاحترافي', price: 'حسب الاستخدام', period: 'سحابي', features: ['جودة فائقة للاستخدام التجاري', 'أولوية معالجة قصوى عبر API', 'دعم فني وتطوير مخصص'], is_popular: false }
+      ],
+      faqs: [
+        { question: 'هل يدعم FLUX.1 اللغة العربية؟', answer: 'نعم، يفهم الأوامر باللغة العربية ويولد النصوص والزخارف بشكل ممتاز.' },
+        { question: 'ما الفرق بين إصدارات FLUX؟', answer: 'تتضمن الإصدارات Schnell للسرعة الفائقة، وDev للتطوير والأبحاث، وPro للاستخدام التجاري الاحترافي.' }
+      ]
     }
   ];
 
   for (const t of extraTools) {
-    const check = await query(`SELECT id FROM tools WHERE slug = $1`, [t.slug]);
+    const check = await query(`SELECT id FROM tools WHERE slug = $1 OR slug = 'flux' OR slug = 'flux-1-black-forest-labs'`, [t.slug]);
     let toolId = check.rows[0]?.id;
 
     if (!toolId) {
@@ -428,6 +461,15 @@ export async function runExpansion() {
         await query(`INSERT INTO tool_faqs (tool_id, question, answer, display_order) VALUES ($1, $2, $3, $4)`, [
           toolId, t.faqs[i].question, t.faqs[i].answer, i
         ]);
+      }
+    } else {
+      // Ensure status is published and category is correctly linked
+      await query(`UPDATE tools SET status = 'published' WHERE id = $1`, [toolId]);
+      for (const cSlug of t.categories) {
+        const cRes = await query(`SELECT id FROM categories WHERE slug = $1`, [cSlug]);
+        if (cRes.rows[0]) {
+          await query(`INSERT INTO tool_categories (tool_id, category_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, [toolId, cRes.rows[0].id]);
+        }
       }
     }
   }
