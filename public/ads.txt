@@ -1,7 +1,1 @@
-# Google AdSense Authorized Digital Sellers (ads.txt) for Daleel AI
-# -----------------------------------------------------------------------------
-# Replace pub-6343594295307676 below with your real Google AdSense Publisher ID (e.g. pub-XXXXXXXXXXXXXXXX).
-# Alternatively, you can change your Publisher ID anytime from the Admin Dashboard > Ad Management,
-# and the dynamic /ads.txt endpoint will serve your updated ID in real-time.
-# -----------------------------------------------------------------------------
 google.com, pub-6343594295307676, DIRECT, f08c47fec0942fa0
