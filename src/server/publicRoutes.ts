@@ -8,6 +8,7 @@ import { AiService } from './services/aiService.ts';
 import { query } from './db.ts';
 import { generateToken, authMiddleware, AuthRequest } from './middleware/auth.ts';
 import { generateSitemapXml, getSitemapEntries } from './services/sitemapService.ts';
+import { generateSeoAuditReport } from './services/seoService.ts';
 import { serverCache } from './services/cacheService.ts';
 import { AnalyticsService } from './services/analyticsService.ts';
 
@@ -49,6 +50,17 @@ publicRouter.get('/seo/sitemap-stats', async (req: Request, res: Response) => {
       updatedAt: summary.generatedAt,
       standards: 'sitemaps.org/schemas/sitemap/0.9',
     });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Real-time SEO compliance audit and health score
+publicRouter.get('/seo/audit', async (req: Request, res: Response) => {
+  try {
+    const host = req.get('host');
+    const audit = await generateSeoAuditReport(host);
+    res.json(audit);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

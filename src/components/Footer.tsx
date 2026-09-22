@@ -170,7 +170,8 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
               <li><button onClick={() => navigate('/resources')} className="hover:text-indigo-400 transition-colors">الكتب والقوالب المجانية</button></li>
               <li><button onClick={() => navigate('/about')} className="hover:text-indigo-400 transition-colors">من نحن</button></li>
               <li><button onClick={() => navigate('/contact')} className="hover:text-indigo-400 transition-colors">تواصل معنا</button></li>
-              <li><a href="/sitemap.xml" target="_blank" className="hover:text-indigo-400 transition-colors flex items-center gap-1">خريطة الموقع (Sitemap) <ExternalLink className="w-3 h-3" /></a></li>
+              <li><a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors flex items-center gap-1">خريطة الموقع (Sitemap XML) <ExternalLink className="w-3 h-3" /></a></li>
+              <li><a href="/feed.xml" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors flex items-center gap-1">خلاصة الأخبار والتحديثات (RSS 2.0) <ExternalLink className="w-3 h-3" /></a></li>
             </ul>
           </div>
 

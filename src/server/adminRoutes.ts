@@ -3,6 +3,14 @@ import bcrypt from 'bcryptjs';
 import { query } from './db.ts';
 import { generateToken, authMiddleware, AuthRequest, recordAuditLog } from './middleware/auth.ts';
 import { serverCache } from './services/cacheService.ts';
+import { AiService } from './services/aiService.ts';
+import { 
+  invalidateSitemapCache, 
+  getSitemapStatus, 
+  notifySearchEngines, 
+  generateSitemapXml,
+  syncSitemapToDisk 
+} from './services/sitemapService.ts';
 
 export const adminRouter = Router();
 
@@ -137,8 +145,9 @@ adminRouter.post('/tools', authMiddleware, async (req: AuthRequest, res: Respons
 
     await recordAuditLog(req.user?.id || null, 'CREATE_TOOL', 'TOOL', toolId, { name, slug }, req.ip);
 
-    // Invalidate Cache for tools
+    // Invalidate Cache for tools and update sitemap
     serverCache.invalidateToolsCache(slug);
+    invalidateSitemapCache({ type: 'tool', slug, action: 'create', host: req.get('host') });
 
     res.status(201).json(inserted.rows[0]);
   } catch (err: any) {
@@ -196,6 +205,7 @@ adminRouter.put('/tools/:id', authMiddleware, async (req: AuthRequest, res: Resp
     // Invalidate Cache immediately so users see updated data instantly
     const toolUpdated = updated.rows[0];
     const invalidationResult = serverCache.invalidateToolsCache(toolUpdated.slug);
+    invalidateSitemapCache({ type: 'tool', slug: toolUpdated.slug, action: 'update', host: req.get('host') });
 
     res.json({
       ...toolUpdated,
@@ -215,10 +225,11 @@ adminRouter.delete('/tools/:id', authMiddleware, async (req: AuthRequest, res: R
 
     await recordAuditLog(req.user?.id || null, 'DELETE_TOOL', 'TOOL', id, { name: deleted.rows[0].name }, req.ip);
 
-    // Invalidate Cache for deleted tool
+    // Invalidate Cache and Sitemap for deleted tool
     serverCache.invalidateToolsCache(deleted.rows[0].slug);
+    invalidateSitemapCache({ type: 'tool', slug: deleted.rows[0].slug, action: 'delete', host: req.get('host') });
 
-    res.json({ message: 'تم حذف الأداة بنجاح وتحديث الكاش' });
+    res.json({ message: 'تم حذف الأداة بنجاح وتحديث الكاش وخريطة الموقع' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -232,7 +243,11 @@ adminRouter.post('/categories', authMiddleware, async (req: AuthRequest, res: Re
       INSERT INTO categories (name, name_en, slug, description, icon, color, parent_id)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
-    `, [name, name_en || null, slug, description, icon || 'Folder', color || '#3B82F6', parent_id || null]);
+    `, [name, name_en, slug, description, icon, color, parent_id || null]);
+    
+    await recordAuditLog(req.user?.id || null, 'CREATE_CATEGORY', 'CATEGORY', inserted.rows[0].id, { name, slug }, req.ip);
+    invalidateSitemapCache({ type: 'category', slug, action: 'create', host: req.get('host') });
+
     res.status(201).json(inserted.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -271,7 +286,61 @@ adminRouter.post('/articles', authMiddleware, async (req: AuthRequest, res: Resp
       meta_title || `${title} | دليل الذكاء الاصطناعي`, meta_description || excerpt,
       meta_keywords || '', og_image_url || cover_image_url || '', canonical_url || '', og_title || title, og_description || excerpt, robots_directive || 'index, follow'
     ]);
-    res.status(201).json(inserted.rows[0]);
+    
+    const createdArt = inserted.rows[0];
+    await recordAuditLog(req.user?.id || null, 'CREATE_ARTICLE', 'ARTICLE', createdArt.id, { title, slug }, req.ip);
+    invalidateSitemapCache({ type: 'article', slug, action: 'create', host: req.get('host') });
+
+    res.status(201).json(createdArt);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.put('/articles/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, slug, excerpt, content, cover_image_url, read_time, is_featured, meta_title, meta_description, meta_keywords, og_image_url, canonical_url, og_title, og_description, robots_directive } = req.body;
+    const updated = await query(`
+      UPDATE articles SET
+        title = COALESCE($1, title),
+        slug = COALESCE($2, slug),
+        excerpt = COALESCE($3, excerpt),
+        content = COALESCE($4, content),
+        cover_image_url = COALESCE($5, cover_image_url),
+        read_time = COALESCE($6, read_time),
+        is_featured = COALESCE($7, is_featured),
+        meta_title = COALESCE($8, meta_title),
+        meta_description = COALESCE($9, meta_description),
+        meta_keywords = COALESCE($10, meta_keywords),
+        og_image_url = COALESCE($11, og_image_url),
+        canonical_url = COALESCE($12, canonical_url),
+        og_title = COALESCE($13, og_title),
+        og_description = COALESCE($14, og_description),
+        robots_directive = COALESCE($15, robots_directive),
+        updated_at = NOW()
+      WHERE id = $16
+      RETURNING *
+    `, [title, slug, excerpt, content, cover_image_url, read_time, is_featured, meta_title, meta_description, meta_keywords, og_image_url, canonical_url, og_title, og_description, robots_directive, id]);
+
+    if (updated.rows.length === 0) return res.status(404).json({ error: 'المقال غير موجود' });
+    const art = updated.rows[0];
+    await recordAuditLog(req.user?.id || null, 'UPDATE_ARTICLE', 'ARTICLE', id, { title: art.title, slug: art.slug }, req.ip);
+    invalidateSitemapCache({ type: 'article', slug: art.slug, action: 'update', host: req.get('host') });
+    res.json(art);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.delete('/articles/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleted = await query(`DELETE FROM articles WHERE id = $1 RETURNING title, slug`, [id]);
+    if (deleted.rows.length === 0) return res.status(404).json({ error: 'المقال غير موجود' });
+    await recordAuditLog(req.user?.id || null, 'DELETE_ARTICLE', 'ARTICLE', id, { title: deleted.rows[0].title }, req.ip);
+    invalidateSitemapCache({ type: 'article', slug: deleted.rows[0].slug, action: 'delete', host: req.get('host') });
+    res.json({ message: 'تم حذف المقال بنجاح وتحديث خريطة الموقع' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -839,9 +908,11 @@ adminRouter.post('/seo/batch-generate', authMiddleware, async (req: AuthRequest,
       req.ip
     );
 
+    invalidateSitemapCache({ type: 'all', action: 'batch-generate', host: req.get('host') });
+
     res.json({
       success: true,
-      message: `تم توليد وتحديث وسوم SEO بنجاح لـ ${totalUpdated} صفحة في قاعدة البيانات!`,
+      message: `تم توليد وتحديث وسوم SEO بنجاح لـ ${totalUpdated} صفحة في قاعدة البيانات ومزامنة خريطة الموقع!`,
       details: {
         totalUpdated,
         updatedToolsCount,
@@ -898,6 +969,7 @@ adminRouter.put('/seo/tool/:id', authMiddleware, async (req: AuthRequest, res: R
     }
 
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_TOOL', 'TOOL', id, { name: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'tool', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -947,6 +1019,7 @@ adminRouter.put('/seo/article/:id', authMiddleware, async (req: AuthRequest, res
     }
 
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_ARTICLE', 'ARTICLE', id, { title: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'article', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -967,6 +1040,7 @@ adminRouter.put('/seo/category/:id', authMiddleware, async (req: AuthRequest, re
     `, [meta_title || null, meta_description || null, meta_keywords || null, og_image_url || null, canonical_url || null, og_title || null, og_description || null, robots_directive || 'index, follow', id]);
     if (updated.rows.length === 0) return res.status(404).json({ error: 'التصنيف غير موجود' });
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_CATEGORY', 'CATEGORY', id, { name: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'category', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -987,6 +1061,7 @@ adminRouter.put('/seo/comparison/:id', authMiddleware, async (req: AuthRequest, 
     `, [meta_title || null, meta_description || null, meta_keywords || null, og_image_url || null, canonical_url || null, og_title || null, og_description || null, robots_directive || 'index, follow', id]);
     if (updated.rows.length === 0) return res.status(404).json({ error: 'المقارنة غير موجودة' });
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_COMPARISON', 'COMPARISON', id, { title: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'comparison', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1007,6 +1082,7 @@ adminRouter.put('/seo/tutorial/:id', authMiddleware, async (req: AuthRequest, re
     `, [meta_title || null, meta_description || null, meta_keywords || null, og_image_url || null, canonical_url || null, og_title || null, og_description || null, robots_directive || 'index, follow', id]);
     if (updated.rows.length === 0) return res.status(404).json({ error: 'الدليل التعليمي غير موجود' });
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_TUTORIAL', 'TUTORIAL', id, { title: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'tutorial', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1027,7 +1103,66 @@ adminRouter.put('/seo/review/:id', authMiddleware, async (req: AuthRequest, res:
     `, [meta_title || null, meta_description || null, meta_keywords || null, og_image_url || null, canonical_url || null, og_title || null, og_description || null, robots_directive || 'index, follow', id]);
     if (updated.rows.length === 0) return res.status(404).json({ error: 'المراجعة غير موجودة' });
     await recordAuditLog(req.user?.id || null, 'UPDATE_SEO_REVIEW', 'REVIEW', id, { title: updated.rows[0].name, meta_title }, req.ip);
+    invalidateSitemapCache({ type: 'review', slug: updated.rows[0].slug, action: 'seo-update', host: req.get('host') });
     res.json(updated.rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Admin Dynamic Sitemap Management Endpoints
+adminRouter.get('/seo/sitemap/status', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const status = getSitemapStatus();
+    res.json(status);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/seo/sitemap/regenerate', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const host = req.get('host');
+    const { count, summary, etag, latestLastMod, xml } = await generateSitemapXml(host, true);
+    syncSitemapToDisk(xml);
+    
+    // Non-blocking notification to search engines
+    const pingResult = await notifySearchEngines([], host);
+    
+    await recordAuditLog(
+      req.user?.id || null,
+      'REGENERATE_SITEMAP',
+      'SEO',
+      'sitemap',
+      { count, breakdown: summary.breakdown, pingResult },
+      req.ip
+    );
+
+    res.json({
+      success: true,
+      message: `تم تحديث خريطة الموقع تلقائياً بنجاح وتزامنها مع قاعدة البيانات (${count} رابط) وإشعار محركات البحث`,
+      totalUrls: count,
+      breakdown: summary.breakdown,
+      latestLastMod: latestLastMod.toISOString(),
+      etag,
+      ping: pingResult,
+      sitemapUrl: summary.sitemapUrl,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/seo/sitemap/ping', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const host = req.get('host');
+    const { urls = [] } = req.body;
+    const result = await notifySearchEngines(urls, host);
+    res.json({
+      success: true,
+      message: 'تم إرسال إشعار الفهرسة الفوري لمحركات البحث عبر بروتوكول IndexNow بنجاح',
+      result,
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -1368,3 +1503,236 @@ adminRouter.post('/cache/purge', authMiddleware, async (req: AuthRequest, res: R
     res.status(500).json({ error: err.message });
   }
 });
+
+// ==========================================
+// E-E-A-T & Google AdSense Content Engine
+// ==========================================
+
+// 1. Audit all articles for E-E-A-T & Low Value Content Risk
+adminRouter.get('/content/eeat-audit', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const articlesRes = await query(`
+      SELECT a.id, a.title, a.slug, a.excerpt, a.content, a.read_time, a.is_featured, a.published_at,
+             a.meta_title, a.meta_description,
+             COALESCE(json_agg(c.name) FILTER (WHERE c.name IS NOT NULL), '[]') as categories
+      FROM articles a
+      LEFT JOIN article_categories ac ON a.id = ac.article_id
+      LEFT JOIN categories c ON ac.category_id = c.id
+      GROUP BY a.id
+      ORDER BY a.published_at DESC
+    `);
+
+    const auditedArticles = articlesRes.rows.map((art: any) => {
+      const content = art.content || '';
+      const words = content.split(/\s+/).filter(Boolean).length;
+      const hasH2 = /^##\s+/m.test(content);
+      const hasH3 = /^###\s+/m.test(content);
+      const hasTable = /\|.+\|.+\|/.test(content);
+      const hasFaq = /###\s+.*(سؤال|كيف|ما|هل|لماذا|\?|\؟)/i.test(content) || /##\s+.*(الأسئلة الشائعة|FAQ)/i.test(content);
+      const hasLists = /^[-*]\s+/m.test(content) || /^\d+\.\s+/m.test(content);
+
+      // Score calculation
+      let score = 50;
+      if (words >= 900) score += 20;
+      else if (words >= 600) score += 10;
+      else if (words < 400) score -= 20;
+
+      if (hasH2) score += 5;
+      if (hasH3) score += 5;
+      if (hasTable) score += 10;
+      if (hasFaq) score += 5;
+      if (hasLists) score += 5;
+
+      const riskLevel: 'low_value_risk' | 'moderate' | 'eeat_ready' = 
+        score >= 85 ? 'eeat_ready' : (score >= 65 ? 'moderate' : 'low_value_risk');
+
+      return {
+        id: art.id,
+        title: art.title,
+        slug: art.slug,
+        excerpt: art.excerpt,
+        wordCount: words,
+        readTime: art.read_time,
+        isFeatured: art.is_featured,
+        publishedAt: art.published_at,
+        categories: art.categories,
+        score: Math.min(100, Math.max(20, score)),
+        riskLevel,
+        hasH2,
+        hasH3,
+        hasTable,
+        hasFaq,
+        hasLists,
+        metaConfigured: Boolean(art.meta_title && art.meta_description),
+      };
+    });
+
+    const total = auditedArticles.length;
+    const readyCount = auditedArticles.filter(a => a.riskLevel === 'eeat_ready').length;
+    const atRiskCount = auditedArticles.filter(a => a.riskLevel === 'low_value_risk').length;
+    const averageScore = total > 0 ? Math.round(auditedArticles.reduce((acc, a) => acc + a.score, 0) / total) : 100;
+
+    res.json({
+      summary: {
+        totalArticles: total,
+        readyArticlesCount: readyCount,
+        atRiskArticlesCount: atRiskCount,
+        averageScore,
+        adsenseReadyPercentage: total > 0 ? Math.round((readyCount / total) * 100) : 100
+      },
+      articles: auditedArticles,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. AI E-E-A-T Rewrite and Expansion Endpoint
+adminRouter.post('/content/eeat-rewrite', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { 
+      currentTitle, 
+      currentContent, 
+      targetKeywords, 
+      tone, 
+      targetAudience, 
+      articleId, 
+      autoSave 
+    } = req.body;
+
+    if (!currentContent && !currentTitle) {
+      return res.status(400).json({ error: 'يرجى تقديم عنوان أو نص المقال الحالي لتطويره' });
+    }
+
+    const result = await AiService.rewriteArticleForEEAT({
+      currentTitle,
+      currentContent,
+      targetKeywords,
+      tone,
+      targetAudience,
+    });
+
+    // If autoSave requested with an articleId, update the database record
+    if (autoSave && articleId) {
+      await query(`
+        UPDATE articles 
+        SET title = $1, 
+            content = $2, 
+            excerpt = $3, 
+            read_time = $4,
+            meta_title = $5,
+            meta_description = $6,
+            updated_at = NOW()
+        WHERE id = $7
+      `, [
+        result.title,
+        result.content,
+        result.excerpt,
+        result.readTime,
+        result.metaTitle,
+        result.metaDescription,
+        articleId
+      ]);
+
+      // Invalidate cache
+      serverCache.clearAll();
+      invalidateSitemapCache();
+
+      await recordAuditLog(
+        req.user?.id || null,
+        'EEAT_ARTICLE_UPGRADE',
+        'ARTICLE',
+        articleId,
+        { title: result.title, wordCount: result.wordCount, eeatScore: result.eeatScore },
+        req.ip
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'تمت إعادة صياغة وتوسيع المقال بنجاح وفق معايير Google E-E-A-T',
+      data: result,
+      savedToDatabase: Boolean(autoSave && articleId)
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل في إعادة كتابة المقال' });
+  }
+});
+
+// 3. Batch Upgrade All Articles to E-E-A-T Compliance
+adminRouter.post('/content/articles/upgrade-all-eeat', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const articlesRes = await query(`
+      SELECT id, title, slug, excerpt, content 
+      FROM articles 
+      ORDER BY published_at DESC
+    `);
+
+    const upgraded: any[] = [];
+
+    for (const art of articlesRes.rows) {
+      const words = (art.content || '').split(/\s+/).filter(Boolean).length;
+      // If words < 800 or doesn't have table/headings, expand it
+      if (words < 800 || !art.content?.includes('|')) {
+        const rewritten = await AiService.rewriteArticleForEEAT({
+          currentTitle: art.title,
+          currentContent: art.content,
+          targetKeywords: ['الذكاء الاصطناعي', 'أدوات الإنتاجية', 'دليل شامل 2026'],
+          tone: 'مهنية وعميقة'
+        });
+
+        await query(`
+          UPDATE articles 
+          SET title = $1,
+              content = $2,
+              excerpt = $3,
+              read_time = $4,
+              meta_title = $5,
+              meta_description = $6,
+              updated_at = NOW()
+          WHERE id = $7
+        `, [
+          rewritten.title,
+          rewritten.content,
+          rewritten.excerpt,
+          rewritten.readTime,
+          rewritten.metaTitle,
+          rewritten.metaDescription,
+          art.id
+        ]);
+
+        upgraded.push({
+          id: art.id,
+          oldTitle: art.title,
+          newTitle: rewritten.title,
+          oldWords: words,
+          newWords: rewritten.wordCount,
+          eeatScore: rewritten.eeatScore
+        });
+      }
+    }
+
+    serverCache.clearAll();
+    invalidateSitemapCache();
+
+    await recordAuditLog(
+      req.user?.id || null,
+      'BATCH_EEAT_UPGRADE',
+      'ARTICLES',
+      'all',
+      { upgradedCount: upgraded.length },
+      req.ip
+    );
+
+    res.json({
+      success: true,
+      message: `تمت ترقية وتوسيع ${upgraded.length} مقالات بنجاح لتتوافق 100% مع شروط Google AdSense ومعايير E-E-A-T`,
+      upgradedCount: upgraded.length,
+      upgraded
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+

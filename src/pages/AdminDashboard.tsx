@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
+  ShieldCheck,
   Lock, 
   LogOut, 
   Plus, 
@@ -27,8 +28,10 @@ import { AdminAnalyticsDashboard } from '../components/AdminAnalyticsDashboard.t
 import { AdminRevenueEstimator } from '../components/AdminRevenueEstimator.tsx';
 import { AdminRevenueGrowth } from '../components/AdminRevenueGrowth.tsx';
 import { AdminKeywordOpportunityManager } from '../components/AdminKeywordOpportunityManager.tsx';
+import { AdminEEATArticleOptimizer } from '../components/AdminEEATArticleOptimizer.tsx';
+import { AdminContentQualityAuditor } from '../components/AdminContentQualityAuditor.tsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.tsx';
-import { TrendingUp, Split, KeyRound, Zap } from 'lucide-react';
+import { TrendingUp, Split, KeyRound, Zap, Sparkles as SparklesIcon } from 'lucide-react';
 import { purgeServerCache } from '../utils/cacheManager.ts';
 
 interface AdminDashboardProps {
@@ -41,7 +44,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
   const [stats, setStats] = useState<any>(null);
   const [tools, setTools] = useState<Tool[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'keywords' | 'revenue' | 'growth' | 'tools' | 'addTool' | 'seo' | 'ads' | 'categories' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'eeat' | 'auditor' | 'analytics' | 'keywords' | 'revenue' | 'growth' | 'tools' | 'addTool' | 'seo' | 'ads' | 'categories' | 'settings'>('overview');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -240,6 +243,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
         </button>
 
         <button
+          onClick={() => setActiveTab('eeat')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'eeat' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <SparklesIcon className="w-4 h-4 text-amber-300" />
+          <span>مُطوّر مقالات E-E-A-T & AdSense</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-700 text-[10px] font-mono">High Value</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('auditor')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'auditor' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>مدقق جودة المحتوى (Auditor)</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-700 text-[10px] font-mono">Quality 100</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('tools')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
             activeTab === 'tools' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -371,6 +396,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
             </div>
           </div>
         </div>
+      )}
+
+      {/* TAB CONTENT: 1.5 EEAT & ADSENSE ARTICLE OPTIMIZER */}
+      {activeTab === 'eeat' && (
+        <ErrorBoundary isWidget widgetName="مطور مقالات E-E-A-T">
+          <AdminEEATArticleOptimizer token={token} />
+        </ErrorBoundary>
+      )}
+
+      {/* TAB CONTENT: 1.8 CONTENT QUALITY AUDITOR */}
+      {activeTab === 'auditor' && (
+        <ErrorBoundary isWidget widgetName="مدقق جودة المحتوى E-E-A-T">
+          <AdminContentQualityAuditor token={token} />
+        </ErrorBoundary>
       )}
 
       {/* TAB CONTENT: 2. TOOLS MANAGEMENT LIST */}

@@ -7,7 +7,9 @@ import { runExpansion } from './src/server/expansion.ts';
 import { publicRouter } from './src/server/publicRoutes.ts';
 import { adminRouter } from './src/server/adminRoutes.ts';
 import { query } from './src/server/db.ts';
-import { generateSitemapXml } from './src/server/services/sitemapService.ts';
+import { generateSitemapXml, INDEXNOW_KEY } from './src/server/services/sitemapService.ts';
+import { generateRssFeed, prerenderSeoHtml, generateSeoAuditReport } from './src/server/services/seoService.ts';
+import fs from 'fs';
 
 async function startServer() {
   const app = express();
@@ -134,17 +136,67 @@ Sitemap: ${protocol}://${host}/sitemap.xml
     res.send(opensearchXml);
   });
 
-  // Dynamic sitemap.xml automatically generated and hosted
+  // Dynamic sitemap.xml automatically generated, cached, and synced to live DB
   app.get('/sitemap.xml', async (req, res) => {
     try {
       const host = req.get('host');
-      const { xml } = await generateSitemapXml(host);
+      const forceRefresh = req.query.refresh === 'true';
+      const { xml, etag, latestLastMod } = await generateSitemapXml(host, forceRefresh);
+      
       res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+      res.setHeader('X-Robots-Tag', 'noindex, follow');
+      res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      res.setHeader('ETag', etag);
+      res.setHeader('Last-Modified', latestLastMod.toUTCString());
+
+      const ifNoneMatch = req.headers['if-none-match'];
+      const ifModifiedSince = req.headers['if-modified-since'];
+
+      if (ifNoneMatch && ifNoneMatch === etag) {
+        return res.status(304).end();
+      }
+
+      if (ifModifiedSince) {
+        const clientDate = new Date(ifModifiedSince).getTime();
+        if (Math.floor(clientDate / 1000) >= Math.floor(latestLastMod.getTime() / 1000)) {
+          return res.status(304).end();
+        }
+      }
+
       res.send(xml);
     } catch (e: any) {
       console.error('Error serving sitemap.xml:', e);
       res.status(500).type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><error>Could not generate sitemap</error>');
+    }
+  });
+
+  // IndexNow Protocol Key Verification Route (Bing, Yandex, Seznam, Naver)
+  app.get([`/${INDEXNOW_KEY}.txt`, '/daleelai2026indexnowkey.txt'], (req, res) => {
+    res.type('text/plain; charset=utf-8').send(INDEXNOW_KEY);
+  });
+
+  // Dynamic RSS 2.0 / Atom Syndication Feed for Google, Bing & News Crawlers
+  app.get(['/feed.xml', '/rss.xml', '/feed', '/rss'], async (req, res) => {
+    try {
+      const host = req.get('host');
+      const rssXml = await generateRssFeed(host);
+      res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800');
+      res.send(rssXml);
+    } catch (e: any) {
+      console.error('Error serving RSS feed:', e);
+      res.status(500).type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><error>Could not generate RSS feed</error>');
+    }
+  });
+
+  // SEO Health & Performance Audit Endpoint
+  app.get('/api/seo/audit', async (req, res) => {
+    try {
+      const host = req.get('host');
+      const audit = await generateSeoAuditReport(host);
+      res.json(audit);
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to generate SEO audit report' });
     }
   });
 
@@ -220,9 +272,25 @@ google.com, ${pubId}, DIRECT, f08c47fec0942fa0
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
+    const indexHtmlPath = path.join(distPath, 'index.html');
+    let cachedTemplate = '';
+
     app.use(express.static(distPath));
-    app.get('*', (req: Request, res: Response) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    app.get('*', async (req: Request, res: Response) => {
+      try {
+        if (!cachedTemplate && fs.existsSync(indexHtmlPath)) {
+          cachedTemplate = fs.readFileSync(indexHtmlPath, 'utf-8');
+        }
+        if (cachedTemplate) {
+          const host = req.get('host');
+          const renderedHtml = await prerenderSeoHtml(cachedTemplate, req.path, host);
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          return res.send(renderedHtml);
+        }
+      } catch (err) {
+        console.error('Error in SEO pre-rendering fallback:', err);
+      }
+      res.sendFile(indexHtmlPath);
     });
   }
 

@@ -25,10 +25,14 @@ import {
   CheckCheck,
   AlertTriangle,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  Zap,
+  Radio,
+  Send
 } from 'lucide-react';
 import { PageSEO, SEOAuditIssue, SEOAuditSummary } from '../types.ts';
 import { OptimizedImage } from './OptimizedImage.tsx';
+import { getCanonicalDomain } from '../utils/seo.ts';
 
 interface AdminSEOManagerProps {
   token: string;
@@ -73,6 +77,19 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
   const [showSitemapModal, setShowSitemapModal] = useState(false);
   const [rawXml, setRawXml] = useState<string>('');
   const [copiedSitemap, setCopiedSitemap] = useState(false);
+  const [sitemapEngineStatus, setSitemapEngineStatus] = useState<{
+    version?: number;
+    isCached?: boolean;
+    lastGenerated?: string | null;
+    latestLastMod?: string | null;
+    totalUrls?: number;
+    breakdown?: any;
+    lastPingTime?: string | null;
+    lastPingResult?: any;
+    indexNowKey?: string;
+  } | null>(null);
+  const [regeneratingSitemap, setRegeneratingSitemap] = useState(false);
+  const [pingingIndexNow, setPingingIndexNow] = useState(false);
 
   // Batch Dynamic Generator State
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -124,6 +141,67 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
       console.error('Failed to load sitemap stats:', e);
     } finally {
       setSitemapLoading(false);
+    }
+  };
+
+  const fetchSitemapEngineStatus = async () => {
+    try {
+      const res = await fetch('/api/admin/seo/sitemap/status', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSitemapEngineStatus(data);
+      }
+    } catch (e) {
+      console.error('Failed to load sitemap engine status:', e);
+    }
+  };
+
+  const handleRegenerateSitemap = async () => {
+    setRegeneratingSitemap(true);
+    try {
+      const res = await fetch('/api/admin/seo/sitemap/regenerate', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFeedback({ text: data.message || 'تم تحديث ومزامنة خريطة الموقع فورياً مع قاعدة البيانات', type: 'success' });
+        await fetchSitemapStats();
+        await fetchSitemapEngineStatus();
+      } else {
+        throw new Error(data.error || 'فشل التحديث');
+      }
+    } catch (err: any) {
+      setFeedback({ text: err.message || 'حدث خطأ أثناء تحديث خريطة الموقع', type: 'error' });
+    } finally {
+      setRegeneratingSitemap(false);
+    }
+  };
+
+  const handlePingIndexNow = async () => {
+    setPingingIndexNow(true);
+    try {
+      const res = await fetch('/api/admin/seo/sitemap/ping', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ urls: [] })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFeedback({ text: data.message || 'تم إرسال إشعار IndexNow لمحركات البحث بنجاح', type: 'success' });
+        await fetchSitemapEngineStatus();
+      } else {
+        throw new Error(data.error || 'فشل إرسال الإشعار');
+      }
+    } catch (err: any) {
+      setFeedback({ text: err.message || 'فشل إرسال إشعار الفهرسة', type: 'error' });
+    } finally {
+      setPingingIndexNow(false);
     }
   };
 
@@ -184,6 +262,7 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
     fetchSEOItems();
     fetchAuditReport();
     fetchSitemapStats();
+    fetchSitemapEngineStatus();
   }, []);
 
   const selectItem = (item: PageSEO) => {
@@ -502,7 +581,7 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
   // Schema JSON-LD Generator for Live Preview
   const generateSchemaJson = () => {
     if (!selectedItem) return {};
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
+    const origin = getCanonicalDomain();
     const fullUrl = formData.canonical_url || `${origin}/${selectedItem.type === 'tool' ? 'tool' : 'articles'}/${selectedItem.slug}`;
 
     if (selectedItem.type === 'tool') {
@@ -571,6 +650,46 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
                 <Sparkles className="w-4 h-4 text-indigo-200" />
                 <span>المولد الديناميكي الشامل لوسوم Meta</span>
               </button>
+
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10 transition-colors"
+              >
+                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Sitemap XML</span>
+              </a>
+
+              <a
+                href="/feed.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                <span>RSS 2.0 Feed</span>
+              </a>
+
+              <a
+                href="/robots.txt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10 transition-colors"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>robots.txt</span>
+              </a>
+
+              <a
+                href="/api/seo/audit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10 transition-colors"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />
+                <span>تقرير فحص SEO</span>
+              </a>
             </div>
           </div>
 
@@ -952,6 +1071,36 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
           {/* Sitemap Actions */}
           <div className="flex flex-wrap items-center gap-2">
             <button
+              type="button"
+              disabled={regeneratingSitemap}
+              onClick={handleRegenerateSitemap}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-bold transition-all disabled:opacity-60 cursor-pointer shadow-2xs"
+              title="إعادة بناء خريطة الموقع فورياً ومزامنتها مع قاعدة البيانات"
+            >
+              {regeneratingSitemap ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-700" />
+              ) : (
+                <Zap className="w-3.5 h-3.5 text-amber-600" />
+              )}
+              <span>{regeneratingSitemap ? 'جارِ التحديث...' : 'تحديث ومزامنة فورية'}</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={pingingIndexNow}
+              onClick={handlePingIndexNow}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 text-xs font-bold transition-all disabled:opacity-60 cursor-pointer shadow-2xs"
+              title="إرسال إشعار فوري لمحركات البحث (IndexNow / Bing / Yandex)"
+            >
+              {pingingIndexNow ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-700" />
+              ) : (
+                <Radio className="w-3.5 h-3.5 text-emerald-600" />
+              )}
+              <span>{pingingIndexNow ? 'جارِ الإشعار...' : 'إرسال لـ IndexNow'}</span>
+            </button>
+
+            <button
               onClick={() => {
                 const origin = typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai';
                 navigator.clipboard.writeText(`${origin}/sitemap.xml`);
@@ -984,6 +1133,30 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
             </a>
           </div>
         </div>
+
+        {/* Engine Status Line */}
+        {sitemapEngineStatus && (
+          <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-slate-50/80 rounded-xl border border-slate-100 text-[11px] text-slate-600">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <strong className="text-slate-800 font-bold">محرك الخرائط:</strong>{' '}
+                {sitemapEngineStatus.isCached ? 'كاش فوري نشط (In-Memory Cache)' : 'توليد ديناميكي مباشر'}
+              </span>
+              {sitemapEngineStatus.latestLastMod && (
+                <span className="text-slate-500">
+                  آخر تعديل بالمحتوى: <strong className="font-mono text-slate-700">{new Date(sitemapEngineStatus.latestLastMod).toLocaleDateString('ar-SA')}</strong>
+                </span>
+              )}
+            </div>
+
+            {sitemapEngineStatus.lastPingTime && (
+              <span className="text-emerald-700 font-medium">
+                آخر إشعار IndexNow: {new Date(sitemapEngineStatus.lastPingTime).toLocaleTimeString('ar-SA')}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Sitemap Breakdown Badges */}
         {sitemapStats && (

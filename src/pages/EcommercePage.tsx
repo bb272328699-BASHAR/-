@@ -183,11 +183,23 @@ export const EcommercePage: React.FC<EcommercePageProps> = ({ navigate }) => {
       {/* Top Header & Breadcrumbs */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-4">
-            <button onClick={() => navigate('/')} className="hover:text-indigo-600 transition-colors">الرئيسية</button>
-            <span>/</span>
-            <span className="text-slate-900">المتاجر الإلكترونية والتسويق بالعمولة</span>
-          </div>
+          <nav aria-label="مسار التنقل" itemScope itemType="https://schema.org/BreadcrumbList" className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-4">
+            <span itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <button 
+                onClick={() => navigate('/')} 
+                itemProp="item" 
+                className="hover:text-indigo-600 transition-colors"
+              >
+                <span itemProp="name">الرئيسية</span>
+              </button>
+              <meta itemProp="position" content="1" />
+            </span>
+            <span aria-hidden="true">/</span>
+            <span itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <span itemProp="name" className="text-slate-900 font-bold">المتاجر الإلكترونية والتسويق بالعمولة</span>
+              <meta itemProp="position" content="2" />
+            </span>
+          </nav>
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-3 max-w-3xl">
@@ -1163,9 +1175,13 @@ export const EcommercePage: React.FC<EcommercePageProps> = ({ navigate }) => {
         )}
 
         {/* ============================================================ */}
-        {/* FAQ ACCORDION SECTION */}
+        {/* FAQ ACCORDION SECTION (Schema.org FAQPage Microdata) */}
         {/* ============================================================ */}
-        <div className="mt-16 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 space-y-6">
+        <section 
+          itemScope 
+          itemType="https://schema.org/FAQPage" 
+          className="mt-16 bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 space-y-6"
+        >
           <div className="max-w-2xl space-y-2">
             <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
               <HelpCircle className="w-6 h-6 text-indigo-600" />
@@ -1178,13 +1194,16 @@ export const EcommercePage: React.FC<EcommercePageProps> = ({ navigate }) => {
             {faqs.map((faq, idx) => (
               <div 
                 key={idx}
+                itemScope 
+                itemProp="mainEntity" 
+                itemType="https://schema.org/Question"
                 className="border border-slate-200 rounded-2xl overflow-hidden transition-colors"
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === idx ? null : idx)}
                   className="w-full text-right p-4 sm:p-5 flex items-center justify-between gap-4 font-bold text-slate-900 text-sm hover:bg-slate-50/80 transition-colors cursor-pointer"
                 >
-                  <span>{faq.q}</span>
+                  <span itemProp="name">{faq.q}</span>
                   {openFaqIndex === idx ? (
                     <ChevronUp className="w-4 h-4 text-indigo-600 flex-shrink-0" />
                   ) : (
@@ -1193,14 +1212,19 @@ export const EcommercePage: React.FC<EcommercePageProps> = ({ navigate }) => {
                 </button>
 
                 {openFaqIndex === idx && (
-                  <div className="px-5 pb-5 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3 bg-slate-50/50">
-                    {faq.a}
+                  <div 
+                    itemScope 
+                    itemProp="acceptedAnswer" 
+                    itemType="https://schema.org/Answer"
+                    className="px-5 pb-5 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3 bg-slate-50/50"
+                  >
+                    <div itemProp="text">{faq.a}</div>
                   </div>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
       </div>
 

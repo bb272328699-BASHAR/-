@@ -13,9 +13,14 @@ import {
   CheckCircle2,
   AlertCircle,
   ArrowLeft,
-  Heart
+  Heart,
+  Cookie,
+  Lock,
+  Check,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
+import { getSavedConsent, saveConsentChoice } from '../utils/consent.ts';
 
 interface BookmarkedTool {
   id: string;
@@ -304,51 +309,143 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({ navigate }) =>
 
       {/* Tab 2: Settings */}
       {activeTab === 'settings' && (
-        <div className="max-w-xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">تعديل الملف الشخصي</h3>
+        <div className="space-y-6 max-w-2xl">
+          {/* Profile Edit Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+            <h3 className="text-lg font-bold text-slate-900">تعديل الملف الشخصي</h3>
 
-          {updateMsg && (
-            <div className={`p-3 rounded-xl text-xs mb-4 flex items-center gap-2 ${
-              updateMsg.includes('نجاح') 
-                ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                : 'bg-rose-50 border border-rose-200 text-rose-700'
-            }`}>
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>{updateMsg}</span>
+            {updateMsg && (
+              <div className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                updateMsg.includes('نجاح') 
+                  ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                  : 'bg-rose-50 border border-rose-200 text-rose-700'
+              }`}>
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{updateMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">الاسم المعروض</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني المعتمد</label>
+                <input
+                  type="email"
+                  disabled
+                  value={user?.email || ''}
+                  className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 cursor-not-allowed dir-ltr text-right"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">البريد الإلكتروني مرتبط برقم عضويتك ولا يمكن تغييره يدوياً لأسباب أمنية.</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isUpdating ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+              </button>
+            </form>
+          </div>
+
+          {/* PRIVACY & COOKIE CONSENT NOTICE CARD (طلب الموافقة والتفضيلات) */}
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-500/30 space-y-5">
+            <div className="flex items-start justify-between gap-4 border-b border-indigo-500/20 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                  <Cookie className="w-6 h-6 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                    <span>إعدادات ملفات تعريف الارتباط والخصوصية</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                      Consent Mode v2
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-300">تخصيص موافقتك على كوكيز التحليلات والإعلانات المخصصة</p>
+                </div>
+              </div>
+
+              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>حماية كاملة للخصوصية</span>
+              </span>
             </div>
-          )}
 
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">الاسم المعروض</label>
-              <input
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                required
-              />
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              نحن في <strong>دليل الذكاء الاصطناعي</strong> نلبي أعلى معايير الشفافية وقوانين حماية البيانات العامة (GDPR & CCPA). نطلب موافقتك الصريحة لتخزين ملفات تعريف الارتباط لتحسين أداء السيرفر وتخصيص تجربة الأدوات والإعلانات المعتمدة.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  الكوكيز الأساسية والجلسات
+                </span>
+                <p className="text-[11px] text-slate-400">حفظ أدواتك المفضلة والجلسات بأمان (مفعلة دائماً).</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                <span className="font-bold text-white flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  تحليلات Google & AdSense
+                </span>
+                <p className="text-[11px] text-slate-400">قياس الزيارات وعرض إعلانات ملائمة اهتماماتك.</p>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">البريد الإلكتروني المعتمد</label>
-              <input
-                type="email"
-                disabled
-                value={user.email}
-                className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500 cursor-not-allowed dir-ltr text-right"
-              />
-              <p className="text-[10px] text-slate-400 mt-1">البريد الإلكتروني مرتبط برقم عضويتك ولا يمكن تغييره يدوياً لأسباب أمنية.</p>
-            </div>
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/10">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveConsentChoice('all');
+                    localStorage.setItem('daleel_cookie_consent', 'true');
+                    alert('تمت الموافقة وتحديث إعدادات ملفات تعريف الارتباط بنجاح!');
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>الموافقة على جميع الكوكيز</span>
+                </button>
 
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
-            >
-              {isUpdating ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-            </button>
-          </form>
+                <button
+                  type="button"
+                  onClick={() => {
+                    saveConsentChoice('essential');
+                    localStorage.setItem('daleel_cookie_consent', 'true');
+                    alert('تم حفظ اختيارك للاقتصار على الكوكيز الضرورية فقط.');
+                  }}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs transition-all border border-white/10 cursor-pointer"
+                >
+                  الكوكيز الضرورية فقط
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('daleel_cookie_consent');
+                  window.dispatchEvent(new CustomEvent('daleel_consent_updated'));
+                  window.location.reload();
+                }}
+                className="text-[11px] text-indigo-300 hover:text-white flex items-center gap-1 underline cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>إعادة إظهار شريط الموافقة</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

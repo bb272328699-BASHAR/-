@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, ArrowLeft, Loader2, Sparkles, Clock, Calendar } from 'lucide-react';
+import { BookOpen, ArrowLeft, Loader2, Sparkles, Clock, Calendar, ShieldCheck } from 'lucide-react';
 import { Article } from '../types.ts';
 import { DEFAULT_ARTICLES } from '../data/defaultCatalog.ts';
-import { SocialShareButtons } from '../components/SocialShareButtons.tsx';
 import { updateDocumentSEO } from '../utils/seo.ts';
 import { generateArticleSEO } from '../utils/autoSeoGenerator.ts';
 import { OptimizedImage } from '../components/OptimizedImage.tsx';
 import { RelatedArticlesSection } from '../components/RelatedArticlesSection.tsx';
 import { RelatedToolsSection } from '../components/RelatedToolsSection.tsx';
-import { AdSlot } from '../components/AdSlot.tsx';
+import { EEATArticleViewer } from '../components/EEATArticleViewer.tsx';
 import { trackPageView } from '../utils/analytics.ts';
 
 interface ArticlesPageProps {
@@ -94,67 +93,22 @@ export const ArticlesPage: React.FC<ArticlesPageProps> = ({ navigate, articleSlu
           <span className="text-indigo-600 font-bold">{singleArticle.title}</span>
         </nav>
 
-        <article className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-            <div className="flex items-center gap-3 text-xs text-slate-500">
-              <span className="font-bold text-slate-700">{singleArticle.author_name}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {singleArticle.read_time}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {new Date(singleArticle.published_at).toLocaleDateString('ar-EG')}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-bold hidden sm:inline">مشاركة المقال:</span>
-              <SocialShareButtons
-                title={`${singleArticle.title} | دليل الذكاء الاصطناعي`}
-                description={singleArticle.excerpt}
-                variant="compact"
-              />
-            </div>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight">
-            {singleArticle.title}
-          </h1>
-
-          {/* Strategic Ad Placement 1: Directly After the Main Title (H1) */}
-          <AdSlot position="article_top" className="my-4" />
-
-          {/* Article Cover Image in WebP */}
-          {singleArticle.cover_image_url && (
-            <div className="w-full rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs max-h-96">
-              <OptimizedImage
-                src={singleArticle.cover_image_url}
-                alt={singleArticle.title}
-                priority={true}
-                aspectRatio="16/9"
-                responsiveWidths={[480, 768, 1024, 1280]}
-                className="w-full h-full object-cover"
-                containerClassName="w-full h-full max-h-96"
-              />
-            </div>
-          )}
-
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-medium text-sm sm:text-base leading-relaxed">
-            {singleArticle.excerpt}
-          </div>
-
-          <div className="prose prose-slate max-w-none text-slate-700 text-base leading-relaxed space-y-4">
-            <p>{singleArticle.content}</p>
-          </div>
-
-          {/* Strategic Ad Placement 2: End of Article Content */}
-          <AdSlot position="article_bottom" className="my-6" />
-
-          <div className="pt-6 border-t border-slate-100">
-            <SocialShareButtons
-              title={`${singleArticle.title} - مقال تحليلي في الذكاء الاصطناعي`}
-              description={singleArticle.excerpt}
-              variant="banner"
-            />
-          </div>
-        </article>
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-sm">
+          <EEATArticleViewer
+            id={singleArticle.id}
+            slug={singleArticle.slug}
+            title={singleArticle.title}
+            excerpt={singleArticle.excerpt}
+            content={singleArticle.content}
+            author_name={singleArticle.author_name}
+            published_at={singleArticle.published_at}
+            read_time={singleArticle.read_time}
+            cover_image_url={singleArticle.cover_image_url}
+            categories={singleArticle.categories}
+            onBack={() => navigate('/articles')}
+            backLabel="العودة لكافة المقالات"
+          />
+        </div>
 
         {/* Related Articles Section */}
         {Array.isArray(singleArticle.relatedArticles) && singleArticle.relatedArticles.length > 0 && (

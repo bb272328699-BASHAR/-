@@ -70,9 +70,57 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     isGloballyBlocked ? 'blocked' : 'loading'
   );
   
+  // Lazy Loading Trigger State: Wait until viewport intersection OR user interaction
+  const [shouldLoadAd, setShouldLoadAd] = useState(false);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const insRef = useRef<HTMLModElement>(null);
   const pushedRef = useRef(false);
+
+  // Lazy Loading Setup: IntersectionObserver + User Interaction Listeners
+  useEffect(() => {
+    if (shouldLoadAd) return;
+
+    let observer: IntersectionObserver | null = null;
+
+    const triggerAdLoad = () => {
+      setShouldLoadAd(true);
+      cleanupListeners();
+    };
+
+    const cleanupListeners = () => {
+      if (observer) observer.disconnect();
+      window.removeEventListener('scroll', triggerAdLoad);
+      window.removeEventListener('pointerdown', triggerAdLoad);
+      window.removeEventListener('touchstart', triggerAdLoad);
+      window.removeEventListener('mousemove', triggerAdLoad);
+      window.removeEventListener('keydown', triggerAdLoad);
+    };
+
+    // 1. IntersectionObserver: Load ad when slot is within 250px of viewport
+    if (typeof IntersectionObserver !== 'undefined' && containerRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            triggerAdLoad();
+          }
+        },
+        { rootMargin: '250px 0px' }
+      );
+      observer.observe(containerRef.current);
+    }
+
+    // 2. Fallback User Interaction Events
+    window.addEventListener('scroll', triggerAdLoad, { passive: true, once: true });
+    window.addEventListener('pointerdown', triggerAdLoad, { passive: true, once: true });
+    window.addEventListener('touchstart', triggerAdLoad, { passive: true, once: true });
+    window.addEventListener('mousemove', triggerAdLoad, { passive: true, once: true });
+    window.addEventListener('keydown', triggerAdLoad, { passive: true, once: true });
+
+    return () => {
+      cleanupListeners();
+    };
+  }, [shouldLoadAd]);
 
   useEffect(() => {
     fetchAdSettings().then((s) => setSettings(s));
@@ -154,9 +202,9 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     slotId = '9685713922';
   }
 
-  // Load AdSense script dynamically if not already loaded
+  // Load AdSense script dynamically if not already loaded (and triggered by Lazy Load)
   useEffect(() => {
-    if (!isAdsEnabled || isTestMode || !isValidPublisher) {
+    if (!shouldLoadAd || !isAdsEnabled || isTestMode || !isValidPublisher) {
       return;
     }
 
@@ -188,11 +236,11 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
     } else {
       setScriptLoaded(true);
     }
-  }, [isAdsEnabled, isAutoAdsEnabled, isTestMode, formattedPublisherId, isValidPublisher]);
+  }, [shouldLoadAd, isAdsEnabled, isAutoAdsEnabled, isTestMode, formattedPublisherId, isValidPublisher]);
 
   // Execute AdSense Push and Setup MutationObserver for Status & Error Diagnostics
   useEffect(() => {
-    if (!isAdsEnabled || isTestMode || !consentGranted || isGloballyBlocked) {
+    if (!shouldLoadAd || !isAdsEnabled || isTestMode || !consentGranted || isGloballyBlocked) {
       return;
     }
 
@@ -260,7 +308,7 @@ export const AdSlot: React.FC<AdSlotProps> = ({ position, className = '', slotId
       observer.disconnect();
       clearTimeout(fallbackTimer);
     };
-  }, [scriptLoaded, isAdsEnabled, isTestMode, consentGranted, isGloballyBlocked, adStatus]);
+  }, [shouldLoadAd, scriptLoaded, isAdsEnabled, isTestMode, consentGranted, isGloballyBlocked, adStatus]);
 
   // If ads are disabled globally or consent is denied, render nothing
   if (settings && (!isAdsEnabled || !consentGranted)) {

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { query } from '../db.ts';
 import {
   DEFAULT_TOOLS,
@@ -7,6 +9,8 @@ import {
   DEFAULT_TUTORIALS,
   DEFAULT_REVIEWS,
 } from '../../data/defaultCatalog.ts';
+
+export const INDEXNOW_KEY = 'daleelai2026indexnowkey';
 
 export interface SitemapUrlEntry {
   loc: string;
@@ -30,8 +34,25 @@ export interface SitemapSummary {
   };
   generatedAt: string;
   sitemapUrl: string;
+  latestLastMod?: string;
   entries?: SitemapUrlEntry[];
 }
+
+export interface CachedSitemap {
+  xml: string;
+  count: number;
+  summary: SitemapSummary;
+  generatedAt: Date;
+  latestLastMod: Date;
+  etag: string;
+  baseUrl: string;
+}
+
+// In-Memory Fast Cache with Immediate Invalidation
+let sitemapCache: CachedSitemap | null = null;
+let sitemapVersion = 1;
+let lastPingTime: string | null = null;
+let lastPingResult: { success: boolean; message: string; timestamp: string; urlsPushed?: number } | null = null;
 
 /**
  * Escapes XML entities in strings
@@ -71,42 +92,147 @@ export function getBaseUrl(hostHeader?: string): string {
 }
 
 /**
+ * Synchronize generated sitemap and IndexNow key files to static disk directories
+ * Ensures static file hosts (Netlify, Cloud Run, CDNs) always have the latest XML file
+ */
+export function syncSitemapToDisk(xml: string): void {
+  try {
+    const publicDir = path.join(process.cwd(), 'public');
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+    }
+    fs.writeFileSync(path.join(publicDir, 'sitemap.xml'), xml, 'utf8');
+    fs.writeFileSync(path.join(publicDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY, 'utf8');
+
+    const distDir = path.join(process.cwd(), 'dist');
+    if (fs.existsSync(distDir)) {
+      fs.writeFileSync(path.join(distDir, 'sitemap.xml'), xml, 'utf8');
+      fs.writeFileSync(path.join(distDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY, 'utf8');
+    }
+  } catch (err: any) {
+    console.warn('[Sitemap Sync] Failed to write sitemap to disk:', err.message);
+  }
+}
+
+/**
+ * Notify Search Engines (IndexNow protocol for Bing, Yandex, Seznam, Naver)
+ * Triggers near-instant indexing for new tools and articles
+ */
+export async function notifySearchEngines(urlList: string[] = [], hostHeader?: string) {
+  const baseUrl = getBaseUrl(hostHeader);
+  const cleanHost = baseUrl.replace(/^https?:\/\//, '');
+  const sitemapUrl = `${baseUrl}/sitemap.xml`;
+
+  const urlsToSubmit = Array.from(new Set([
+    sitemapUrl,
+    `${baseUrl}/feed.xml`,
+    ...urlList.map((u) => (u.startsWith('http') ? u : `${baseUrl}${u.startsWith('/') ? '' : '/'}${u}`))
+  ])).slice(0, 50);
+
+  const payload = {
+    host: cleanHost,
+    key: INDEXNOW_KEY,
+    keyLocation: `${baseUrl}/${INDEXNOW_KEY}.txt`,
+    urlList: urlsToSubmit,
+  };
+
+  try {
+    fetch('https://api.indexnow.org/indexnow', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'User-Agent': 'DaleelAI-SitemapEngine/2026',
+      },
+      body: JSON.stringify(payload),
+    }).then(async (res) => {
+      lastPingTime = new Date().toISOString();
+      lastPingResult = {
+        success: res.ok || res.status === 200 || res.status === 202,
+        message: `IndexNow ping status: ${res.status} ${res.statusText}`,
+        timestamp: lastPingTime,
+        urlsPushed: urlsToSubmit.length,
+      };
+      console.log(`[Sitemap IndexNow] Notified search engines for ${urlsToSubmit.length} URLs (Status: ${res.status})`);
+    }).catch((err) => {
+      lastPingTime = new Date().toISOString();
+      lastPingResult = {
+        success: false,
+        message: `IndexNow ping error: ${err.message}`,
+        timestamp: lastPingTime,
+        urlsPushed: urlsToSubmit.length,
+      };
+      console.warn('[Sitemap IndexNow] Ping warning:', err.message);
+    });
+
+    return {
+      success: true,
+      urlsSubmitted: urlsToSubmit,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err: any) {
+    console.warn('[Sitemap Ping] Notification dispatch failed:', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Invalidate sitemap cache immediately upon tool/article additions, updates, or deletions
+ * Automatically triggers background regeneration and search engine pinging
+ */
+export function invalidateSitemapCache(triggerInfo?: { type?: string; slug?: string; action?: string; host?: string }) {
+  sitemapCache = null;
+  sitemapVersion++;
+  console.log(`[Sitemap] Invalidation triggered by ${triggerInfo?.type || 'entity'} (${triggerInfo?.action || 'update'}): ${triggerInfo?.slug || ''}. Version incremented to ${sitemapVersion}`);
+
+  // Background regeneration & disk write
+  setTimeout(async () => {
+    try {
+      const { xml } = await generateSitemapXml(triggerInfo?.host, true);
+      syncSitemapToDisk(xml);
+
+      if (triggerInfo?.slug && triggerInfo?.type) {
+        const path = triggerInfo.type === 'tool' ? `/tools/${triggerInfo.slug}`
+          : triggerInfo.type === 'article' ? `/articles/${triggerInfo.slug}`
+          : triggerInfo.type === 'category' ? `/categories/${triggerInfo.slug}`
+          : triggerInfo.type === 'comparison' ? `/comparisons/${triggerInfo.slug}`
+          : `/${triggerInfo.slug}`;
+        notifySearchEngines([path], triggerInfo.host);
+      }
+    } catch (e: any) {
+      console.error('[Sitemap] Background regeneration error:', e.message);
+    }
+  }, 50);
+}
+
+/**
+ * Returns live status of the sitemap engine for admin monitoring
+ */
+export function getSitemapStatus() {
+  return {
+    version: sitemapVersion,
+    isCached: !!sitemapCache,
+    lastGenerated: sitemapCache?.generatedAt || null,
+    latestLastMod: sitemapCache?.latestLastMod || null,
+    totalUrls: sitemapCache?.count || 0,
+    breakdown: sitemapCache?.summary.breakdown || null,
+    lastPingTime,
+    lastPingResult,
+    indexNowKey: INDEXNOW_KEY,
+  };
+}
+
+/**
  * Fetch all sitemap items from database and generate structured entries
  */
-export async function getSitemapEntries(hostHeader?: string): Promise<{ entries: SitemapUrlEntry[]; summary: SitemapSummary }> {
+export async function getSitemapEntries(hostHeader?: string): Promise<{ 
+  entries: SitemapUrlEntry[]; 
+  summary: SitemapSummary; 
+  latestLastMod: Date;
+}> {
   const baseUrl = getBaseUrl(hostHeader);
-  const todayIso = new Date().toISOString().split('T')[0];
-
-  // Core Static & Hub Routes
-  const staticEntries: SitemapUrlEntry[] = [
-    { loc: `${baseUrl}/`, priority: 1.0, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/ai-tools`, priority: 0.95, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { 
-      loc: `${baseUrl}/ecommerce`, 
-      priority: 0.95, 
-      changefreq: 'daily', 
-      lastmod: todayIso, 
-      type: 'static',
-      images: [{ loc: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=1200&auto=format&fit=crop&q=80', title: 'دليل ومقارنة منصات التجارة الإلكترونية والتسويق بالعمولة 2026' }]
-    },
-    { loc: `${baseUrl}/categories`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/advisor`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/prompts`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/stacks`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/alternatives`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/calculator`, priority: 0.8, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/comparisons`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/reviews`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/articles`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/tutorials`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/resources`, priority: 0.75, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/about`, priority: 0.5, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/contact`, priority: 0.5, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/privacy`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/terms`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/affiliate-disclosure`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-    { loc: `${baseUrl}/editorial-policy`, priority: 0.4, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
-  ];
+  const now = new Date();
+  const todayIso = now.toISOString().split('T')[0];
+  let maxTimestamp = 0;
 
   const toolEntries: SitemapUrlEntry[] = [];
   const categoryEntries: SitemapUrlEntry[] = [];
@@ -152,6 +278,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 1. Published Tools with Images & Canonicals
     for (const tool of toolsRes.rows) {
+      if (tool.updated_date) {
+        const ts = new Date(tool.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = tool.updated_date ? new Date(tool.updated_date).toISOString().split('T')[0] : todayIso;
       const toolLoc = tool.canonical_url && tool.canonical_url.startsWith('http') 
         ? tool.canonical_url 
@@ -177,6 +307,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 2. Categories
     for (const cat of categoriesRes.rows) {
+      if (cat.updated_date) {
+        const ts = new Date(cat.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = cat.updated_date ? new Date(cat.updated_date).toISOString().split('T')[0] : todayIso;
       categoryEntries.push({
         loc: `${baseUrl}/categories/${encodeURIComponent(cat.slug)}`,
@@ -189,6 +323,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 3. Articles & News
     for (const article of articlesRes.rows) {
+      if (article.updated_date) {
+        const ts = new Date(article.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = article.updated_date ? new Date(article.updated_date).toISOString().split('T')[0] : todayIso;
       const artLoc = article.canonical_url && article.canonical_url.startsWith('http')
         ? article.canonical_url
@@ -214,6 +352,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 4. Comparisons
     for (const comp of comparisonsRes.rows) {
+      if (comp.updated_date) {
+        const ts = new Date(comp.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = comp.updated_date ? new Date(comp.updated_date).toISOString().split('T')[0] : todayIso;
       const compLoc = comp.canonical_url && comp.canonical_url.startsWith('http')
         ? comp.canonical_url
@@ -239,6 +381,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 5. Tutorials
     for (const tut of tutorialsRes.rows) {
+      if (tut.updated_date) {
+        const ts = new Date(tut.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = tut.updated_date ? new Date(tut.updated_date).toISOString().split('T')[0] : todayIso;
       const tutLoc = tut.canonical_url && tut.canonical_url.startsWith('http')
         ? tut.canonical_url
@@ -264,6 +410,10 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
 
     // 6. In-depth Reviews
     for (const rev of reviewsRes.rows) {
+      if (rev.updated_date) {
+        const ts = new Date(rev.updated_date).getTime();
+        if (ts > maxTimestamp) maxTimestamp = ts;
+      }
       const date = rev.updated_date ? new Date(rev.updated_date).toISOString().split('T')[0] : todayIso;
       const revLoc = rev.canonical_url && rev.canonical_url.startsWith('http')
         ? rev.canonical_url
@@ -286,8 +436,8 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
         images: images.length > 0 ? images : undefined,
       });
     }
-  } catch (err) {
-    console.error('Error fetching dynamic entries for sitemap from database:', err);
+  } catch (err: any) {
+    console.error('[Sitemap] Error fetching dynamic entries from database:', err.message);
   }
 
   // Fallbacks if database entries were empty or unreachable
@@ -365,6 +515,40 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
     }
   }
 
+  const latestDateIso = maxTimestamp > 0 ? new Date(maxTimestamp).toISOString().split('T')[0] : todayIso;
+  const latestLastMod = maxTimestamp > 0 ? new Date(maxTimestamp) : now;
+
+  // Core Static & Hub Routes (lastmod reflects latest content freshness)
+  const staticEntries: SitemapUrlEntry[] = [
+    { loc: `${baseUrl}/`, priority: 1.0, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/ai-tools`, priority: 0.95, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { 
+      loc: `${baseUrl}/ecommerce`, 
+      priority: 0.95, 
+      changefreq: 'daily', 
+      lastmod: latestDateIso, 
+      type: 'static',
+      images: [{ loc: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=1200&auto=format&fit=crop&q=80', title: 'دليل ومقارنة منصات التجارة الإلكترونية والتسويق بالعمولة 2026' }]
+    },
+    { loc: `${baseUrl}/categories`, priority: 0.85, changefreq: 'weekly', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/advisor`, priority: 0.9, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/prompts`, priority: 0.9, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/stacks`, priority: 0.85, changefreq: 'weekly', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/alternatives`, priority: 0.9, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/calculator`, priority: 0.8, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/comparisons`, priority: 0.9, changefreq: 'daily', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/reviews`, priority: 0.85, changefreq: 'weekly', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/articles`, priority: 0.85, changefreq: 'weekly', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/tutorials`, priority: 0.85, changefreq: 'weekly', lastmod: latestDateIso, type: 'static' },
+    { loc: `${baseUrl}/resources`, priority: 0.75, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/about`, priority: 0.5, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/contact`, priority: 0.5, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/privacy`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/terms`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/affiliate-disclosure`, priority: 0.3, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+    { loc: `${baseUrl}/editorial-policy`, priority: 0.4, changefreq: 'monthly', lastmod: todayIso, type: 'static' },
+  ];
+
   const allEntries: SitemapUrlEntry[] = [
     ...staticEntries,
     ...toolEntries,
@@ -386,18 +570,41 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
       tutorials: tutorialEntries.length,
       reviews: reviewEntries.length,
     },
-    generatedAt: new Date().toISOString(),
+    generatedAt: now.toISOString(),
+    latestLastMod: latestLastMod.toISOString(),
     sitemapUrl: `${baseUrl}/sitemap.xml`,
   };
 
-  return { entries: allEntries, summary };
+  return { entries: allEntries, summary, latestLastMod };
 }
 
 /**
- * Generate a complete, Google/Bing compliant XML sitemap string
+ * Generate a complete, Google/Bing compliant XML sitemap string with caching and ETag
  */
-export async function generateSitemapXml(hostHeader?: string): Promise<{ xml: string; count: number; summary: SitemapSummary }> {
-  const { entries, summary } = await getSitemapEntries(hostHeader);
+export async function generateSitemapXml(
+  hostHeader?: string, 
+  forceRefresh = false
+): Promise<{ 
+  xml: string; 
+  count: number; 
+  summary: SitemapSummary; 
+  etag: string; 
+  latestLastMod: Date;
+}> {
+  const baseUrl = getBaseUrl(hostHeader);
+
+  // Return cached version if valid, fresh, and not forced
+  if (!forceRefresh && sitemapCache && sitemapCache.baseUrl === baseUrl) {
+    return {
+      xml: sitemapCache.xml,
+      count: sitemapCache.count,
+      summary: sitemapCache.summary,
+      etag: sitemapCache.etag,
+      latestLastMod: sitemapCache.latestLastMod,
+    };
+  }
+
+  const { entries, summary, latestLastMod } = await getSitemapEntries(hostHeader);
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`;
@@ -431,5 +638,26 @@ export async function generateSitemapXml(hostHeader?: string): Promise<{ xml: st
 
   xml += `</urlset>`;
 
-  return { xml, count: entries.length, summary };
+  const etag = `W/"sitemap-${entries.length}-${latestLastMod.getTime()}-v${sitemapVersion}"`;
+
+  sitemapCache = {
+    xml,
+    count: entries.length,
+    summary,
+    generatedAt: new Date(),
+    latestLastMod,
+    etag,
+    baseUrl,
+  };
+
+  // Sync to disk asynchronously
+  syncSitemapToDisk(xml);
+
+  return {
+    xml,
+    count: entries.length,
+    summary,
+    etag,
+    latestLastMod,
+  };
 }
