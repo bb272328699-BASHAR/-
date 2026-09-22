@@ -178,6 +178,18 @@ export function updateDocumentSEO(config: SEOConfig) {
   }
 }
 
+export const PRIMARY_CANONICAL_DOMAIN = 'https://ai-toolsar.netlify.app';
+
+export function getCanonicalDomain(): string {
+  if (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) {
+    const org = window.location.origin;
+    if (org.includes('ai-toolsar') || org.includes('netlify.app') || (!org.includes('localhost') && !org.includes('run.app'))) {
+      return org;
+    }
+  }
+  return PRIMARY_CANONICAL_DOMAIN;
+}
+
 /**
  * Standardized SEO configurations for primary static routes
  */
@@ -185,18 +197,37 @@ export const ROUTE_SEO_MAP: Record<string, SEOConfig> = {
   '/': {
     title: 'دليل الذكاء الاصطناعي | المرجع الأول لأدوات ومقارنات الذكاء الاصطناعي',
     description: 'المرجع العربي الشامل لاكتشاف وتجربة أفضل أدوات وتطبيقات الذكاء الاصطناعي في 2026. مراجعات حقيقية، مقارنات دقيقة، وشروحات عملية.',
-    keywords: 'دليل الذكاء الاصطناعي, أدوات الذكاء الاصطناعي, ChatGPT, Midjourney, Claude, مقارنات الذكاء الاصطناعي',
+    keywords: 'دليل الذكاء الاصطناعي, أدوات الذكاء الاصطناعي, ChatGPT, Midjourney, Claude, مقارنات الذكاء الاصطناعي, الذكاء الاصطناعي العربي',
     ogType: 'website',
     structuredData: {
       '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      'name': 'دليل الذكاء الاصطناعي',
-      'url': 'https://daleel.ai/',
-      'potentialAction': {
-        '@type': 'SearchAction',
-        'target': 'https://daleel.ai/ai-tools?search={search_term_string}',
-        'query-input': 'required name=search_term_string'
-      }
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          '@id': 'https://ai-toolsar.netlify.app/#website',
+          'name': 'دليل الذكاء الاصطناعي',
+          'alternateName': ['Daleel AI', 'دليل الذكاء الاصطناعي العربي'],
+          'url': 'https://ai-toolsar.netlify.app/',
+          'description': 'المرجع العربي الشامل لاكتشاف وتجربة أفضل أدوات وتطبيقات الذكاء الاصطناعي في 2026.',
+          'inLanguage': 'ar',
+          'potentialAction': {
+            '@type': 'SearchAction',
+            'target': 'https://ai-toolsar.netlify.app/ai-tools?search={search_term_string}',
+            'query-input': 'required name=search_term_string'
+          }
+        },
+        {
+          '@type': 'Organization',
+          '@id': 'https://ai-toolsar.netlify.app/#organization',
+          'name': 'دليل الذكاء الاصطناعي | Daleel AI',
+          'url': 'https://ai-toolsar.netlify.app/',
+          'logo': 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=512&h=512&auto=format&fit=crop&q=80',
+          'sameAs': [
+            'https://twitter.com/DaleelAI',
+            'https://linkedin.com/company/daleel-ai'
+          ]
+        }
+      ]
     }
   },
   '/ai-tools': {
@@ -206,10 +237,23 @@ export const ROUTE_SEO_MAP: Record<string, SEOConfig> = {
     ogType: 'website',
     structuredData: {
       '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      'name': 'مكتبة أدوات الذكاء الاصطناعي',
-      'description': 'دليل شامل لأحدث أدوات الذكاء الاصطناعي في مختلف المجالات والتخصصات.',
-      'url': 'https://daleel.ai/ai-tools'
+      '@graph': [
+        {
+          '@type': 'CollectionPage',
+          '@id': 'https://ai-toolsar.netlify.app/ai-tools#collection',
+          'name': 'مكتبة أدوات الذكاء الاصطناعي 2026',
+          'description': 'دليل شامل لأحدث أدوات الذكاء الاصطناعي في مختلف المجالات والتخصصات.',
+          'url': 'https://ai-toolsar.netlify.app/ai-tools'
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': 'https://ai-toolsar.netlify.app/ai-tools#breadcrumb',
+          'itemListElement': [
+            { '@type': 'ListItem', 'position': 1, 'name': 'الرئيسية', 'item': 'https://ai-toolsar.netlify.app/' },
+            { '@type': 'ListItem', 'position': 2, 'name': 'مكتبة الأدوات', 'item': 'https://ai-toolsar.netlify.app/ai-tools' }
+          ]
+        }
+      ]
     }
   },
   '/categories': {
@@ -271,6 +315,82 @@ export const ROUTE_SEO_MAP: Record<string, SEOConfig> = {
     description: 'مراجعات مفصلة وتجارب عملية محايدة توضح إيجابيات وسلبيات كل أداة بدون مجاملات لمساعدتك على اتخاذ القرار الصحيح.',
     keywords: 'مراجعات أدوات الذكاء الاصطناعي, تقييمات البرامج, مراجعة ChatGPT, تجربة الأدوات',
     ogType: 'website'
+  },
+  '/ecommerce': {
+    title: 'مقارنة منصات المتاجر الإلكترونية والتسويق بالعمولة 2026 | سلة، زد، شوبيفاي',
+    description: 'دليل مقارنة شامل وحيادي بين منصات إنشاء المتاجر الإلكترونية سلة وزد وشوبيفاي وووكومرس، مع حاسبة تكاليف وأرباح تفاعلية وأفضل برامج التسويق بالعمولة وكوبونات الخصم.',
+    keywords: 'مقارنة سلة وزد وشوبيفاي, أفضل منصة متجر الكتروني, حاسبة تكلفة المتاجر, التسويق بالعمولة للمتاجر, دروب شيبينج, مقارنة منصات التجارة الالكترونية',
+    ogType: 'website',
+    ogImage: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=1200&h=630&auto=format&fit=crop&q=80',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebPage',
+          '@id': 'https://ai-toolsar.netlify.app/ecommerce#webpage',
+          'url': 'https://ai-toolsar.netlify.app/ecommerce',
+          'name': 'مقارنة منصات المتاجر الإلكترونية والتسويق بالعمولة 2026 | سلة، زد، شوبيفاي',
+          'description': 'دليل مقارنة شامل وحيادي بين منصات إنشاء المتاجر الإلكترونية سلة وزد وشوبيفاي وووكومرس، مع حاسبة تكاليف وأرباح تفاعلية.',
+          'inLanguage': 'ar'
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': 'https://ai-toolsar.netlify.app/ecommerce#breadcrumb',
+          'itemListElement': [
+            {
+              '@type': 'ListItem',
+              'position': 1,
+              'name': 'الرئيسية',
+              'item': 'https://ai-toolsar.netlify.app/'
+            },
+            {
+              '@type': 'ListItem',
+              'position': 2,
+              'name': 'مقارنة المتاجر والتسويق بالعمولة',
+              'item': 'https://ai-toolsar.netlify.app/ecommerce'
+            }
+          ]
+        },
+        {
+          '@type': 'FAQPage',
+          '@id': 'https://ai-toolsar.netlify.app/ecommerce#faq',
+          'mainEntity': [
+            {
+              '@type': 'Question',
+              'name': 'ما الفرق الرئيسي بين منصة سلة ومنصة زد للمتاجر السعودية؟',
+              'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': 'سلة تتفوق في سرعة وسهولة الإطلاق، وتوفر باقة مجانية (بيسك) مدى الحياة وباقة بلس بـ 99 ريال، مع دعم واسع للمبتدئين. بينما منصة زد تركز أكثر على تجار التجزئة أصحاب الفروع الواقعية وتقدم منظومة متقدمة لنقاط البيع الموحدة (Zid POS) وشبكة زد شيب باشتراكات سنوية.'
+              }
+            },
+            {
+              '@type': 'Question',
+              'name': 'هل شوبيفاي يدعم بوابات الدفع السعودية مثل مدى وأبل باي؟',
+              'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': 'نعم، لكنه يتطلب الربط عبر بوابات دفع وسيطة معتمدة مثل Tap Payments أو PayTabs، مع ملاحظة أن شوبيفاي يفرض عمولة إضافية (0.5% - 2%) عند استخدام بوابات دفع غير تابعة له.'
+              }
+            },
+            {
+              '@type': 'Question',
+              'name': 'ما هي المنصة الأفضل للدروب شيبينغ الدولي؟',
+              'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': 'منصة شوبيفاي (Shopify) هي الخيار العالمي الأول بلا منازع للدروب شيبينغ الدولي لتكاملها المباشر مع تطبيقات الموردين العالمية مثل DSers و CJ Dropshipping وسهولة تعدد العملات واللغات.'
+              }
+            },
+            {
+              '@type': 'Question',
+              'name': 'كيف أبدأ التسويق بالعمولة لمنصات المتاجر الإلكترونية؟',
+              'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': 'يمكنك التسجيل في برنامج شركاء سلة والحصول على عمولة 20% متكررة شهرياً، أو برنامج شركاء شوبيفاي ($150 لكل متجر مشترك)، مع مشاركة روابط الإحالة عبر موقعك أو شبكات التواصل.'
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 };
 
@@ -289,7 +409,7 @@ function formatSlugToTitle(slug: string): string {
  * and builds unique high-CTR SEO configurations.
  */
 export function getDynamicRouteSEO(pathname: string, originUrl?: string): SEOConfig | null {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const parts = pathname.split('?')[0].split('/').filter(Boolean);
   if (parts.length < 2) return null;
 
@@ -425,18 +545,19 @@ export function getDynamicRouteSEO(pathname: string, originUrl?: string): SEOCon
 export function applyRouteSEO(pathname: string) {
   // Normalize pathname
   const cleanPath = pathname.split('?')[0].replace(/\/$/, '') || '/';
+  const domain = getCanonicalDomain();
   
   if (ROUTE_SEO_MAP[cleanPath]) {
     const config = {
       ...ROUTE_SEO_MAP[cleanPath],
-      canonicalUrl: `https://daleel.ai${cleanPath === '/' ? '' : cleanPath}`
+      canonicalUrl: `${domain}${cleanPath === '/' ? '' : cleanPath}`
     };
     updateDocumentSEO(config);
     return;
   }
 
   // Try dynamic route resolution
-  const dynamicConfig = getDynamicRouteSEO(cleanPath);
+  const dynamicConfig = getDynamicRouteSEO(cleanPath, domain);
   if (dynamicConfig) {
     updateDocumentSEO(dynamicConfig);
   }

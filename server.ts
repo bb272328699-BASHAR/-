@@ -49,6 +49,7 @@ async function startServer() {
 User-agent: Googlebot
 Allow: /
 Allow: /ai-tools
+Allow: /ecommerce
 Allow: /tools/
 Allow: /categories/
 Allow: /articles/
@@ -66,6 +67,9 @@ Disallow: /tools/?*status=unpublished
 Disallow: /*?*status=unpublished
 Disallow: /*?*unpublished=1
 
+User-agent: Google-InspectionTool
+Allow: /
+
 User-agent: Googlebot-Image
 Allow: /
 Allow: /assets/
@@ -80,6 +84,19 @@ Allow: /
 Disallow: /admin
 
 User-agent: Baiduspider
+Allow: /
+Disallow: /admin
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
 Allow: /
 Disallow: /admin
 

@@ -81,6 +81,14 @@ export async function getSitemapEntries(hostHeader?: string): Promise<{ entries:
   const staticEntries: SitemapUrlEntry[] = [
     { loc: `${baseUrl}/`, priority: 1.0, changefreq: 'daily', lastmod: todayIso, type: 'static' },
     { loc: `${baseUrl}/ai-tools`, priority: 0.95, changefreq: 'daily', lastmod: todayIso, type: 'static' },
+    { 
+      loc: `${baseUrl}/ecommerce`, 
+      priority: 0.95, 
+      changefreq: 'daily', 
+      lastmod: todayIso, 
+      type: 'static',
+      images: [{ loc: 'https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=1200&auto=format&fit=crop&q=80', title: 'دليل ومقارنة منصات التجارة الإلكترونية والتسويق بالعمولة 2026' }]
+    },
     { loc: `${baseUrl}/categories`, priority: 0.85, changefreq: 'weekly', lastmod: todayIso, type: 'static' },
     { loc: `${baseUrl}/advisor`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },
     { loc: `${baseUrl}/prompts`, priority: 0.9, changefreq: 'daily', lastmod: todayIso, type: 'static' },

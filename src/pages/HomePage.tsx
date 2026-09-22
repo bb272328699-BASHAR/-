@@ -19,7 +19,8 @@ import {
   Eye,
   MousePointerClick,
   Users,
-  Mic
+  Mic,
+  Store
 } from 'lucide-react';
 import { Tool, Category, Article, Comparison, Review, Tutorial } from '../types.ts';
 import { ToolCard } from '../components/ToolCard.tsx';
@@ -252,8 +253,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           {/* Quick AI Pro Hub Bar */}
-          <div className="pt-6 max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-indigo-100 shadow-sm grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+          <div className="pt-6 max-w-5xl mx-auto">
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-indigo-100 shadow-sm grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
               
               <button
                 onClick={() => navigate('/advisor')}
@@ -262,6 +263,15 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <span className="text-xl group-hover:scale-110 transition-transform">🤖</span>
                 <span className="text-xs font-black">المستشار الذكي</span>
                 <span className="text-[10px] text-indigo-600">مطابقة بالذكاء</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/ecommerce')}
+                className="p-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group border border-rose-200/60"
+              >
+                <span className="text-xl group-hover:scale-110 transition-transform">🛒</span>
+                <span className="text-xs font-black">المتاجر والأفلييت</span>
+                <span className="text-[10px] text-rose-600">سلة، زد، شوبيفاي</span>
               </button>
 
               <button
@@ -293,7 +303,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={() => navigate('/calculator')}
-                className="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group border border-blue-200/60 col-span-2 sm:col-span-1"
+                className="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-800 transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 group border border-blue-200/60"
               >
                 <span className="text-xl group-hover:scale-110 transition-transform">💰</span>
                 <span className="text-xs font-black">حاسبة ROI</span>
@@ -362,6 +372,42 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Ad Placement: Home Top Section Banner */}
       <AdSlot position="home_banner" />
+
+      {/* 2.5 E-COMMERCE & AFFILIATE HIGHLIGHT BANNER */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="space-y-3 text-center lg:text-right max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-rose-500/20 text-rose-300 text-xs font-bold px-3 py-1 rounded-full border border-rose-500/30">
+                <Store className="w-3.5 h-3.5" />
+                <span>قسم المتاجر الإلكترونية والتسويق بالعمولة 2026</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                هل تفكر في إطلاق متجرك أو الربح من التسويق بالعمولة؟
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                قارن فوراً بين <strong>سلة، زد، شوبيفاي، وووكومرس</strong> مع حاسبة تكاليف ورسوم تفاعلية مجانية، وتعرّف على أفضل برامج العمولة لأمازون ونون مع أدوات الذكاء الاصطناعي لمضاعفة مبيعاتك.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+              <button
+                onClick={() => navigate('/ecommerce')}
+                className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>اختبار المنصة الأنسب لمتجرك 🎯</span>
+              </button>
+              <button
+                onClick={() => navigate('/ecommerce')}
+                className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-black text-xs sm:text-sm px-6 py-3.5 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>دليل المقارنة والحاسبة</span>
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 3. TRENDING TOOLS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

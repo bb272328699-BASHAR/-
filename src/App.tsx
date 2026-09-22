@@ -21,6 +21,7 @@ import { PromptsHubPage } from './pages/PromptsHubPage.tsx';
 import { StacksPage } from './pages/StacksPage.tsx';
 import { RoiCalculatorPage } from './pages/RoiCalculatorPage.tsx';
 import { AlternativesPage } from './pages/AlternativesPage.tsx';
+import { EcommercePage } from './pages/EcommercePage.tsx';
 import { AuthModal } from './components/AuthModal.tsx';
 import { CookieBanner } from './components/CookieBanner.tsx';
 import { ComparisonDock } from './components/ComparisonDock.tsx';
@@ -401,6 +402,11 @@ export default function App() {
     // 16. User Profile & Bookmarks
     if (currentPath === '/profile') {
       return <UserProfilePage navigate={navigate} />;
+    }
+
+    // 17. E-commerce Platforms & Affiliate: /ecommerce or /ecommerce-platforms
+    if (currentPath === '/ecommerce' || currentPath === '/ecommerce-platforms' || currentPath.startsWith('/ecommerce')) {
+      return <EcommercePage navigate={navigate} />;
     }
 
     // 12. Static Pages

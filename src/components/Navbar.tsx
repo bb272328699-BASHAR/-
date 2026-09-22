@@ -38,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, openSearc
     { label: 'الرئيسية', path: '/' },
     { label: 'المستشار الذكي ✨', path: '/advisor', highlight: true },
     { label: 'الأدوات', path: '/ai-tools' },
+    { label: 'المتاجر والأفلييت 🛒', path: '/ecommerce' },
     { label: 'الأوامر والبرومبتات', path: '/prompts' },
     { label: 'حزم الأدوات', path: '/stacks' },
     { label: 'المقارنات', path: '/comparisons' },

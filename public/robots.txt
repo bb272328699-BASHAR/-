@@ -1,3 +1,66 @@
+# ====================================================================
+# robots.txt for Daleel AI (https://ai-toolsar.netlify.app)
+# Designed for Optimal Google Search Console, Bing, and AI Engine Indexing
+# ====================================================================
+
+User-agent: Googlebot
+Allow: /
+Allow: /ai-tools
+Allow: /ecommerce
+Allow: /tools/
+Allow: /categories/
+Allow: /articles/
+Allow: /comparisons/
+Allow: /reviews/
+Allow: /tutorials/
+Allow: /prompts
+Allow: /stacks
+Allow: /alternatives
+Allow: /calculator
+Allow: /advisor
+Disallow: /admin
+Disallow: /api/admin/
+Disallow: /*?*status=unpublished
+Disallow: /*?*unpublished=1
+
+User-agent: Google-InspectionTool
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /assets/
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.webp$
+Allow: /*.svg$
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin
+
+User-agent: Baiduspider
+Allow: /
+Disallow: /admin
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+
 User-agent: *
 Allow: /
 Disallow: /admin
@@ -5,3 +68,4 @@ Disallow: /api/admin/
 
 # Google Search Console XML Sitemaps
 Sitemap: https://ai-toolsar.netlify.app/sitemap.xml
+

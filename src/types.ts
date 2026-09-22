@@ -251,3 +251,91 @@ export interface ToolQuestion {
   createdAt: string;
 }
 
+export interface EcommercePlatform {
+  id: string;
+  name: string;
+  name_ar: string;
+  slug: string;
+  logo_url: string;
+  tagline: string;
+  description: string;
+  rating: number;
+  review_count: number;
+  pricing_model: string;
+  starting_price: string;
+  starting_price_numeric: number; // in USD or SAR equivalent for calculator
+  transaction_fee: string;
+  transaction_fee_rate: number; // percentage (e.g. 0 or 0.005 or 0.02)
+  fixed_fee_per_order: number; // e.g. 1 SAR or $0.30
+  payment_gateways: string[];
+  shipping_partners: string[];
+  target_market: 'السعودية والخليج' | 'عالمي ودولي' | 'شمال إفريقيا ومحلي' | 'شامل';
+  best_for: string;
+  trial_info: string;
+  affiliate_url: string;
+  affiliate_commission: string;
+  coupon_code?: string;
+  coupon_discount?: string;
+  pros: string[];
+  cons: string[];
+  ai_features: string[];
+  is_popular?: boolean;
+  is_featured?: boolean;
+  badge?: string;
+  plans: {
+    name: string;
+    price: string;
+    billing: string;
+    features: string[];
+    is_popular?: boolean;
+  }[];
+}
+
+export interface AffiliateProgram {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string;
+  category: 'متاجر تجزئة وإلكترونيات' | 'منصات ومواقع سحابية' | 'شبكات تسويق بالعمولة' | 'أدوات رقمية وذكاء اصطناعي';
+  commission_rate: string;
+  cookie_duration: string;
+  payout_threshold: string;
+  payout_methods: string[];
+  description: string;
+  target_regions: string[];
+  pros: string[];
+  requirements: string[];
+  affiliate_signup_url: string;
+  rating: number;
+  is_recommended?: boolean;
+}
+
+export interface EcommerceAiTool {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string;
+  category: 'تصوير المنتجات والاستوديو' | 'كتابة المحتوى والسيو' | 'شات بوت وخدمة العملاء' | 'تسعير ومنافسين' | 'فيديو وإعلانات';
+  tagline: string;
+  description: string;
+  pricing: string;
+  rating: number;
+  free_plan: boolean;
+  affiliate_url: string;
+  key_feature: string;
+}
+
+export interface CouponDeal {
+  id: string;
+  title: string;
+  brand_name: string;
+  brand_logo: string;
+  category: string;
+  code: string;
+  discount_value: string;
+  expiry_date?: string;
+  affiliate_url: string;
+  is_exclusive: boolean;
+  terms?: string;
+}
+

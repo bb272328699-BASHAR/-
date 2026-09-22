@@ -153,6 +153,7 @@ export const Footer: React.FC<FooterProps> = ({ navigate }) => {
             <h4 className="text-white font-bold text-sm">استكشاف المنصة</h4>
             <ul className="space-y-2 text-sm text-slate-400">
               <li><button onClick={() => navigate('/advisor')} className="hover:text-indigo-400 transition-colors font-bold text-indigo-300 flex items-center gap-1">المستشار الذكي (AI Advisor) ✨</button></li>
+              <li><button onClick={() => navigate('/ecommerce')} className="hover:text-indigo-400 transition-colors font-bold text-amber-300 flex items-center gap-1">المتاجر والتسويق بالعمولة 🛒</button></li>
               <li><button onClick={() => navigate('/prompts')} className="hover:text-indigo-400 transition-colors">مكتبة ومولد الأوامر (Prompts)</button></li>
               <li><button onClick={() => navigate('/stacks')} className="hover:text-indigo-400 transition-colors">حزم الأدوات التخصصية (Stacks)</button></li>
               <li><button onClick={() => navigate('/alternatives')} className="hover:text-indigo-400 transition-colors">دليل البدائل المجانية</button></li>

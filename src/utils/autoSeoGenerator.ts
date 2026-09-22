@@ -1,5 +1,5 @@
 import { Tool, Article, Category, Comparison, Tutorial, Review } from '../types.ts';
-import { SEOConfig } from './seo.ts';
+import { SEOConfig, getCanonicalDomain } from './seo.ts';
 
 /**
  * Automatic SEO, Meta Tags & Schema.org JSON-LD Generator
@@ -7,7 +7,7 @@ import { SEOConfig } from './seo.ts';
  */
 
 export function generateToolSEO(tool: Tool, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = tool.canonical_url || `${origin}/tools/${tool.slug}`;
   const fullTitle = tool.meta_title || `${tool.name} - مراجعة شاملة وميزات وأسعار 2026 | دليل الذكاء الاصطناعي`;
   
@@ -130,7 +130,7 @@ export function generateToolSEO(tool: Tool, originUrl?: string): SEOConfig {
 }
 
 export function generateArticleSEO(article: Article, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = article.canonical_url || `${origin}/articles/${article.slug}`;
   const fullTitle = article.meta_title || `${article.title} | دليل الذكاء الاصطناعي`;
   
@@ -218,7 +218,7 @@ export function generateArticleSEO(article: Article, originUrl?: string): SEOCon
 }
 
 export function generateCategorySEO(category: Category, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = `${origin}/categories/${category.slug}`;
   const fullTitle = `${category.name} - أفضل أدوات وتطبيقات الذكاء الاصطناعي 2026 | دليل الذكاء الاصطناعي`;
   const description = category.description || `استكشف أفضل أدوات الذكاء الاصطناعي المتخصصة في قسم ${category.name}، مع تقييمات تفصيلية ومقارنات أسعار.`;
@@ -259,7 +259,7 @@ export function generateCategorySEO(category: Category, originUrl?: string): SEO
 }
 
 export function generateComparisonSEO(comp: Comparison, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = `${origin}/comparisons/${comp.slug}`;
   const fullTitle = `${comp.title} - مقارنة تفصيلية أيهما أفضل؟ | دليل الذكاء الاصطناعي`;
   const description = comp.verdict 
@@ -303,7 +303,7 @@ export function generateComparisonSEO(comp: Comparison, originUrl?: string): SEO
 }
 
 export function generateTutorialSEO(tutorial: Tutorial, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = `${origin}/tutorials/${tutorial.slug}`;
   const fullTitle = `${tutorial.title} - دليل تعليمي خطوة بخطوة 2026 | دليل الذكاء الاصطناعي`;
   const description = tutorial.content?.slice(0, 160) || `شرح عملي مفصل لتعلم كيفية استخدام وتطبيق ${tutorial.title} بأعلى كفاءة.`;
@@ -344,7 +344,7 @@ export function generateTutorialSEO(tutorial: Tutorial, originUrl?: string): SEO
 }
 
 export function generateReviewSEO(review: Review, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = `${origin}/reviews/${review.slug}`;
   const fullTitle = `${review.title} - مراجعة الخبراء والتقييم النهائي | دليل الذكاء الاصطناعي`;
   const description = review.summary || review.detailed_review?.slice(0, 160) || `مراجعة حيادية وتفصيلية شاملة للميزات والعيوب والبدائل المتاحة.`;
@@ -394,7 +394,7 @@ export function generateReviewSEO(review: Review, originUrl?: string): SEOConfig
 }
 
 export function generateHubSEO(title: string, description: string, path: string, originUrl?: string): SEOConfig {
-  const origin = originUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://daleel.ai');
+  const origin = originUrl || getCanonicalDomain();
   const canonicalUrl = `${origin}${path.startsWith('/') ? path : `/${path}`}`;
   return {
     title: `${title} | دليل الذكاء الاصطناعي`,
