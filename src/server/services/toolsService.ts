@@ -22,9 +22,29 @@ export const ToolsService = {
       let idx = 1;
 
       if (params.search && params.search.trim()) {
-        conditions.push(`(t.name ILIKE $${idx} OR t.tagline ILIKE $${idx} OR t.description ILIKE $${idx})`);
-        values.push(`%${params.search.trim()}%`);
-        idx++;
+        const rawSearch = params.search.trim();
+        // Remove common Arabic alef/marbouta/diacritics variants for wider matching
+        const cleanSearch = rawSearch
+          .replace(/[أإآٱ]/g, 'ا')
+          .replace(/ة/g, 'ه')
+          .replace(/ى/g, 'ي')
+          .replace(/[\u064B-\u0652]/g, '');
+
+        conditions.push(`(
+          t.name ILIKE $${idx} OR 
+          t.tagline ILIKE $${idx} OR 
+          t.description ILIKE $${idx} OR 
+          t.slug ILIKE $${idx} OR
+          EXISTS (
+            SELECT 1 FROM tool_categories tc2 
+            JOIN categories c2 ON tc2.category_id = c2.id 
+            WHERE tc2.tool_id = t.id AND (c2.name ILIKE $${idx} OR c2.slug ILIKE $${idx})
+          ) OR
+          replace(replace(replace(t.name, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $${idx + 1} OR
+          replace(replace(replace(t.tagline, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $${idx + 1}
+        )`);
+        values.push(`%${rawSearch}%`, `%${cleanSearch}%`);
+        idx += 2;
       }
 
       if (params.category && params.category !== 'all') {

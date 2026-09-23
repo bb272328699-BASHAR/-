@@ -254,7 +254,7 @@ export const ContentService = {
           LIMIT 6
         `),
         query(`
-          SELECT id, title, slug, tool_a_name, tool_b_name
+          SELECT id, title, slug, summary
           FROM comparisons
           LIMIT 3
         `)
@@ -333,7 +333,7 @@ export const ContentService = {
         LIMIT 4
       `, [term, prefixTerm, normTerm]),
       query(`
-        SELECT id, title, slug, summary, tool_a_name, tool_b_name
+        SELECT id, title, slug, summary
         FROM comparisons
         WHERE title ILIKE $1 OR summary ILIKE $1
         LIMIT 3

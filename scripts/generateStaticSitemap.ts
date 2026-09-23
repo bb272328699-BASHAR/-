@@ -1,23 +1,15 @@
-import fs from 'fs';
-import path from 'path';
-import { generateSitemapXml } from '../src/server/services/sitemapService.ts';
+import { generateDynamicSitemap } from '../src/utils/sitemapGenerator.ts';
 
 async function main() {
-  console.log('Generating static sitemap.xml for static exports and Netlify...');
+  console.log('🚀 Generating dynamic sitemap.xml querying PostgreSQL database...');
   try {
-    const targetDomain = process.env.SITE_URL || 'ai-toolsar.netlify.app';
-    const { xml, count, summary } = await generateSitemapXml(targetDomain);
-    const publicDir = path.join(process.cwd(), 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-    }
-    const sitemapPath = path.join(publicDir, 'sitemap.xml');
-    fs.writeFileSync(sitemapPath, xml, 'utf8');
-    console.log(`Successfully generated public/sitemap.xml with ${count} URLs using domain: ${targetDomain}`);
-    console.log('Summary Breakdown:', JSON.stringify(summary.breakdown, null, 2));
+    const targetDomain = process.env.SITE_URL || 'https://ai-toolsar.netlify.app';
+    const result = await generateDynamicSitemap({ domain: targetDomain });
+    console.log(`✅ Successfully generated ${result.outputPath} with ${result.totalUrls} indexable URLs.`);
+    console.log('Breakdown:', JSON.stringify(result.breakdown, null, 2));
     process.exit(0);
   } catch (err) {
-    console.error('Failed to generate static sitemap:', err);
+    console.error('❌ Failed to generate sitemap.xml:', err);
     process.exit(1);
   }
 }

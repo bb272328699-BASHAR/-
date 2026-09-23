@@ -32,6 +32,7 @@ import {
   DEFAULT_ARTICLES 
 } from '../data/defaultCatalog.ts';
 import { useSpeechRecognition } from '../utils/speechRecognition.ts';
+import { normalizeArabic } from '../utils/arabicSearch.ts';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -197,20 +198,20 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       }
     } catch (e) {}
 
-    // In-memory fallback
-    const lower = q.toLowerCase();
+    // In-memory fallback with normalized Arabic matching
+    const normQ = normalizeArabic(q);
     const matchedTools = DEFAULT_TOOLS.filter(t => 
-      t.name?.toLowerCase().includes(lower) || 
-      (t.tagline && t.tagline.toLowerCase().includes(lower)) || 
-      (t.description && t.description.toLowerCase().includes(lower))
+      normalizeArabic(t.name || '').includes(normQ) || 
+      normalizeArabic(t.tagline || '').includes(normQ) || 
+      normalizeArabic(t.description || '').includes(normQ)
     );
     const matchedCats = DEFAULT_CATEGORIES.filter(c => 
-      c.name?.toLowerCase().includes(lower) || 
-      (c.description && c.description.toLowerCase().includes(lower))
+      normalizeArabic(c.name || '').includes(normQ) || 
+      normalizeArabic(c.description || '').includes(normQ)
     );
     const matchedArts = DEFAULT_ARTICLES.filter(a => 
-      a.title?.toLowerCase().includes(lower) || 
-      (a.excerpt && a.excerpt.toLowerCase().includes(lower))
+      normalizeArabic(a.title || '').includes(normQ) || 
+      normalizeArabic((a as any).excerpt || (a as any).summary || '').includes(normQ)
     );
 
     setSuggestionsData({
@@ -219,8 +220,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       tools: matchedTools,
       articles: matchedArts,
       categories: matchedCats,
-      comparisons: DEFAULT_COMPARISONS.filter(c => c.title.toLowerCase().includes(lower)),
-      tutorials: DEFAULT_TUTORIALS.filter(t => t.title.toLowerCase().includes(lower)),
+      comparisons: DEFAULT_COMPARISONS.filter(c => normalizeArabic(c.title || '').includes(normQ)),
+      tutorials: DEFAULT_TUTORIALS.filter(t => normalizeArabic(t.title || '').includes(normQ)),
       interpretedIntent: '',
       isAiPowered: false,
     });

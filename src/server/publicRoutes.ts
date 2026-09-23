@@ -1382,3 +1382,101 @@ publicRouter.post('/tools/:id/upvote', async (req: Request, res: Response) => {
   }
 });
 
+// Dynamic XML OpenSearch Engine Descriptor for Browser Address Bar Search
+publicRouter.get('/opensearch.xml', (req: Request, res: Response) => {
+  const host = req.get('host') || 'ai-toolsar.netlify.app';
+  const protocol = req.protocol === 'https' || host.includes('netlify') || host.includes('run.app') ? 'https' : 'http';
+  const baseUrl = `${protocol}://${host}`;
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Daleel AI</ShortName>
+  <Description>بحث شامل في أفضل أدوات ومقالات الذكاء الاصطناعي العربي</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Image height="16" width="16" type="image/x-icon">${baseUrl}/favicon.ico</Image>
+  <Url type="text/html" template="${baseUrl}/ai-tools?search={searchTerms}"/>
+  <Url type="application/x-suggestions+json" template="${baseUrl}/api/search/suggestions?q={searchTerms}"/>
+</OpenSearchDescription>`;
+
+  res.setHeader('Content-Type', 'application/opensearchdescription+xml');
+  res.send(xml);
+});
+
+// High-Efficiency Search Suggestions & Autocomplete API
+publicRouter.get('/search/suggestions', async (req: Request, res: Response) => {
+  try {
+    const rawQuery = (req.query.q as string || req.query.query as string || '').trim();
+    if (!rawQuery || rawQuery.length < 1) {
+      return res.json({
+        query: '',
+        suggestions: ['ChatGPT', 'Midjourney', 'Claude 3.5', 'توليد الصور', 'البرمجة بالأكواد', 'كتابة المحتوى'],
+        tools: [],
+        articles: [],
+        categories: [],
+      });
+    }
+
+    const cleanQuery = rawQuery
+      .replace(/[أإآٱ]/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي')
+      .replace(/[\u064B-\u0652]/g, '');
+
+    const pattern1 = `%${rawQuery}%`;
+    const pattern2 = `%${cleanQuery}%`;
+
+    const [toolsRes, categoriesRes, articlesRes] = await Promise.all([
+      query(`
+        SELECT id, name, slug, tagline, logo_url, rating, review_count, pricing_type, is_trending, is_popular
+        FROM tools
+        WHERE status = 'published' AND (
+          name ILIKE $1 OR tagline ILIKE $1 OR slug ILIKE $1 OR
+          replace(replace(replace(name, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $2 OR
+          replace(replace(replace(tagline, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $2
+        )
+        ORDER BY 
+          CASE WHEN name ILIKE $1 THEN 1 WHEN name ILIKE $2 THEN 2 ELSE 3 END,
+          rating DESC, review_count DESC
+        LIMIT 8
+      `, [pattern1, pattern2]),
+
+      query(`
+        SELECT id, name, slug, description, color, icon
+        FROM categories
+        WHERE name ILIKE $1 OR slug ILIKE $1 OR
+          replace(replace(replace(name, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $2
+        LIMIT 5
+      `, [pattern1, pattern2]),
+
+      query(`
+        SELECT id, title, slug, summary, cover_image, views_count
+        FROM articles
+        WHERE title ILIKE $1 OR summary ILIKE $1 OR
+          replace(replace(replace(title, 'أ', 'ا'), 'إ', 'ا'), 'ة', 'ه') ILIKE $2
+        LIMIT 5
+      `, [pattern1, pattern2]),
+    ]);
+
+    // Build keyword suggestions
+    const keywordSet = new Set<string>();
+    toolsRes.rows.forEach(t => {
+      keywordSet.add(t.name);
+      if (t.tagline && t.tagline.length < 30) keywordSet.add(t.tagline);
+    });
+    categoriesRes.rows.forEach(c => keywordSet.add(`أدوات ${c.name}`));
+
+    res.json({
+      query: rawQuery,
+      suggestions: Array.from(keywordSet).slice(0, 6),
+      tools: toolsRes.rows,
+      categories: categoriesRes.rows,
+      articles: articlesRes.rows,
+      interpretedIntent: rawQuery.includes('مجاني') ? 'البحث عن الأدوات المجانية' : rawQuery.includes('تصميم') ? 'أدوات التصميم والإنتاج البصري' : 'بحث عام في دليل الأدوات',
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+

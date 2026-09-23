@@ -10,6 +10,7 @@ import { adminRouter } from './src/server/adminRoutes.ts';
 import { ampRouter } from './src/server/ampRoutes.ts';
 import { query } from './src/server/db.ts';
 import { generateSitemapXml, INDEXNOW_KEY } from './src/server/services/sitemapService.ts';
+import { generateDynamicSitemap } from './src/utils/sitemapGenerator.ts';
 import { generateRssFeed, prerenderSeoHtml, generateSeoAuditReport } from './src/server/services/seoService.ts';
 import fs from 'fs';
 
@@ -265,6 +266,7 @@ google.com, ${pubId}, DIRECT, f08c47fec0942fa0
   try {
     await initDatabase();
     await runExpansion();
+    await generateDynamicSitemap({ silent: false });
   } catch (err) {
     console.error('Database initialization warning/error:', err);
   }
