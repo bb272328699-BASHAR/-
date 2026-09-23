@@ -525,4 +525,83 @@ export async function fetchToolQuestions(toolSlug: string): Promise<any[]> {
   }
 }
 
+// ==========================================
+// 5. Real-Time Live Presence System (Active Visitors Heartbeat)
+// ==========================================
+export interface FirestoreLivePresence {
+  id: string;
+  sessionId: string;
+  pagePath: string;
+  pageTitle?: string;
+  device: 'mobile' | 'tablet' | 'desktop';
+  browser?: string;
+  os?: string;
+  lastPing: number; // Unix timestamp ms
+  updatedAt: string;
+}
+
+export async function updateFirestoreLivePresence(params: {
+  sessionId: string;
+  pagePath: string;
+  pageTitle?: string;
+}): Promise<void> {
+  if (!params.sessionId) return;
+  const context = extractClientContext();
+  const presenceId = `pres_${params.sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const presenceRef = doc(db, 'active_presence', presenceId);
+
+  const data: FirestoreLivePresence = {
+    id: presenceId,
+    sessionId: params.sessionId,
+    pagePath: params.pagePath || '/',
+    pageTitle: params.pageTitle || '',
+    device: context.device,
+    browser: context.browser,
+    os: context.os,
+    lastPing: Date.now(),
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    await setDoc(presenceRef, data, { merge: true });
+  } catch (error) {
+    // Silent fail for presence ping
+  }
+}
+
+export async function removeFirestoreLivePresence(sessionId: string): Promise<void> {
+  if (!sessionId) return;
+  const presenceId = `pres_${sessionId.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const presenceRef = doc(db, 'active_presence', presenceId);
+  try {
+    await deleteDoc(presenceRef);
+  } catch (error) {
+    // Silent fail
+  }
+}
+
+export function subscribeToLivePresence(
+  onUpdate: (visitors: FirestoreLivePresence[]) => void
+): Unsubscribe {
+  const colRef = collection(db, 'active_presence');
+  const q = query(colRef, limit(100));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const now = Date.now();
+      // Filter out stale heartbeats older than 90 seconds
+      const activeVisitors = snapshot.docs
+        .map(doc => ({ id: doc.id, ...(doc.data() as any) }))
+        .filter((v: FirestoreLivePresence) => v.lastPing && (now - v.lastPing < 90000));
+
+      onUpdate(activeVisitors);
+    },
+    (error) => {
+      console.warn('Live presence subscription warning:', error);
+    }
+  );
+}
+
+
 

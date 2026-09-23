@@ -119,7 +119,7 @@ export const AnalyticsService = {
       publishedTools: parseInt(totalTools.rows[0]?.count || '0', 10),
       totalToolViews: parseInt(totalViews.rows[0]?.total_views || '0', 10),
       totalToolClicks: parseInt(totalClicks.rows[0]?.total_clicks || '0', 10),
-      activeVisitorsNow: Math.max(12, parseInt(recentEvents.rows[0]?.active_sessions || '0', 10)),
+      activeVisitorsNow: parseInt(recentEvents.rows[0]?.active_sessions || '0', 10),
     };
   },
 };

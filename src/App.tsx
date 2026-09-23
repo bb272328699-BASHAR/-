@@ -22,6 +22,7 @@ import { StacksPage } from './pages/StacksPage.tsx';
 import { RoiCalculatorPage } from './pages/RoiCalculatorPage.tsx';
 import { AlternativesPage } from './pages/AlternativesPage.tsx';
 import { EcommercePage } from './pages/EcommercePage.tsx';
+import { ToolsSitemapPage } from './pages/ToolsSitemapPage.tsx';
 import { AuthModal } from './components/AuthModal.tsx';
 import { CookieBanner } from './components/CookieBanner.tsx';
 import { ComparisonDock } from './components/ComparisonDock.tsx';
@@ -38,6 +39,7 @@ import {
 } from './data/defaultCatalog.ts';
 import { Loader2 } from 'lucide-react';
 import { usePageTracking } from './hooks/usePageTracking.ts';
+import { useRealtimePresence } from './hooks/useRealtimePresence.ts';
 import { fetchAdSettings } from './components/AdSlot.tsx';
 import { getSavedConsent } from './utils/consent.ts';
 import { applyRouteSEO } from './utils/seo.ts';
@@ -60,6 +62,9 @@ export default function App() {
 
   // Google Analytics 4 automatic page view tracking on route changes
   usePageTracking(currentPath);
+
+  // Maintain Live Real-Time Presence Heartbeat via Firestore & Server
+  useRealtimePresence(currentPath);
 
   // Verify GA4 Tracking code & Property ID status (555078183)
   useEffect(() => {
@@ -407,6 +412,11 @@ export default function App() {
     // 17. E-commerce Platforms & Affiliate: /ecommerce or /ecommerce-platforms
     if (currentPath === '/ecommerce' || currentPath === '/ecommerce-platforms' || currentPath.startsWith('/ecommerce')) {
       return <EcommercePage navigate={navigate} />;
+    }
+
+    // 18. Tools & Content HTML Site Map: /sitemap, /tools-sitemap, /site-map
+    if (currentPath === '/sitemap' || currentPath === '/tools-sitemap' || currentPath === '/site-map') {
+      return <ToolsSitemapPage navigate={navigate} categories={categories} tools={DEFAULT_TOOLS} />;
     }
 
     // 12. Static Pages

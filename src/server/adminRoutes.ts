@@ -1225,7 +1225,14 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
       LIMIT 6
     `);
 
-    // 6. Calculate Total Summary Metrics
+    // 6. Calculate Total Summary Metrics & Real Active Users
+    const activeSessionsRes = await query(`
+      SELECT COUNT(DISTINCT session_id) as active_count 
+      FROM analytics_events 
+      WHERE created_at > NOW() - INTERVAL '30 minutes'
+    `).catch(() => ({ rows: [{ active_count: '0' }] }));
+    const realTimeActiveUsers = parseInt(activeSessionsRes.rows[0]?.active_count || '0', 10);
+
     const totalToolViews = topToolsRes.rows.reduce((acc: number, r: any) => acc + Number(r.pageviews), 0);
     const totalArticleViews = topArticlesRes.rows.reduce((acc: number, r: any) => acc + Number(r.pageviews), 0);
     const totalComparisonViews = topComparisonsRes.rows.reduce((acc: number, r: any) => acc + Number(r.pageviews), 0);
@@ -1271,7 +1278,7 @@ adminRouter.get('/analytics/traffic', authMiddleware, async (req: AuthRequest, r
         topSource: 'Google Search (Organic 59%)',
         totalOutboundClicks,
         estimatedRevenueAdSense: Number((totalPageviews * 0.0078).toFixed(2)),
-        realTimeActiveUsers: Math.floor(Math.random() * 8) + 14,
+        realTimeActiveUsers,
       },
       dailyTrends,
       trafficSources: [
