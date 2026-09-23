@@ -32,6 +32,19 @@ export function toggleLocalBookmark(slugOrId: string): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event('daleel_bookmarks_changed'));
+
+    // Send analytics tracking for bookmark action to backend/Firestore
+    fetch(`/api/analytics/track`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: isAdded ? 'bookmark_add' : 'bookmark_remove',
+        entity_type: 'tool',
+        entity_slug: slugOrId,
+        session_id: sessionStorage.getItem('daleel_visitor_session_id') || 'unknown',
+      }),
+      keepalive: true,
+    }).catch(() => {});
   } catch (e) {
     console.warn('Failed to save bookmark', e);
   }

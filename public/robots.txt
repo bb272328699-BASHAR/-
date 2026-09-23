@@ -71,6 +71,7 @@ Allow: /
 Disallow: /admin
 Disallow: /api/admin/
 
-# Google Search Console XML Sitemaps
+# Google Search Console XML Sitemaps & RSS Feeds
 Sitemap: https://ai-toolsar.netlify.app/sitemap.xml
+Sitemap: https://ai-toolsar.netlify.app/feed.xml
 

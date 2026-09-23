@@ -25,6 +25,7 @@ const StacksPage = lazy(() => import('./pages/StacksPage.tsx').then(m => ({ defa
 const RoiCalculatorPage = lazy(() => import('./pages/RoiCalculatorPage.tsx').then(m => ({ default: m.RoiCalculatorPage })));
 const AlternativesPage = lazy(() => import('./pages/AlternativesPage.tsx').then(m => ({ default: m.AlternativesPage })));
 const EcommercePage = lazy(() => import('./pages/EcommercePage.tsx').then(m => ({ default: m.EcommercePage })));
+const AIVideoGeneratorPage = lazy(() => import('./pages/AIVideoGeneratorPage.tsx').then(m => ({ default: m.AIVideoGeneratorPage })));
 const ToolsSitemapPage = lazy(() => import('./pages/ToolsSitemapPage.tsx').then(m => ({ default: m.ToolsSitemapPage })));
 import { AuthModal } from './components/AuthModal.tsx';
 import { CookieBanner } from './components/CookieBanner.tsx';
@@ -47,6 +48,7 @@ import { fetchAdSettings } from './components/AdSlot.tsx';
 import { getSavedConsent } from './utils/consent.ts';
 import { applyRouteSEO } from './utils/seo.ts';
 import { syncClientCache } from './utils/cacheManager.ts';
+import { reportWebVitals } from './utils/webVitals.ts';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname || '/');
@@ -85,6 +87,9 @@ export default function App() {
         console.warn(`[GA4 Verification] ⚠️ GA4 Tracking Script initializing for Property ID: ${propertyId}`);
       }
     }
+
+    // Initialize Web Vitals performance reporting
+    reportWebVitals();
   }, []);
 
   // Automated Search Engine Optimization (SEO) & Schema.org markup on route changes
@@ -385,6 +390,11 @@ export default function App() {
     // 11. AI Advisor: /advisor
     if (currentPath === '/advisor') {
       return <AIAdvisorPage navigate={navigate} />;
+    }
+
+    // 11.5. Veo 3 Video Generator: /ai-video-generator
+    if (currentPath === '/ai-video-generator') {
+      return <AIVideoGeneratorPage navigate={navigate} />;
     }
 
     // 12. Prompts Hub: /prompts

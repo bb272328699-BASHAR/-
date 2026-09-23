@@ -11,6 +11,7 @@ import { generateSitemapXml, getSitemapEntries } from './services/sitemapService
 import { generateSeoAuditReport } from './services/seoService.ts';
 import { serverCache } from './services/cacheService.ts';
 import { AnalyticsService } from './services/analyticsService.ts';
+import { GoogleGenAI, GenerateVideosOperation } from '@google/genai';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'daleel-ai-super-secret-jwt-key-2026';
 
@@ -1258,6 +1259,124 @@ publicRouter.post('/tools/:slug/view', async (req: Request, res: Response) => {
 
     const updatedStats = await AnalyticsService.getToolLiveStats(slug);
     res.json({ success: true, stats: updatedStats });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Veo 3 Video Generation Endpoints
+publicRouter.post('/ai/generate-video', async (req: Request, res: Response) => {
+  try {
+    const { prompt, aspectRatio = '16:9', resolution = '720p' } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ error: 'الرجاء إدخال وصف الفيديو (Prompt)' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'مفتاح Gemini API غير معرف في الخادم' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    
+    // Using veo-3.1-fast-generate-preview as requested
+    const operation = await ai.models.generateVideos({
+      model: 'veo-3.1-fast-generate-preview',
+      prompt: prompt,
+      config: {
+        numberOfVideos: 1,
+        resolution: resolution === '1080p' ? '1080p' : '720p',
+        aspectRatio: aspectRatio === '9:16' ? '9:16' : '16:9',
+      }
+    });
+
+    res.json({
+      success: true,
+      operationName: operation.name,
+      message: 'تم بدء توليد الفيديو بنجاح عبر نموذج Veo 3. جاري المعالجة...',
+    });
+  } catch (err: any) {
+    console.error('Error generating video with Veo 3:', err);
+    res.status(500).json({ error: err.message || 'فشل توليد الفيديو بواسطة Veo 3' });
+  }
+});
+
+publicRouter.post('/ai/poll-video', async (req: Request, res: Response) => {
+  try {
+    const { operationName } = req.body;
+    if (!operationName) {
+      return res.status(400).json({ error: 'معرف العملية (operationName) مطلوب' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'مفتاح Gemini API غير معرف في الخادم' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+    const op = new GenerateVideosOperation();
+    op.name = operationName;
+
+    const updated = await ai.operations.getVideosOperation({ operation: op });
+
+    if (updated.done) {
+      const generatedVideo = updated.response?.generatedVideos?.[0];
+      const videoUri = generatedVideo?.video?.uri;
+      
+      return res.json({
+        done: true,
+        videoUri: videoUri || null,
+        metadata: generatedVideo,
+      });
+    } else {
+      return res.json({
+        done: false,
+        message: 'جاري توليد الفيديو عبر نموذج Veo 3... قد يستغرق ذلك بضع دقائق.',
+      });
+    }
+  } catch (err: any) {
+    console.error('Error polling video operation:', err);
+    res.status(500).json({ error: err.message || 'فشل التحقق من حالة توليد الفيديو' });
+  }
+});
+
+// Tool Upvote / Like / Save Tracking Endpoint
+publicRouter.post('/tools/:id/upvote', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body || {}; // 'upvote' or 'unvote'
+    const isUpvoting = action !== 'unvote';
+
+    const delta = isUpvoting ? 1 : -1;
+
+    // Update tools upvotes_count atomically and automatically re-rank trending status
+    const updateRes = await query(
+      `UPDATE tools 
+       SET upvotes_count = GREATEST(0, upvotes_count + $1),
+           is_trending = CASE WHEN (upvotes_count + $1) >= 5 THEN true ELSE is_trending END
+       WHERE id::text = $2 OR slug = $2
+       RETURNING id, name, slug, upvotes_count, is_trending`,
+      [delta, id]
+    );
+
+    if (updateRes.rows.length === 0) {
+      return res.status(404).json({ error: 'الأداة غير موجودة' });
+    }
+
+    const tool = updateRes.rows[0];
+
+    // Record interaction event for real-time analytics & popular ranking
+    await AnalyticsService.recordEvent({
+      event_type: isUpvoting ? 'upvote' : 'unvote',
+      entity_type: 'tool',
+      entity_slug: tool.slug,
+    });
+
+    res.json({
+      success: true,
+      upvoted: isUpvoting,
+      upvotes_count: tool.upvotes_count,
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
