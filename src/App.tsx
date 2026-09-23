@@ -49,6 +49,7 @@ import { getSavedConsent } from './utils/consent.ts';
 import { applyRouteSEO } from './utils/seo.ts';
 import { syncClientCache } from './utils/cacheManager.ts';
 import { reportWebVitals } from './utils/webVitals.ts';
+import { initGoogleAdsGtag } from './utils/googleAds.ts';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname || '/');
@@ -90,6 +91,9 @@ export default function App() {
 
     // Initialize Web Vitals performance reporting
     reportWebVitals();
+
+    // Initialize Google Ads Conversion Tag
+    initGoogleAdsGtag();
   }, []);
 
   // Automated Search Engine Optimization (SEO) & Schema.org markup on route changes

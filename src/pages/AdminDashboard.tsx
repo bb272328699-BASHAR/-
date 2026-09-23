@@ -30,6 +30,7 @@ import { AdminRevenueGrowth } from '../components/AdminRevenueGrowth.tsx';
 import { AdminKeywordOpportunityManager } from '../components/AdminKeywordOpportunityManager.tsx';
 import { AdminEEATArticleOptimizer } from '../components/AdminEEATArticleOptimizer.tsx';
 import { AdminContentQualityAuditor } from '../components/AdminContentQualityAuditor.tsx';
+import { AdminSearchConsole } from '../components/AdminSearchConsole.tsx';
 import { ErrorBoundary } from '../components/ErrorBoundary.tsx';
 import { TrendingUp, Split, KeyRound, Zap, Sparkles as SparklesIcon } from 'lucide-react';
 import { purgeServerCache } from '../utils/cacheManager.ts';
@@ -44,7 +45,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
   const [stats, setStats] = useState<any>(null);
   const [tools, setTools] = useState<Tool[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'eeat' | 'auditor' | 'analytics' | 'keywords' | 'revenue' | 'growth' | 'tools' | 'addTool' | 'seo' | 'ads' | 'categories' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'eeat' | 'auditor' | 'analytics' | 'searchConsole' | 'keywords' | 'revenue' | 'growth' | 'tools' | 'addTool' | 'seo' | 'ads' | 'categories' | 'settings'>('overview');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -292,6 +293,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
           <TrendingUp className="w-4 h-4 text-emerald-400" />
           <span>مراقبة الزيارات و Google Analytics</span>
           <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/20 text-emerald-700 text-[10px] font-mono">Live</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('searchConsole')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            activeTab === 'searchConsole' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+          }`}
+        >
+          <Globe className="w-4 h-4 text-blue-500" />
+          <span>Google Search Console & Ads Conversion</span>
+          <span className="px-1.5 py-0.2 rounded-md bg-blue-500/20 text-blue-700 text-[10px] font-mono">GSC API</span>
         </button>
 
         <button
@@ -645,6 +657,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ navigate, onLogo
       {activeTab === 'analytics' && (
         <ErrorBoundary isWidget widgetName="تقارير الزيارات و Google Analytics">
           <AdminAnalyticsDashboard token={token} />
+        </ErrorBoundary>
+      )}
+
+      {/* TAB CONTENT: 4.1 GOOGLE SEARCH CONSOLE & ADS CONVERSION */}
+      {activeTab === 'searchConsole' && (
+        <ErrorBoundary isWidget widgetName="Google Search Console & Ads Conversion">
+          <AdminSearchConsole token={token} />
         </ErrorBoundary>
       )}
 

@@ -12,6 +12,7 @@ import {
   syncSitemapToDisk 
 } from './services/sitemapService.ts';
 import { submitUrlForInstantIndexing, getIndexingLogs } from './services/instantIndexingService.ts';
+import { SearchConsoleService } from './services/searchConsoleService.ts';
 
 export const adminRouter = Router();
 
@@ -1780,5 +1781,76 @@ adminRouter.get('/instant-index/logs', authMiddleware, async (req: AuthRequest, 
     res.status(500).json({ error: err.message });
   }
 });
+
+// ==========================================
+// Google Search Console API Admin Endpoints
+// ==========================================
+
+adminRouter.get('/search-console/performance', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const days = parseInt((req.query.days as string) || '28', 10);
+    const report = await SearchConsoleService.getPerformanceReport(days);
+    res.json(report);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل جلب بيانات Search Console' });
+  }
+});
+
+adminRouter.get('/search-console/config', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const config = SearchConsoleService.getConfig();
+    res.json(config);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/search-console/config', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { siteUrl, clientEmail, privateKey, accessToken } = req.body;
+    const updated = SearchConsoleService.updateConfig({ siteUrl, clientEmail, privateKey, accessToken });
+
+    await recordAuditLog(
+      req.user?.id || null,
+      'UPDATE_SEARCH_CONSOLE_CONFIG',
+      'SEO',
+      siteUrl || 'search-console',
+      { siteUrl },
+      req.ip
+    );
+
+    res.json({
+      success: true,
+      message: 'تم حفظ إعدادات ربط Google Search Console بنجاح',
+      config: updated,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.post('/search-console/sync', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const report = await SearchConsoleService.getPerformanceReport(28);
+    res.json({
+      success: true,
+      message: 'تمت المزامنة بنجاح مع Google Search Console',
+      report,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل مزامنة بيانات Search Console' });
+  }
+});
+
+adminRouter.post('/search-console/test-connection', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { siteUrl, accessToken } = req.body;
+    const testResult = await SearchConsoleService.testConnection(siteUrl, accessToken);
+    res.json(testResult);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 
 

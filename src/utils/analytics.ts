@@ -4,6 +4,7 @@
  */
 
 import { recordFirestoreToolClick } from '../lib/firestoreService.ts';
+import { trackGoogleAdsOutboundConversion } from './googleAds.ts';
 
 // Generate or retrieve persistent anonymous visitor session ID
 export function getVisitorSessionId(): string {
@@ -78,6 +79,19 @@ export async function trackOutboundClick(
     targetUrl,
     isAffiliate
   }).catch(() => {});
+
+  // 1.5. Trigger Google Ads & Google Analytics Conversion Event
+  try {
+    trackGoogleAdsOutboundConversion({
+      toolId,
+      toolSlug,
+      toolName: toolName || toolSlug,
+      targetUrl,
+      isAffiliate,
+    });
+  } catch (err) {
+    console.warn('Google Ads Conversion tracking error:', err);
+  }
 
   // 2. Also log to SQL/server backend analytics stream
   try {
