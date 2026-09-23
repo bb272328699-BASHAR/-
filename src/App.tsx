@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar.tsx';
 import { Footer } from './components/Footer.tsx';
 import { SearchModal } from './components/SearchModal.tsx';
 import { OfflineIndicator } from './components/OfflineIndicator.tsx';
+import { GlobalStructuredData } from './components/GlobalStructuredData.tsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.tsx').then(m => ({ default: m.HomePage })));
 const ToolsPage = lazy(() => import('./pages/ToolsPage.tsx').then(m => ({ default: m.ToolsPage })));
@@ -509,6 +510,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50 text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white" dir="rtl">
+      {/* Google Sitelinks & Organization Structured Data */}
+      <GlobalStructuredData />
+
       {/* Subtle Scroll Progress Indicator */}
       <ScrollProgress currentPath={currentPath} />
 
