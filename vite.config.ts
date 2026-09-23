@@ -19,7 +19,10 @@ export default defineConfig(() => {
     },
     build: {
       outDir: 'dist',
-      sourcemap: true,
+      sourcemap: false,
+      minify: 'esbuild',
+      cssMinify: true,
+      assetsInlineLimit: 4096,
       chunkSizeWarningLimit: 800,
       rollupOptions: {
         output: {
@@ -33,6 +36,12 @@ export default defineConfig(() => {
               }
               if (id.includes('motion')) {
                 return 'vendor-motion';
+              }
+              if (id.includes('firebase')) {
+                return 'vendor-firebase';
+              }
+              if (id.includes('recharts')) {
+                return 'vendor-charts';
               }
               return 'vendor';
             }

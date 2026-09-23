@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import cors from 'cors';
+import compression from 'compression';
 import { createServer as createViteServer } from 'vite';
 import { initDatabase } from './src/server/schema.ts';
 import { runExpansion } from './src/server/expansion.ts';
@@ -16,6 +17,7 @@ async function startServer() {
   const PORT = 3000;
 
   // Middlewares
+  app.use(compression());
   app.use(cors());
   app.use(express.json());
 
@@ -275,7 +277,19 @@ google.com, ${pubId}, DIRECT, f08c47fec0942fa0
     const indexHtmlPath = path.join(distPath, 'index.html');
     let cachedTemplate = '';
 
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      maxAge: '1y',
+      etag: true,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+        } else if (filePath.match(/\.(js|css|woff2?|eot|ttf|otf)$/)) {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        } else if (filePath.match(/\.(jpg|jpeg|png|gif|webp|avif|svg|ico)$/)) {
+          res.setHeader('Cache-Control', 'public, max-age=2592000, stale-while-revalidate=86400');
+        }
+      }
+    }));
     app.get('*', async (req: Request, res: Response) => {
       try {
         if (!cachedTemplate && fs.existsSync(indexHtmlPath)) {
