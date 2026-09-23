@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../context/AuthContext.tsx';
 import { useCompare } from '../context/CompareContext.tsx';
 import { ThemeToggle } from './ThemeToggle.tsx';
+import { PWAInstallButton } from './PWAInstallButton.tsx';
 
 interface NavbarProps {
   currentPath: string;
@@ -168,6 +169,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, navigate, openSearc
               <span>تسجيل الدخول</span>
             </button>
           )}
+
+          {/* PWA Install Button */}
+          <div className="hidden sm:block">
+            <PWAInstallButton />
+          </div>
 
           {/* Theme Toggle Button */}
           <ThemeToggle />

@@ -99,6 +99,56 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
   const [batchResult, setBatchResult] = useState<{ message: string; details?: any } | null>(null);
   const [dynamicGenLoading, setDynamicGenLoading] = useState(false);
 
+  // Instant Indexing API State
+  const [showInstantIndexModal, setShowInstantIndexModal] = useState(false);
+  const [instantIndexUrl, setInstantIndexUrl] = useState('');
+  const [instantIndexLoading, setInstantIndexLoading] = useState(false);
+  const [instantIndexResults, setInstantIndexResults] = useState<any[]>([]);
+  const [indexingLogs, setIndexingLogs] = useState<any[]>([]);
+
+  const fetchIndexingLogs = async () => {
+    try {
+      const res = await fetch('/api/admin/instant-index/logs', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIndexingLogs(data.logs || []);
+      }
+    } catch (e) {
+      console.error('Failed to load indexing logs:', e);
+    }
+  };
+
+  const handleInstantIndexSubmit = async (urlOverride?: string) => {
+    const targetUrl = urlOverride || instantIndexUrl || (selectedItem ? getPagePath(selectedItem) : '');
+    if (!targetUrl) return;
+
+    setInstantIndexLoading(true);
+    try {
+      const res = await fetch('/api/admin/instant-index', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ url: targetUrl })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setInstantIndexResults(data.results || []);
+        setFeedback({ text: data.message || 'تم إرسال طلب الأرشفة الفورية بنجاح', type: 'success' });
+        await fetchIndexingLogs();
+      } else {
+        throw new Error(data.error || 'فشل إرسال طلب الأرشفة');
+      }
+    } catch (err: any) {
+      setFeedback({ text: err.message || 'حدث خطأ أثناء طلب الأرشفة الفورية', type: 'error' });
+    } finally {
+      setInstantIndexLoading(false);
+    }
+  };
+
   // Form State for editing selected item
   const [formData, setFormData] = useState({
     meta_title: '',
@@ -263,6 +313,7 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
     fetchAuditReport();
     fetchSitemapStats();
     fetchSitemapEngineStatus();
+    fetchIndexingLogs();
   }, []);
 
   const selectItem = (item: PageSEO) => {
@@ -651,6 +702,19 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
                 <span>المولد الديناميكي الشامل لوسوم Meta</span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedItem) setInstantIndexUrl(getPagePath(selectedItem));
+                  setShowInstantIndexModal(true);
+                  fetchIndexingLogs();
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-amber-200" />
+                <span>⚡ الأرشفة الفورية (Instant Indexing)</span>
+              </button>
+
               <a
                 href="/sitemap.xml"
                 target="_blank"
@@ -871,6 +935,129 @@ export const AdminSEOManager: React.FC<AdminSEOManagerProps> = ({ token }) => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Instant Indexing API Modal */}
+      {showInstantIndexModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" dir="rtl">
+          <div className="bg-white text-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">
+                    أداة الأرشفة الفورية (Instant Indexing API & Search Console)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    إخطار محركات البحث فوراً بأي أداة أو مقال جديد لضمان الظهور خلال دقائق.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowInstantIndexModal(false);
+                  setInstantIndexResults([]);
+                }}
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-800 block">رابط الصفحة أو الأداة المراد أرشفته فورياً:</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={instantIndexUrl}
+                    onChange={(e) => setInstantIndexUrl(e.target.value)}
+                    placeholder="/tools/my-ai-tool أو /articles/new-post"
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-900 font-mono focus:bg-white focus:outline-indigo-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleInstantIndexSubmit()}
+                    disabled={instantIndexLoading || !instantIndexUrl}
+                    className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+                  >
+                    {instantIndexLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    <span>{instantIndexLoading ? 'جاري الإرسال...' : 'إرسال الفهرسة'}</span>
+                  </button>
+                </div>
+                {selectedItem && (
+                  <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500">
+                    <span>مختصر:</span>
+                    <button
+                      type="button"
+                      onClick={() => setInstantIndexUrl(getPagePath(selectedItem))}
+                      className="text-indigo-600 hover:underline font-mono"
+                    >
+                      {getPagePath(selectedItem)} (العنصر المحدد حالياً)
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {instantIndexResults.length > 0 && (
+                <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+                  <span className="font-bold text-amber-900 block">نتائج الإرسال الفوري:</span>
+                  <div className="space-y-1.5">
+                    {instantIndexResults.map((res, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-amber-200/60 text-[11px]">
+                        <span className="font-bold uppercase font-mono text-indigo-700">{res.engine}</span>
+                        <span className={res.success ? 'text-emerald-600 font-bold' : 'text-rose-600 font-bold'}>
+                          {res.message}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Indexing Logs */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <span className="font-bold text-slate-800 block">سجل عمليات الأرشفة الفورية الأخيرة:</span>
+                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                  {indexingLogs.length === 0 ? (
+                    <div className="text-center py-6 text-slate-400 bg-slate-50 rounded-2xl">
+                      لا توجد سجلات أرشفة فورية مسجلة بعد في الجلسة الحالية.
+                    </div>
+                  ) : (
+                    indexingLogs.map((log, idx) => (
+                      <div key={idx} className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-[11px] font-mono">
+                        <div className="flex items-center gap-2 truncate">
+                          <span className={`w-2 h-2 rounded-full ${log.success ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          <span className="text-slate-700 truncate">{log.url}</span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-indigo-600 font-bold uppercase text-[10px]">{log.engine}</span>
+                          <span className="text-slate-400 text-[10px]">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowInstantIndexModal(false);
+                  setInstantIndexResults([]);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer"
+              >
+                إغلاق النافذة
+              </button>
+            </div>
           </div>
         </div>
       )}

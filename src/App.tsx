@@ -1,28 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navbar } from './components/Navbar.tsx';
 import { Footer } from './components/Footer.tsx';
 import { SearchModal } from './components/SearchModal.tsx';
-import { HomePage } from './pages/HomePage.tsx';
-import { ToolsPage } from './pages/ToolsPage.tsx';
-import { ToolDetailPage } from './pages/ToolDetailPage.tsx';
-import { CategoriesPage } from './pages/CategoriesPage.tsx';
-import { CategoryDetailPage } from './pages/CategoryDetailPage.tsx';
-import { ReviewsPage } from './pages/ReviewsPage.tsx';
-import { ComparisonsPage } from './pages/ComparisonsPage.tsx';
-import { TutorialsPage } from './pages/TutorialsPage.tsx';
-import { ArticlesPage } from './pages/ArticlesPage.tsx';
-import { ResourcesPage } from './pages/ResourcesPage.tsx';
-import { StaticPages } from './pages/StaticPages.tsx';
-import { AdminLoginPage } from './pages/AdminLoginPage.tsx';
-import { AdminDashboard } from './pages/AdminDashboard.tsx';
-import { UserProfilePage } from './pages/UserProfilePage.tsx';
-import { AIAdvisorPage } from './pages/AIAdvisorPage.tsx';
-import { PromptsHubPage } from './pages/PromptsHubPage.tsx';
-import { StacksPage } from './pages/StacksPage.tsx';
-import { RoiCalculatorPage } from './pages/RoiCalculatorPage.tsx';
-import { AlternativesPage } from './pages/AlternativesPage.tsx';
-import { EcommercePage } from './pages/EcommercePage.tsx';
-import { ToolsSitemapPage } from './pages/ToolsSitemapPage.tsx';
+import { OfflineIndicator } from './components/OfflineIndicator.tsx';
+
+const HomePage = lazy(() => import('./pages/HomePage.tsx').then(m => ({ default: m.HomePage })));
+const ToolsPage = lazy(() => import('./pages/ToolsPage.tsx').then(m => ({ default: m.ToolsPage })));
+const ToolDetailPage = lazy(() => import('./pages/ToolDetailPage.tsx').then(m => ({ default: m.ToolDetailPage })));
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage.tsx').then(m => ({ default: m.CategoriesPage })));
+const CategoryDetailPage = lazy(() => import('./pages/CategoryDetailPage.tsx').then(m => ({ default: m.CategoryDetailPage })));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage.tsx').then(m => ({ default: m.ReviewsPage })));
+const ComparisonsPage = lazy(() => import('./pages/ComparisonsPage.tsx').then(m => ({ default: m.ComparisonsPage })));
+const TutorialsPage = lazy(() => import('./pages/TutorialsPage.tsx').then(m => ({ default: m.TutorialsPage })));
+const ArticlesPage = lazy(() => import('./pages/ArticlesPage.tsx').then(m => ({ default: m.ArticlesPage })));
+const ResourcesPage = lazy(() => import('./pages/ResourcesPage.tsx').then(m => ({ default: m.ResourcesPage })));
+const StaticPages = lazy(() => import('./pages/StaticPages.tsx').then(m => ({ default: m.StaticPages })));
+const AdminLoginPage = lazy(() => import('./pages/AdminLoginPage.tsx').then(m => ({ default: m.AdminLoginPage })));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard.tsx').then(m => ({ default: m.AdminDashboard })));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage.tsx').then(m => ({ default: m.UserProfilePage })));
+const AIAdvisorPage = lazy(() => import('./pages/AIAdvisorPage.tsx').then(m => ({ default: m.AIAdvisorPage })));
+const PromptsHubPage = lazy(() => import('./pages/PromptsHubPage.tsx').then(m => ({ default: m.PromptsHubPage })));
+const StacksPage = lazy(() => import('./pages/StacksPage.tsx').then(m => ({ default: m.StacksPage })));
+const RoiCalculatorPage = lazy(() => import('./pages/RoiCalculatorPage.tsx').then(m => ({ default: m.RoiCalculatorPage })));
+const AlternativesPage = lazy(() => import('./pages/AlternativesPage.tsx').then(m => ({ default: m.AlternativesPage })));
+const EcommercePage = lazy(() => import('./pages/EcommercePage.tsx').then(m => ({ default: m.EcommercePage })));
+const ToolsSitemapPage = lazy(() => import('./pages/ToolsSitemapPage.tsx').then(m => ({ default: m.ToolsSitemapPage })));
 import { AuthModal } from './components/AuthModal.tsx';
 import { CookieBanner } from './components/CookieBanner.tsx';
 import { ComparisonDock } from './components/ComparisonDock.tsx';
@@ -522,13 +524,23 @@ export default function App() {
 
       {/* Main Routed Page Content wrapped in ErrorBoundary with route key */}
       <main className="flex-1">
-        <ErrorBoundary key={currentPath} navigate={navigate}>
-          {renderRoute()}
-        </ErrorBoundary>
+        <Suspense fallback={
+          <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <span className="text-sm font-bold text-slate-500">جاري تحميل المحتوى الذكي...</span>
+          </div>
+        }>
+          <ErrorBoundary key={currentPath} navigate={navigate}>
+            {renderRoute()}
+          </ErrorBoundary>
+        </Suspense>
       </main>
 
       {/* Global Footer */}
       <Footer navigate={navigate} />
+
+      {/* Offline Status Indicator */}
+      <OfflineIndicator />
 
       {/* Global Search Modal with widget ErrorBoundary */}
       <ErrorBoundary isWidget widgetName="نافذة البحث">

@@ -64,6 +64,20 @@ function setCanonical(url: string) {
   element.setAttribute('href', url);
 }
 
+function setAmpHtml(url: string | null) {
+  let element = document.querySelector('link[rel="amphtml"]') as HTMLLinkElement | null;
+  if (!url) {
+    if (element) element.remove();
+    return;
+  }
+  if (!element) {
+    element = document.createElement('link');
+    element.setAttribute('rel', 'amphtml');
+    document.head.appendChild(element);
+  }
+  element.setAttribute('href', url);
+}
+
 function setJsonLd(data: Record<string, any> | null) {
   const existing = document.querySelector('script[data-type="dynamic-seo-jsonld"]');
   if (existing) {
@@ -122,10 +136,21 @@ export function updateDocumentSEO(config: SEOConfig) {
   }
   setMetaTag('robots', config.robots || 'index, follow');
 
-  // Canonical URL
+  // Canonical & AMP URLs
   const canonical = config.canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
   if (canonical) {
     setCanonical(canonical);
+    if (canonical.includes('/articles/')) {
+      const ampUrl = canonical.replace('/articles/', '/amp/articles/');
+      setAmpHtml(ampUrl);
+    } else if (canonical.includes('/tutorials/')) {
+      const ampUrl = canonical.replace('/tutorials/', '/amp/tutorials/');
+      setAmpHtml(ampUrl);
+    } else {
+      setAmpHtml(null);
+    }
+  } else {
+    setAmpHtml(null);
   }
 
   // OpenGraph (Facebook / WhatsApp / LinkedIn / Slack)

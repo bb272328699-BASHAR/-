@@ -7,6 +7,7 @@ import { initDatabase } from './src/server/schema.ts';
 import { runExpansion } from './src/server/expansion.ts';
 import { publicRouter } from './src/server/publicRoutes.ts';
 import { adminRouter } from './src/server/adminRoutes.ts';
+import { ampRouter } from './src/server/ampRoutes.ts';
 import { query } from './src/server/db.ts';
 import { generateSitemapXml, INDEXNOW_KEY } from './src/server/services/sitemapService.ts';
 import { generateRssFeed, prerenderSeoHtml, generateSeoAuditReport } from './src/server/services/seoService.ts';
@@ -252,6 +253,9 @@ google.com, ${pubId}, DIRECT, f08c47fec0942fa0
       }
     });
   });
+
+  // AMP Accelerated Mobile Pages Router
+  app.use('/amp', ampRouter);
 
   // REST API Routes
   app.use('/api', publicRouter);

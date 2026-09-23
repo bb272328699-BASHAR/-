@@ -11,6 +11,7 @@ import {
   generateSitemapXml,
   syncSitemapToDisk 
 } from './services/sitemapService.ts';
+import { submitUrlForInstantIndexing, getIndexingLogs } from './services/instantIndexingService.ts';
 
 export const adminRouter = Router();
 
@@ -1742,4 +1743,42 @@ adminRouter.post('/content/articles/upgrade-all-eeat', authMiddleware, async (re
     res.status(500).json({ error: err.message });
   }
 });
+
+// Instant Indexing API Endpoints
+adminRouter.post('/instant-index', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { url } = req.body;
+    if (!url) {
+      return res.status(400).json({ error: 'الرجاء إدخال الرابط المراد أرشفته فورياً' });
+    }
+
+    const results = await submitUrlForInstantIndexing(url, req.get('host'));
+    await recordAuditLog(
+      req.user?.id || null,
+      'INSTANT_INDEX_SUBMIT',
+      'SEO',
+      url,
+      { resultsCount: results.length },
+      req.ip
+    );
+
+    res.json({
+      success: true,
+      message: 'تم إرسال طلب الأرشفة الفورية بنجاح إلى محركات البحث',
+      results
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'فشل في إرسال طلب الأرشفة' });
+  }
+});
+
+adminRouter.get('/instant-index/logs', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const logs = getIndexingLogs();
+    res.json({ logs });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 

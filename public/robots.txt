@@ -26,6 +26,11 @@ Disallow: /*?*unpublished=1
 User-agent: Google-InspectionTool
 Allow: /
 
+User-agent: Mediapartners-Google
+Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+
 User-agent: Googlebot-Image
 Allow: /
 Allow: /assets/
